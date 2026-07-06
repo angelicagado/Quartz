@@ -1,292 +1,379 @@
+<template>
+  <component :is="LayoutComponent">
+    <div class="mx-auto w-full max-w-7xl font-['Outfit']">
+      <!-- Header Section -->
+      <div class="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-center">
+        <div>
+          <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+            Events Management
+          </h1>
+          <p class="mt-1 text-slate-500 dark:text-slate-400">
+            Create, manage, and track your organization's events.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div class="relative">
+            <Search class="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search events..."
+              v-model="searchQuery"
+              class="w-full rounded-xl border border-slate-200 bg-white py-2 pr-4 pl-10 text-slate-600 shadow-sm transition-all outline-none placeholder:text-slate-400 focus:border-[#C5A059] focus:ring-2 focus:ring-[#C5A059]/20 sm:w-64 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+            />
+          </div>
+          <button
+            v-if="role === 'admin'"
+            @click="isCreateModalOpen = true"
+            class="hidden items-center gap-2 rounded-xl bg-[#1E293B] px-5 py-2.5 font-medium text-white shadow-[0_4px_12px_rgba(30,41,59,0.25)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-[0_6px_16px_rgba(30,41,59,0.35)] active:translate-y-0 md:flex"
+          >
+            <Plus class="h-5 w-5" />
+            Create Event
+          </button>
+          <button
+            v-if="role === 'admin'"
+            @click="isCreateModalOpen = true"
+            class="flex h-11 w-11 items-center justify-center rounded-full bg-[#1E293B] text-white shadow-md hover:bg-slate-800 active:scale-[0.98] md:hidden"
+          >
+            <Plus class="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="hide-scrollbar mb-6 flex items-center gap-2 overflow-x-auto pb-2">
+        <button
+          @click="activeFilter = 'all'"
+          class="rounded-lg border px-5 py-2 font-medium whitespace-nowrap transition-colors"
+          :class="activeFilter === 'all' ? 'border-[#C5A059]/20 bg-[#C5A059]/10 text-[#C5A059]' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'"
+        >
+          All Events
+        </button>
+        <button
+          @click="activeFilter = 'upcoming'"
+          class="rounded-lg border px-5 py-2 font-medium whitespace-nowrap transition-colors"
+          :class="activeFilter === 'upcoming' ? 'border-[#C5A059]/20 bg-[#C5A059]/10 text-[#C5A059]' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'"
+        >
+          Upcoming
+        </button>
+        <button
+          @click="activeFilter = 'past'"
+          class="rounded-lg border px-5 py-2 font-medium whitespace-nowrap transition-colors"
+          :class="activeFilter === 'past' ? 'border-[#C5A059]/20 bg-[#C5A059]/10 text-[#C5A059]' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'"
+        >
+          Past
+        </button>
+        <button
+          @click="isAdvancedFilterOpen = !isAdvancedFilterOpen"
+          class="ml-auto flex items-center gap-2 rounded-lg border px-4 py-2 font-medium shadow-sm transition-all"
+          :class="isAdvancedFilterOpen ? 'border-slate-900 bg-slate-900 text-white dark:border-slate-100 dark:bg-slate-100 dark:text-slate-900' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'"
+        >
+          <Filter class="h-4 w-4" />
+          {{ isAdvancedFilterOpen ? 'Hide Filters' : 'More Filters' }}
+        </button>
+      </div>
+
+      <!-- Advanced Filter Panel -->
+      <div v-if="isAdvancedFilterOpen" class="mb-8 animate-in rounded-2xl border border-slate-200 bg-white p-6 shadow-sm duration-300 fade-in slide-in-from-top-4 dark:border-slate-700 dark:bg-slate-800">
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <div>
+            <label class="mb-2 block text-xs font-bold tracking-widest text-slate-400 uppercase">Registration Type</label>
+            <select
+              v-model="registrationTypeFilter"
+              class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-600 transition-all outline-none focus:border-[#C5A059] dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200"
+            >
+              <option value="all">Internal & External</option>
+              <option value="public">Public Events</option>
+              <option value="private">Private (Invite only)</option>
+              <option value="internal">Staff Only</option>
+            </select>
+          </div>
+          <div>
+            <label class="mb-2 block text-xs font-bold tracking-widest text-slate-400 uppercase">Certificate Status</label>
+            <select
+              v-model="certificateFilter"
+              class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-600 transition-all outline-none focus:border-[#C5A059] dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200"
+            >
+              <option value="all">Any Status</option>
+              <option value="enabled">With Certificate</option>
+              <option value="disabled">No Certificate</option>
+            </select>
+          </div>
+          <div>
+            <label class="mb-2 block text-xs font-bold tracking-widest text-slate-400 uppercase">Evaluation Requirement</label>
+            <select
+              v-model="evaluationFilter"
+              class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-600 transition-all outline-none focus:border-[#C5A059] dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200"
+            >
+              <option value="all">Any Requirement</option>
+              <option value="required">Evaluation Required</option>
+              <option value="not_required">Optional Feedack</option>
+            </select>
+          </div>
+        </div>
+        <div class="mt-4 flex justify-end border-t border-slate-100 pt-4 dark:border-slate-700">
+          <button
+            @click="resetFilters"
+            class="text-xs font-bold tracking-widest text-rose-500 uppercase transition-colors hover:text-rose-600"
+          >
+            Reset All Filters
+          </button>
+        </div>
+      </div>
+
+      <!-- Grid -->
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <!-- Create New Card (Admin Only) -->
+        <div
+          v-if="role === 'admin'"
+          @click="isCreateModalOpen = true"
+          class="group flex min-h-[360px] cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50/50 p-8 transition-all duration-300 hover:-translate-y-1 hover:border-[#C5A059]/50 hover:bg-white hover:shadow-lg dark:border-slate-700 dark:bg-slate-800/50 dark:hover:bg-slate-800"
+        >
+          <div class="relative mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 shadow-sm transition-all duration-300 group-hover:border-[#C5A059]/20 group-hover:bg-[#C5A059]/10 group-hover:text-[#C5A059] dark:border-slate-600 dark:bg-slate-700">
+            <div class="absolute inset-0 scale-0 rounded-full bg-[#C5A059]/20 transition-all duration-700 ease-out group-hover:scale-150 group-hover:opacity-0"></div>
+            <Plus class="relative z-10 h-7 w-7" />
+          </div>
+          <h3 class="text-lg font-semibold text-slate-800 transition-colors group-hover:text-slate-900 dark:text-slate-200 dark:group-hover:text-white">
+            Create New Event
+          </h3>
+          <p class="mt-2 max-w-[200px] text-center text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+            Organize a new conference, seminar, or specialized workshop.
+          </p>
+        </div>
+
+        <!-- Rendering Cards from DB -->
+        <EventCard
+          v-for="event in filteredEvents"
+          :key="event.id"
+          :event="event"
+          @view="handleViewEvent(event)"
+        />
+
+        <div v-if="filteredEvents.length === 0" class="col-span-full animate-in rounded-[2.5rem] border border-slate-100 bg-white py-20 text-center shadow-sm transition-all duration-500 fade-in slide-in-from-bottom-4 dark:border-slate-800 dark:bg-slate-900">
+          <div class="flex flex-col items-center gap-4">
+            <Search class="h-12 w-12 text-slate-200 dark:text-slate-700" />
+            <div>
+              <p class="text-xl font-bold text-slate-900 dark:text-slate-100">No events found</p>
+              <p class="mt-1 font-light text-slate-500 dark:text-slate-400">Try adjusting your search or category filters.</p>
+            </div>
+            <button
+              @click="resetFilters"
+              class="mt-2 font-bold text-[#C5A059] hover:underline"
+            >
+              Clear all filters
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ModalForm :show="isCreateModalOpen" @close="isCreateModalOpen = false" title="Create New Event">
+      <form @submit.prevent="submit" class="space-y-6">
+        <div>
+          <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">Event Title *</label>
+          <input
+            type="text"
+            v-model="form.title"
+            class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 transition-all outline-none focus:border-[#C5A059] focus:bg-white focus:ring-2 focus:ring-[#C5A059]/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+            placeholder="e.g. Annual Design Summit"
+            required
+          />
+          <p v-if="form.errors.title" class="mt-1 text-sm text-rose-500">{{ form.errors.title }}</p>
+        </div>
+
+        <div>
+          <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">Description *</label>
+          <textarea
+            v-model="form.description"
+            rows="3"
+            class="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 transition-all outline-none focus:border-[#C5A059] focus:bg-white focus:ring-2 focus:ring-[#C5A059]/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+            placeholder="Provide a brief overview..."
+            required
+          ></textarea>
+          <p v-if="form.errors.description" class="mt-1 text-sm text-rose-500">{{ form.errors.description }}</p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div>
+            <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">Start Date & Time *</label>
+            <input
+              type="datetime-local"
+              v-model="form.start_date"
+              class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 transition-all outline-none focus:border-[#C5A059] focus:bg-white focus:ring-2 focus:ring-[#C5A059]/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              required
+            />
+            <p v-if="form.errors.start_date" class="mt-1 text-sm text-rose-500">{{ form.errors.start_date }}</p>
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">End Date & Time *</label>
+            <input
+              type="datetime-local"
+              v-model="form.end_date"
+              class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 transition-all outline-none focus:border-[#C5A059] focus:bg-white focus:ring-2 focus:ring-[#C5A059]/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              required
+            />
+            <p v-if="form.errors.end_date" class="mt-1 text-sm text-rose-500">{{ form.errors.end_date }}</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div>
+            <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">Registration Type</label>
+            <select
+              v-model="form.registration_type"
+              class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 transition-all outline-none focus:border-[#C5A059] focus:bg-white focus:ring-2 focus:ring-[#C5A059]/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+            >
+              <option value="public">Public</option>
+              <option value="private">Private (Invite Only)</option>
+              <option value="internal">Internal Staff</option>
+            </select>
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">Attendance Tracking</label>
+            <select
+              v-model="form.attendance_type"
+              class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 transition-all outline-none focus:border-[#C5A059] focus:bg-white focus:ring-2 focus:ring-[#C5A059]/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+            >
+              <option value="single">Single Scan Event</option>
+              <option value="am">AM Scan Only</option>
+              <option value="am_pm">AM & PM Scans</option>
+              <option value="am_pm_in_out">AM & PM (In/Out) Scans</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mt-2 space-y-3 rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/50">
+          <label class="flex cursor-pointer items-center gap-3">
+            <input
+              type="checkbox"
+              v-model="form.evaluation_required"
+              class="h-5 w-5 rounded border-slate-300 bg-white text-[#C5A059] focus:ring-[#C5A059]"
+            />
+            <div>
+              <div class="font-semibold text-slate-800 dark:text-slate-200">Require Evaluation</div>
+              <div class="text-xs text-slate-500 dark:text-slate-400">Participants must submit feedback before getting their certificate.</div>
+            </div>
+          </label>
+          <div class="h-0 border-t border-slate-200 indent-2 dark:border-slate-700"></div>
+          <label class="flex cursor-pointer items-center gap-3">
+            <input
+              type="checkbox"
+              v-model="form.certificate_enabled"
+              class="h-5 w-5 rounded border-slate-300 bg-white text-[#C5A059] focus:ring-[#C5A059]"
+            />
+            <div>
+              <div class="font-semibold text-slate-800 dark:text-slate-200">Enable Certificates</div>
+              <div class="text-xs text-slate-500 dark:text-slate-400">Automatically generate PDF certificates for attendees.</div>
+            </div>
+          </label>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 border-t border-slate-100 pt-4 pb-2 dark:border-slate-800">
+          <button
+            type="button"
+            @click="isCreateModalOpen = false"
+            class="rounded-xl border border-slate-200 bg-white px-5 py-2.5 font-medium text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            :disabled="form.processing"
+            class="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-6 py-2.5 font-medium text-white shadow-[0_4px_12px_rgba(30,41,59,0.25)] transition-all hover:bg-slate-800 dark:border-slate-600 dark:bg-slate-700 dark:hover:bg-slate-600"
+          >
+            {{ form.processing ? 'Saving...' : 'Create Event' }}
+          </button>
+        </div>
+      </form>
+    </ModalForm>
+  </component>
+</template>
+
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3';
-import { CalendarDays, Edit, Eye, Plus, Search, Trash2 } from '@lucide/vue';
-import { ref, watch } from 'vue';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-
-interface Event {
-    id: number;
-    title: string;
-    start_time: string;
-    end_time: string;
-    registration_type: 'public' | 'static';
-    attendance_type: 'one_time' | 'am_pm';
-    status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
-    organizer?: { name: string };
-}
-
-interface PaginatedEvents {
-    data: Event[];
-    links: { url: string | null; label: string; active: boolean }[];
-    meta: {
-        current_page: number;
-        last_page: number;
-        per_page: number;
-        total: number;
-        from: number;
-        to: number;
-    };
-}
+import { ref, computed } from 'vue';
+import { usePage, useForm, router } from '@inertiajs/vue3';
+import { Plus, Search, Filter, X } from 'lucide-vue-next';
+import EventCard from '@/components/EventCard.vue';
+import ModalForm from '@/components/ModalForm.vue';
+import AdminLayout from '@/layouts/AdminLayout.vue';
+import OrganizerLayout from '@/layouts/OrganizerLayout.vue';
+import ParticipantLayout from '@/layouts/ParticipantLayout.vue';
+import type { Event } from '@/types/Event';
 
 const props = defineProps<{
-    events: PaginatedEvents;
-    filters?: { search?: string; status?: string };
+    events: Event[];
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'Events', href: '/events' },
-        ],
-    },
+const page = usePage();
+const auth = computed(() => page.props.auth as any);
+const role = computed(() => auth.value.user.role.name);
+
+const LayoutComponent = computed(() => {
+    if (role.value === 'super_admin' || role.value === 'admin') return AdminLayout;
+    if (role.value === 'organizer') return OrganizerLayout;
+    return ParticipantLayout;
 });
 
-const search = ref(props.filters?.search ?? '');
-const statusFilter = ref(props.filters?.status ?? '');
+const isCreateModalOpen = ref(false);
+const searchQuery = ref('');
+const activeFilter = ref('all');
+const isAdvancedFilterOpen = ref(false);
+const registrationTypeFilter = ref('all');
+const certificateFilter = ref('all');
+const evaluationFilter = ref('all');
 
-let searchTimeout: ReturnType<typeof setTimeout>;
-
-watch([search, statusFilter], () => {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => {
-        router.get('/events', { search: search.value, status: statusFilter.value }, {
-            preserveState: true,
-            replace: true,
-        });
-    }, 300);
+const form = useForm({
+    title: '',
+    description: '',
+    start_date: '',
+    end_date: '',
+    registration_type: 'public',
+    attendance_type: 'single',
+    evaluation_required: false,
+    certificate_enabled: false,
 });
 
-function deleteEvent(id: number) {
-    if (confirm('Are you sure you want to delete this event?')) {
-        router.delete(`/events/${id}`);
-    }
-}
+const filteredEvents = computed(() => {
+    return props.events.filter((event) => {
+        const matchesSearch = event.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+                              event.description.toLowerCase().includes(searchQuery.value.toLowerCase());
 
-function formatDate(dateStr: string) {
-    return new Date(dateStr).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
+        const isUpcoming = new Date(event.start_date) > new Date();
+        const matchesFilter = activeFilter.value === 'all' ||
+                              (activeFilter.value === 'upcoming' && isUpcoming) ||
+                              (activeFilter.value === 'past' && !isUpcoming);
+
+        const matchesRegistration = registrationTypeFilter.value === 'all' || event.registration_type === registrationTypeFilter.value;
+        const matchesCertificate = certificateFilter.value === 'all' ||
+                                   (certificateFilter.value === 'enabled' && event.certificate_enabled) ||
+                                   (certificateFilter.value === 'disabled' && !event.certificate_enabled);
+        const matchesEvaluation = evaluationFilter.value === 'all' ||
+                                  (evaluationFilter.value === 'required' && event.evaluation_required) ||
+                                  (evaluationFilter.value === 'not_required' && !event.evaluation_required);
+
+        return matchesSearch && matchesFilter && matchesRegistration && matchesCertificate && matchesEvaluation;
     });
-}
+});
 
-function formatTime(dateStr: string) {
-    return new Date(dateStr).toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
+const submit = () => {
+    form.post('/events', {
+        onSuccess: () => {
+            isCreateModalOpen.value = false;
+            form.reset();
+        },
     });
-}
-
-const statusConfig: Record<string, { label: string; classes: string }> = {
-    upcoming: { label: 'Upcoming', classes: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800' },
-    ongoing: { label: 'Ongoing', classes: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-green-200 dark:border-green-800' },
-    completed: { label: 'Completed', classes: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border-gray-200 dark:border-gray-700' },
-    cancelled: { label: 'Cancelled', classes: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 border-red-200 dark:border-red-800' },
 };
 
-const registrationConfig: Record<string, { label: string; classes: string }> = {
-    public: { label: 'Public', classes: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border-purple-200 dark:border-purple-800' },
-    static: { label: 'Static List', classes: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 border-orange-200 dark:border-orange-800' },
+const resetFilters = () => {
+    searchQuery.value = '';
+    activeFilter.value = 'all';
+    registrationTypeFilter.value = 'all';
+    certificateFilter.value = 'all';
+    evaluationFilter.value = 'all';
 };
 
-const attendanceConfig: Record<string, { label: string; classes: string }> = {
-    one_time: { label: 'One-Time', classes: 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 border-teal-200 dark:border-teal-800' },
-    am_pm: { label: 'AM/PM', classes: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800' },
+const handleViewEvent = (event: Event) => {
+    const prefix = role.value === 'organizer' ? '/organizer' : '';
+    router.get(`${prefix}/events/${event.id}`);
 };
 </script>
-
-<template>
-    <Head title="Events" />
-
-    <div class="flex h-full flex-1 flex-col gap-6 p-6">
-        <!-- Header -->
-        <div class="flex items-center justify-between">
-            <div>
-                <h1 class="text-2xl font-bold tracking-tight text-foreground">Events</h1>
-                <p class="mt-1 text-sm text-muted-foreground">Manage all your events and track attendance.</p>
-            </div>
-            <Link href="/events/create">
-                <Button class="gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white shadow-md shadow-violet-200 dark:shadow-violet-900/30 transition-all duration-200">
-                    <Plus class="size-4" />
-                    New Event
-                </Button>
-            </Link>
-        </div>
-
-        <!-- Filters -->
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div class="relative flex-1">
-                <Search class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                    v-model="search"
-                    placeholder="Search events..."
-                    class="pl-9 bg-background"
-                />
-            </div>
-            <select
-                v-model="statusFilter"
-                class="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs focus:outline-none focus:ring-2 focus:ring-ring/50 transition-colors"
-            >
-                <option value="">All Statuses</option>
-                <option value="upcoming">Upcoming</option>
-                <option value="ongoing">Ongoing</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
-            </select>
-        </div>
-
-        <!-- Table -->
-        <div class="rounded-xl border border-border bg-card shadow-xs overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead>
-                        <tr class="border-b border-border bg-muted/40">
-                            <th class="px-4 py-3 text-left font-semibold text-muted-foreground">Title</th>
-                            <th class="px-4 py-3 text-left font-semibold text-muted-foreground">Start Date</th>
-                            <th class="px-4 py-3 text-left font-semibold text-muted-foreground">End Date</th>
-                            <th class="px-4 py-3 text-left font-semibold text-muted-foreground">Registration</th>
-                            <th class="px-4 py-3 text-left font-semibold text-muted-foreground">Attendance</th>
-                            <th class="px-4 py-3 text-left font-semibold text-muted-foreground">Status</th>
-                            <th class="px-4 py-3 text-left font-semibold text-muted-foreground">Organizer</th>
-                            <th class="px-4 py-3 text-right font-semibold text-muted-foreground">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-border">
-                        <template v-if="events.data.length > 0">
-                            <tr
-                                v-for="event in events.data"
-                                :key="event.id"
-                                class="group transition-colors hover:bg-muted/30"
-                            >
-                                <td class="px-4 py-3">
-                                    <div class="flex items-center gap-3">
-                                        <div class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 shadow-sm">
-                                            <CalendarDays class="size-4 text-white" />
-                                        </div>
-                                        <span class="font-medium text-foreground">{{ event.title }}</span>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3 text-muted-foreground">
-                                    <div class="flex flex-col">
-                                        <span>{{ formatDate(event.start_time) }}</span>
-                                        <span class="text-xs text-muted-foreground/70">{{ formatTime(event.start_time) }}</span>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3 text-muted-foreground">
-                                    <div class="flex flex-col">
-                                        <span>{{ formatDate(event.end_time) }}</span>
-                                        <span class="text-xs text-muted-foreground/70">{{ formatTime(event.end_time) }}</span>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3">
-                                    <span
-                                        v-if="registrationConfig[event.registration_type]"
-                                        :class="['inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium', registrationConfig[event.registration_type].classes]"
-                                    >
-                                        {{ registrationConfig[event.registration_type].label }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-3">
-                                    <span
-                                        v-if="attendanceConfig[event.attendance_type]"
-                                        :class="['inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium', attendanceConfig[event.attendance_type].classes]"
-                                    >
-                                        {{ attendanceConfig[event.attendance_type].label }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-3">
-                                    <span
-                                        v-if="statusConfig[event.status]"
-                                        :class="['inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium', statusConfig[event.status].classes]"
-                                    >
-                                        {{ statusConfig[event.status].label }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-3 text-muted-foreground">
-                                    {{ event.organizer?.name ?? '—' }}
-                                </td>
-                                <td class="px-4 py-3">
-                                    <div class="flex items-center justify-end gap-1">
-                                        <Link :href="`/events/${event.id}`">
-                                            <Button variant="ghost" size="icon-sm" class="opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <Eye class="size-4" />
-                                            </Button>
-                                        </Link>
-                                        <Link :href="`/events/${event.id}/edit`">
-                                            <Button variant="ghost" size="icon-sm" class="opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <Edit class="size-4" />
-                                            </Button>
-                                        </Link>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon-sm"
-                                            class="opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10"
-                                            @click="deleteEvent(event.id)"
-                                        >
-                                            <Trash2 class="size-4" />
-                                        </Button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </template>
-
-                        <!-- Empty State -->
-                        <tr v-else>
-                            <td colspan="8" class="px-4 py-16 text-center">
-                                <div class="flex flex-col items-center gap-3">
-                                    <div class="flex size-16 items-center justify-center rounded-2xl bg-muted">
-                                        <CalendarDays class="size-8 text-muted-foreground/50" />
-                                    </div>
-                                    <div>
-                                        <p class="font-semibold text-foreground">No events found</p>
-                                        <p class="mt-1 text-sm text-muted-foreground">
-                                            {{ search || statusFilter ? 'Try adjusting your filters.' : 'Get started by creating your first event.' }}
-                                        </p>
-                                    </div>
-                                    <Link v-if="!search && !statusFilter" href="/events/create">
-                                        <Button size="sm" class="mt-1">
-                                            <Plus class="size-4" />
-                                            New Event
-                                        </Button>
-                                    </Link>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Pagination -->
-            <div v-if="events.meta && events.meta.last_page > 1" class="flex items-center justify-between border-t border-border px-4 py-3">
-                <p class="text-sm text-muted-foreground">
-                    Showing <span class="font-medium text-foreground">{{ events.meta.from }}</span>–<span class="font-medium text-foreground">{{ events.meta.to }}</span>
-                    of <span class="font-medium text-foreground">{{ events.meta.total }}</span> events
-                </p>
-                <div class="flex items-center gap-1">
-                    <template v-for="link in events.links" :key="link.label">
-                        <Link
-                            v-if="link.url"
-                            :href="link.url"
-                            preserve-state
-                        >
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                :class="link.active ? 'bg-primary text-primary-foreground hover:bg-primary/90' : ''"
-                                v-html="link.label"
-                            />
-                        </Link>
-                        <Button
-                            v-else
-                            variant="ghost"
-                            size="sm"
-                            disabled
-                            v-html="link.label"
-                        />
-                    </template>
-                </div>
-            </div>
-        </div>
-    </div>
-</template>
