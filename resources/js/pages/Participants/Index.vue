@@ -140,8 +140,6 @@ const page = usePage();
 const auth = computed(() => page.props.auth as any);
 const role = computed(() => auth.value.user.role.name);
 
-const role = computed(() => auth.value.user.role.name);
-
 const searchQuery = ref('');
 
 const filteredParticipants = computed(() => {

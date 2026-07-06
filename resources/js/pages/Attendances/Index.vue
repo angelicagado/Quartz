@@ -1,6 +1,6 @@
 <template>
   <Head title="Attendance Scanner" />
-    <div class="mx-auto max-w-5xl animate-in space-y-8 pb-20 font-['Outfit'] duration-500 fade-in">
+    <div class="mx-auto max-w-5xl animate-in space-y-8 pb-20 duration-500 fade-in">
       <div class="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div class="space-y-1">
           <div class="inline-flex items-center gap-2 rounded-full border border-[#C5A059]/20 bg-[#C5A059]/10 px-3 py-1 text-[10px] font-bold tracking-widest text-[#C5A059] uppercase dark:border-slate-700 dark:bg-slate-800">

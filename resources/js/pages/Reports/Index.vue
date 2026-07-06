@@ -1,6 +1,6 @@
 <template>
   <Head title="Reports & Analytics" />
-    <div class="mx-auto w-full max-w-7xl pb-10 font-['Outfit']">
+    <div class="mx-auto w-full max-w-7xl pb-10">
       <div class="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
           <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">

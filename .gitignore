@@ -19,6 +19,7 @@
 .phpunit.result.cache
 Homestead.json
 Homestead.yaml
+.github
 npm-debug.log
 yarn-error.log
 /auth.json
@@ -27,3 +28,8 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+.agents
+.claude
+.codex
+/.AGENTS.md
+/.CLAUDE.md

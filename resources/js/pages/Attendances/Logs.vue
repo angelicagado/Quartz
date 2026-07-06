@@ -1,6 +1,6 @@
 <template>
   <Head title="Live Attendance Logs" />
-    <div class="mx-auto max-w-7xl animate-in space-y-8 pb-10 font-['Outfit'] duration-500 fade-in">
+    <div class="mx-auto max-w-7xl animate-in space-y-8 pb-10 duration-500 fade-in">
       <div class="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div class="space-y-1">
           <div class="inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1 text-[10px] font-bold tracking-widest text-indigo-600 uppercase dark:border-indigo-500/30 dark:bg-indigo-500/20 dark:text-indigo-400">
@@ -142,7 +142,5 @@ const props = defineProps<{
 
 const page = usePage();
 const auth = computed(() => page.props.auth as any);
-const role = computed(() => auth.value.user.role.name);
-
 const role = computed(() => auth.value.user.role.name);
 </script>

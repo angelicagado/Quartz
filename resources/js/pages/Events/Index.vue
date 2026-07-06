@@ -30,6 +30,7 @@ const evaluationFilter = ref('all');
 const form = useForm({
     title: '',
     description: '',
+    image_banner: null as File | null,
     start_date: '',
     end_date: '',
     registration_type: 'public',
@@ -60,6 +61,14 @@ const filteredEvents = computed(() => {
     });
 });
 
+const hasActiveFilters = computed(() => {
+    return searchQuery.value !== '' ||
+           activeFilter.value !== 'all' ||
+           registrationTypeFilter.value !== 'all' ||
+           certificateFilter.value !== 'all' ||
+           evaluationFilter.value !== 'all';
+});
+
 const submit = () => {
     form.post('/events', {
         onSuccess: () => {
@@ -85,7 +94,7 @@ const handleViewEvent = (event: Event) => {
 
 <template>
   <Head title="Events" />
-    <div class="mx-auto w-full max-w-7xl font-['Outfit']">
+    <div class="mx-auto w-full max-w-7xl">
       <!-- Header Section -->
       <div class="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
@@ -108,7 +117,7 @@ const handleViewEvent = (event: Event) => {
             />
           </div>
           <button
-            v-if="role === 'admin'"
+            v-if="['admin', 'super_admin'].includes(role)"
             @click="isCreateModalOpen = true"
             class="hidden items-center gap-2 rounded-xl bg-[#1E293B] px-5 py-2.5 font-medium text-white shadow-[0_4px_12px_rgba(30,41,59,0.25)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-[0_6px_16px_rgba(30,41,59,0.35)] active:translate-y-0 md:flex"
           >
@@ -116,7 +125,7 @@ const handleViewEvent = (event: Event) => {
             Create Event
           </button>
           <button
-            v-if="role === 'admin'"
+            v-if="['admin', 'super_admin'].includes(role)"
             @click="isCreateModalOpen = true"
             class="flex h-11 w-11 items-center justify-center rounded-full bg-[#1E293B] text-white shadow-md hover:bg-slate-800 active:scale-[0.98] md:hidden"
           >
@@ -210,7 +219,7 @@ const handleViewEvent = (event: Event) => {
       <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         <!-- Create New Card (Admin Only) -->
         <div
-          v-if="role === 'admin'"
+          v-if="['admin', 'super_admin'].includes(role) && !hasActiveFilters"
           @click="isCreateModalOpen = true"
           class="group flex min-h-[360px] cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50/50 p-8 transition-all duration-300 hover:-translate-y-1 hover:border-[#C5A059]/50 hover:bg-white hover:shadow-lg dark:border-slate-700 dark:bg-slate-800/50 dark:hover:bg-slate-800"
         >
@@ -234,7 +243,7 @@ const handleViewEvent = (event: Event) => {
           @view="handleViewEvent(event)"
         />
 
-        <div v-if="filteredEvents.length === 0" class="col-span-full animate-in rounded-[2.5rem] border border-slate-100 bg-white py-20 text-center shadow-sm transition-all duration-500 fade-in slide-in-from-bottom-4 dark:border-slate-800 dark:bg-slate-900">
+        <div v-if="filteredEvents.length === 0 && hasActiveFilters" class="col-span-full animate-in rounded-[2.5rem] border border-slate-100 bg-white py-20 text-center shadow-sm transition-all duration-500 fade-in slide-in-from-bottom-4 dark:border-slate-800 dark:bg-slate-900">
           <div class="flex flex-col items-center gap-4">
             <Search class="h-12 w-12 text-slate-200 dark:text-slate-700" />
             <div>
@@ -252,105 +261,124 @@ const handleViewEvent = (event: Event) => {
       </div>
     </div>
 
-    <ModalForm :show="isCreateModalOpen" @close="isCreateModalOpen = false" title="Create New Event">
-      <form @submit.prevent="submit" class="space-y-6">
-        <div>
-          <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">Event Title *</label>
-          <input
-            type="text"
-            v-model="form.title"
-            class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 transition-all outline-none focus:border-[#C5A059] focus:bg-white focus:ring-2 focus:ring-[#C5A059]/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-            placeholder="e.g. Annual Design Summit"
-            required
-          />
-          <p v-if="form.errors.title" class="mt-1 text-sm text-rose-500">{{ form.errors.title }}</p>
-        </div>
-
-        <div>
-          <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">Description *</label>
-          <textarea
-            v-model="form.description"
-            rows="3"
-            class="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 transition-all outline-none focus:border-[#C5A059] focus:bg-white focus:ring-2 focus:ring-[#C5A059]/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-            placeholder="Provide a brief overview..."
-            required
-          ></textarea>
-          <p v-if="form.errors.description" class="mt-1 text-sm text-rose-500">{{ form.errors.description }}</p>
-        </div>
-
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div>
-            <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">Start Date & Time *</label>
-            <input
-              type="datetime-local"
-              v-model="form.start_date"
-              class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 transition-all outline-none focus:border-[#C5A059] focus:bg-white focus:ring-2 focus:ring-[#C5A059]/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-              required
-            />
-            <p v-if="form.errors.start_date" class="mt-1 text-sm text-rose-500">{{ form.errors.start_date }}</p>
-          </div>
-          <div>
-            <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">End Date & Time *</label>
-            <input
-              type="datetime-local"
-              v-model="form.end_date"
-              class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 transition-all outline-none focus:border-[#C5A059] focus:bg-white focus:ring-2 focus:ring-[#C5A059]/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-              required
-            />
-            <p v-if="form.errors.end_date" class="mt-1 text-sm text-rose-500">{{ form.errors.end_date }}</p>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div>
-            <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">Registration Type</label>
-            <select
-              v-model="form.registration_type"
-              class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 transition-all outline-none focus:border-[#C5A059] focus:bg-white focus:ring-2 focus:ring-[#C5A059]/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-            >
-              <option value="public">Public</option>
-              <option value="private">Private (Invite Only)</option>
-              <option value="internal">Internal Staff</option>
-            </select>
-          </div>
-          <div>
-            <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">Attendance Tracking</label>
-            <select
-              v-model="form.attendance_type"
-              class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 transition-all outline-none focus:border-[#C5A059] focus:bg-white focus:ring-2 focus:ring-[#C5A059]/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-            >
-              <option value="single">Single Scan Event</option>
-              <option value="am">AM Scan Only</option>
-              <option value="am_pm">AM & PM Scans</option>
-              <option value="am_pm_in_out">AM & PM (In/Out) Scans</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="mt-2 space-y-3 rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/50">
-          <label class="flex cursor-pointer items-center gap-3">
-            <input
-              type="checkbox"
-              v-model="form.evaluation_required"
-              class="h-5 w-5 rounded border-slate-300 bg-white text-[#C5A059] focus:ring-[#C5A059]"
-            />
+    <ModalForm :show="isCreateModalOpen" @close="isCreateModalOpen = false" title="Create New Event" maxWidth="max-w-4xl">
+      <form @submit.prevent="submit" class="flex flex-col gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <!-- Left Column -->
+          <div class="space-y-6">
             <div>
-              <div class="font-semibold text-slate-800 dark:text-slate-200">Require Evaluation</div>
-              <div class="text-xs text-slate-500 dark:text-slate-400">Participants must submit feedback before getting their certificate.</div>
+              <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">Event Title *</label>
+              <input
+                type="text"
+                v-model="form.title"
+                class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 transition-all outline-none focus:border-[#C5A059] focus:bg-white focus:ring-2 focus:ring-[#C5A059]/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                placeholder="e.g. Annual Design Summit"
+                required
+              />
+              <p v-if="form.errors.title" class="mt-1 text-sm text-rose-500">{{ form.errors.title }}</p>
             </div>
-          </label>
-          <div class="h-0 border-t border-slate-200 indent-2 dark:border-slate-700"></div>
-          <label class="flex cursor-pointer items-center gap-3">
-            <input
-              type="checkbox"
-              v-model="form.certificate_enabled"
-              class="h-5 w-5 rounded border-slate-300 bg-white text-[#C5A059] focus:ring-[#C5A059]"
-            />
+
             <div>
-              <div class="font-semibold text-slate-800 dark:text-slate-200">Enable Certificates</div>
-              <div class="text-xs text-slate-500 dark:text-slate-400">Automatically generate PDF certificates for attendees.</div>
+              <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">Description *</label>
+              <textarea
+                v-model="form.description"
+                rows="4"
+                class="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 transition-all outline-none focus:border-[#C5A059] focus:bg-white focus:ring-2 focus:ring-[#C5A059]/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                placeholder="Provide a brief overview..."
+                required
+              ></textarea>
+              <p v-if="form.errors.description" class="mt-1 text-sm text-rose-500">{{ form.errors.description }}</p>
             </div>
-          </label>
+
+            <div>
+              <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">Image Banner</label>
+              <input
+                type="file"
+                @input="form.image_banner = $event.target.files[0]"
+                accept="image/*"
+                class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 transition-all outline-none focus:border-[#C5A059] focus:bg-white focus:ring-2 focus:ring-[#C5A059]/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#C5A059]/10 file:text-[#C5A059] hover:file:bg-[#C5A059]/20 cursor-pointer"
+              />
+              <p v-if="form.errors.image_banner" class="mt-1 text-sm text-rose-500">{{ form.errors.image_banner }}</p>
+            </div>
+          </div>
+
+          <!-- Right Column -->
+          <div class="space-y-6">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">Start Date & Time *</label>
+                <input
+                  type="datetime-local"
+                  v-model="form.start_date"
+                  class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 transition-all outline-none focus:border-[#C5A059] focus:bg-white focus:ring-2 focus:ring-[#C5A059]/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  required
+                />
+                <p v-if="form.errors.start_date" class="mt-1 text-sm text-rose-500">{{ form.errors.start_date }}</p>
+              </div>
+              <div>
+                <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">End Date & Time *</label>
+                <input
+                  type="datetime-local"
+                  v-model="form.end_date"
+                  class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 transition-all outline-none focus:border-[#C5A059] focus:bg-white focus:ring-2 focus:ring-[#C5A059]/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  required
+                />
+                <p v-if="form.errors.end_date" class="mt-1 text-sm text-rose-500">{{ form.errors.end_date }}</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">Registration Type</label>
+                <select
+                  v-model="form.registration_type"
+                  class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 transition-all outline-none focus:border-[#C5A059] focus:bg-white focus:ring-2 focus:ring-[#C5A059]/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                >
+                  <option value="public">Public</option>
+                  <option value="private">Private (Invite Only)</option>
+                  <option value="internal">Internal Staff</option>
+                </select>
+              </div>
+              <div>
+                <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">Attendance Tracking</label>
+                <select
+                  v-model="form.attendance_type"
+                  class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 transition-all outline-none focus:border-[#C5A059] focus:bg-white focus:ring-2 focus:ring-[#C5A059]/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                >
+                  <option value="single">Single Scan Event</option>
+                  <option value="am">AM Scan Only</option>
+                  <option value="am_pm">AM & PM Scans</option>
+                  <option value="am_pm_in_out">AM & PM (In/Out) Scans</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mt-2 space-y-3 rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/50">
+              <label class="flex cursor-pointer items-center gap-3">
+                <input
+                  type="checkbox"
+                  v-model="form.evaluation_required"
+                  class="h-5 w-5 rounded border-slate-300 bg-white text-[#C5A059] focus:ring-[#C5A059]"
+                />
+                <div>
+                  <div class="font-semibold text-slate-800 dark:text-slate-200">Require Evaluation</div>
+                  <div class="text-xs text-slate-500 dark:text-slate-400">Participants must submit feedback before getting their certificate.</div>
+                </div>
+              </label>
+              <div class="h-0 border-t border-slate-200 indent-2 dark:border-slate-700"></div>
+              <label class="flex cursor-pointer items-center gap-3">
+                <input
+                  type="checkbox"
+                  v-model="form.certificate_enabled"
+                  class="h-5 w-5 rounded border-slate-300 bg-white text-[#C5A059] focus:ring-[#C5A059]"
+                />
+                <div>
+                  <div class="font-semibold text-slate-800 dark:text-slate-200">Enable Certificates</div>
+                  <div class="text-xs text-slate-500 dark:text-slate-400">Automatically generate PDF certificates for attendees.</div>
+                </div>
+              </label>
+            </div>
+          </div>
         </div>
 
         <div class="flex items-center justify-end gap-3 border-t border-slate-100 pt-4 pb-2 dark:border-slate-800">

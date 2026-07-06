@@ -1,6 +1,6 @@
 <template>
   <Head title="System Overview" />
-    <div class="mx-auto max-w-7xl space-y-6 px-0 pb-10 font-['Outfit'] sm:space-y-8 sm:px-2">
+    <div class="mx-auto max-w-7xl space-y-6 px-0 pb-10 sm:space-y-8 sm:px-2">
       <!-- Header Profile Dashboard -->
       <div class="relative flex flex-col justify-between gap-6 overflow-hidden rounded-3xl border border-slate-800 bg-slate-900 p-6 text-white shadow-2xl transition-all duration-500 hover:shadow-[#C5A059]/5 sm:p-10 md:flex-row md:items-center lg:p-12">
         <div class="absolute top-0 right-0 h-[500px] w-[500px] translate-x-1/3 -translate-y-1/2 rounded-full bg-[#C5A059]/10 blur-3xl"></div>

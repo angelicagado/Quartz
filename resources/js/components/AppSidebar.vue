@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
-import { BarChart3, BookOpen, CalendarDays, FolderGit2, LayoutGrid, Ticket, Users, QrCode, Activity } from '@lucide/vue';
+import { BarChart3,  CalendarDays, LayoutGrid, Ticket, Users, QrCode, Activity } from '@lucide/vue';
 import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
@@ -64,16 +64,7 @@ const mainNavItems = computed<NavItem[]>(() => [
 ]);
 
 const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/vue-starter-kit',
-        icon: FolderGit2,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#vue',
-        icon: BookOpen,
-    },
+
 ];
 </script>
 
@@ -89,11 +80,11 @@ const footerNavItems: NavItem[] = [
                     </SidebarMenuButton>
                 </SidebarMenuItem>
             </SidebarMenu>
-            <SidebarMenu>
+            <!-- <SidebarMenu>
                 <SidebarMenuItem>
                     <TeamSwitcher />
                 </SidebarMenuItem>
-            </SidebarMenu>
+            </SidebarMenu> -->
         </SidebarHeader>
 
         <SidebarContent>

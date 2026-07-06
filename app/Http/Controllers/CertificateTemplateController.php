@@ -15,6 +15,8 @@ use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\ImageManager;
 
 class CertificateTemplateController extends Controller
 {
@@ -123,158 +125,60 @@ class CertificateTemplateController extends Controller
 
         $template = $event->certificateTemplate;
 
-        if (! $event->certificate_enabled || $template === null) {
+        if (! $event->certificate_enabled || $template === null || ! $template->background_path) {
             return redirect()->route('portal.events')
                 ->with('error', 'No certificate template is configured for this event.');
         }
 
-        $backgroundUrl = $template->background_path
-            ? Storage::url(str_replace('public/', '', $template->background_path))
-            : null;
+        $backgroundPath = storage_path('app/'.$template->background_path);
+        if (! file_exists($backgroundPath)) {
+            return redirect()->route('portal.events')
+                ->with('error', 'Certificate background image not found.');
+        }
 
-        $html = $this->buildCertificateHtml(
-            participantName: $user->name,
-            eventTitle: $event->title,
-            eventDate: $event->start_time->format('F j, Y'),
-            backgroundUrl: $backgroundUrl,
-            templateName: $template->name,
-        );
+        $manager = new ImageManager(new Driver);
+        $image = $manager->read($backgroundPath);
 
-        /** @var PDF $pdf */
-        $pdf = app('dompdf.wrapper');
-        $pdf->loadHTML($html);
-        $pdf->setPaper('a4', 'landscape');
+        $mapping = $template->dynamic_fields_mapping ?? [];
+        $fontPath = 'C:\\Windows\\Fonts\\arial.ttf';
 
-        $filename = 'certificate_'.Str::slug($event->title).'_'.Str::slug($user->name).'.pdf';
+        foreach ($mapping as $key => $config) {
+            $text = '';
+            if ($key === 'participant_name') {
+                $text = $user->name;
+            }
+            if ($key === 'event_title') {
+                $text = $event->title;
+            }
+            if ($key === 'date') {
+                $text = $event->start_time->format('F j, Y');
+            }
 
-        return $pdf->download($filename);
-    }
+            if (! $text) {
+                continue;
+            }
 
-    /**
-     * Build the HTML for the certificate PDF.
-     */
-    private function buildCertificateHtml(
-        string $participantName,
-        string $eventTitle,
-        string $eventDate,
-        ?string $backgroundUrl,
-        string $templateName,
-    ): string {
-        $backgroundStyle = $backgroundUrl
-            ? "background-image: url('{$backgroundUrl}'); background-size: cover; background-position: center;"
-            : 'background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);';
+            $x = intval($config['x'] ?? 0);
+            $y = intval($config['y'] ?? 0);
+            $size = intval($config['size'] ?? 24);
+            $color = $config['color'] ?? '#000000';
 
-        return <<<HTML
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="utf-8">
-            <style>
-                body {
-                    margin: 0;
-                    padding: 0;
-                    font-family: 'Georgia', serif;
+            $image->text($text, $x, $y, function ($font) use ($fontPath, $size, $color) {
+                if (file_exists($fontPath)) {
+                    $font->filename($fontPath);
                 }
-                .certificate {
-                    width: 297mm;
-                    height: 210mm;
-                    {$backgroundStyle}
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    text-align: center;
-                    color: #fff;
-                    position: relative;
-                }
-                .overlay {
-                    position: absolute;
-                    top: 0; left: 0; right: 0; bottom: 0;
-                    background: rgba(0,0,0,0.35);
-                }
-                .content {
-                    position: relative;
-                    z-index: 1;
-                    padding: 40px;
-                }
-                .border-outer {
-                    border: 4px solid rgba(255,215,0,0.8);
-                    padding: 30px 50px;
-                }
-                .border-inner {
-                    border: 1px solid rgba(255,215,0,0.5);
-                    padding: 20px 40px;
-                }
-                h1 {
-                    font-size: 14pt;
-                    letter-spacing: 8px;
-                    text-transform: uppercase;
-                    margin: 0 0 10px 0;
-                    color: #ffd700;
-                }
-                .subtitle {
-                    font-size: 10pt;
-                    letter-spacing: 4px;
-                    margin: 0 0 20px 0;
-                }
-                .presented-to {
-                    font-size: 9pt;
-                    letter-spacing: 2px;
-                    margin: 10px 0 5px 0;
-                    text-transform: uppercase;
-                }
-                .name {
-                    font-size: 28pt;
-                    font-weight: bold;
-                    margin: 8px 0;
-                    color: #ffd700;
-                    font-style: italic;
-                }
-                .event-label {
-                    font-size: 9pt;
-                    letter-spacing: 2px;
-                    margin: 15px 0 5px 0;
-                    text-transform: uppercase;
-                }
-                .event-title {
-                    font-size: 14pt;
-                    font-weight: bold;
-                    margin: 5px 0;
-                }
-                .date {
-                    font-size: 10pt;
-                    margin-top: 15px;
-                    color: rgba(255,255,255,0.8);
-                }
-                .quartz {
-                    margin-top: 20px;
-                    font-size: 8pt;
-                    letter-spacing: 4px;
-                    text-transform: uppercase;
-                    color: rgba(255,255,255,0.6);
-                }
-            </style>
-        </head>
-        <body>
-            <div class="certificate">
-                <div class="overlay"></div>
-                <div class="content">
-                    <div class="border-outer">
-                        <div class="border-inner">
-                            <h1>Certificate of Participation</h1>
-                            <p class="subtitle">{$templateName}</p>
-                            <p class="presented-to">This is to certify that</p>
-                            <div class="name">{$participantName}</div>
-                            <p class="event-label">has successfully participated in</p>
-                            <div class="event-title">{$eventTitle}</div>
-                            <p class="date">held on {$eventDate}</p>
-                            <p class="quartz">QUARTZ Event Management System</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </body>
-        </html>
-        HTML;
+                $font->size($size);
+                $font->color($color);
+                $font->align('left');
+                $font->valign('top');
+            });
+        }
+
+        $filename = 'certificate_'.Str::slug($event->title).'_'.Str::slug($user->name).'.png';
+        $encoded = $image->toPng();
+
+        return response($encoded->toString())
+            ->header('Content-Type', 'image/png')
+            ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
     }
 }

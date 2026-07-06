@@ -1,0 +1,112 @@
+quartz:
+superadmin
+- /dashboard
+	- display header for dashboard (Welcome, {user role}, include description on the {user role})
+	- display user count
+	- display active events
+	- display organizers count
+	- display system health
+	- implement global management quick links
+	- implement live attendance feed
+
+- /users
+	- add user (through form)
+	- search and filter of users
+	- edit and delete functionalities
+	- change full name, email address, password, and system role
+	- activation of user
+
+- /events
+	- display all events
+	- display upcoming events
+	- display past events
+	- display filter (registration type (internal & external, public events, private(invite only), staff only), certificate status (any status, with certificate, no certificate), and evaluation requirement (any requirement, evaluation required, optional feedback))
+	- assign organizer
+- /attendance 
+	- scanner for qr code (upload, camera)
+	- implement a dropdown box for selection of which event would the participant would attend
+	- display recent scans feed 
+
+- /logs
+	- table with timestamp, activity, participant, status/mode, performed by
+
+
+Admin user role
+- /dashboard
+	- header (Welcome Back, {user}!)
+	- quick action/links to modules
+	- display upcoming events
+	- display pending approvals
+	- display total events managed
+	- implement charts (placeholder for now)
+	- event type distribution (conference, workshop, seminar)
+	- live event feed
+
+- /events
+	- search and filter events
+	- all events, upcoming, past events
+	- display filter (registration type (internal & external, public events, private(invite only), staff only), certificate status (any status, with certificate, no certificate), and evaluation requirement (any requirement, evaluation required, optional feedback))
+	- create events (event title, description, start date & time, end date & time, event type, registration type (public, private, internal staff), attendance tracking (single time, beginning & end scans, dual in/out scans), require evalution input field, enable certificates)
+	- display event (event status, event banner, title, description, date, location/address, participant count, badges (evaluation required and if cert is given))
+	
+
+- /events/{id}
+	- title, description, time and date, location, invitation link with qr code for the invitation link (add a copy button for copying the link and a share button for sharing the qr code or invitation link)
+	- display participant count
+	- add a edit event button
+	- add a delete event button
+	- add registered participants list (name, email, timestamp, registration status (depends on type of event), actions for removal of participant or sending an email)
+	- display evaluation rating for completed events or past events
+	- add a create evaluation form
+	- add a import certificate template form
+	- assign organizer
+	- add a export functionality
+- /attendance
+	- scanner for qr code (upload, camera)
+	- implement a dropdown box for selection of which event would the participant would attend
+	- display recent scans feed 
+
+
+- /live-attendance
+	- attendance feed on events 
+	- table with (timestamp, participant, event, status/mode, scanned by)
+
+- /evaluations
+	- add a table for list of evaluations done by participants (participant, event, rating, feedback, date)
+	- add a chart for analytics of evaluation of events
+	- build evaluation form for event functionality
+
+- /certificates
+	- display certificates receiver (participant, event, cert number, issue date, actions)
+	- assign certificate functionality
+	- add certificate
+
+
+organizer
+- /dashboard
+	- header
+	- quick access links (launch qr scanner, managed events, live attendance)
+	- live event tracking
+	- include also a ui for notification or alerts
+
+
+- /events
+	- same as the previous roles but should only be limited to what the organizers is assigned
+
+- /events/{id}
+	- same as the previous role but limited functionalities or access only
+
+- /attendance
+	- same as the previous role
+
+- /live-attendance 
+	- same as the previous role
+
+- don't include the attendees list
+
+
+participant
+
+- display the events the participants has joined
+- display the certificates the participant has collected or received
+- display participant profile

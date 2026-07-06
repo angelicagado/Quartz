@@ -1,6 +1,6 @@
 <template>
   <Head :title="event.title" />
-    <div class="mx-auto max-w-7xl animate-in space-y-8 pb-20 font-['Outfit'] duration-500 fade-in">
+    <div class="mx-auto max-w-7xl animate-in space-y-8 pb-20 duration-500 fade-in">
       <!-- Breadcrumbs / Back -->
       <Link
         :href="role === 'organizer' ? '/organizer/events' : '/events'"
@@ -135,8 +135,12 @@
             </tbody>
           </table>
         </div>
+      <!-- Certificate Builder Section -->
+      <div v-if="['admin', 'super_admin'].includes(role) && event.certificate_enabled">
+        <CertificateBuilder :event="event" :existingTemplate="event.certificate_template" />
       </div>
     </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -145,6 +149,7 @@ import { Link, usePage, Head } from '@inertiajs/vue3';
 import { Calendar, MapPin, Clock, Download, Mail, ArrowLeft, MoreVertical } from '@lucide/vue';
 import QrcodeVue from 'qrcode.vue';
 import type { Event } from '@/types/Event';
+import CertificateBuilder from './Partials/CertificateBuilder.vue';
 
 const props = defineProps<{
     event: Event & { participants: any[] };
@@ -155,11 +160,6 @@ const auth = computed(() => page.props.auth as any);
 const role = computed(() => auth.value.user.role.name);
 
 const registrationUrl = computed(() => `${window.location.origin}/events/${props.event.registration_token}/register`);
-
-const copyRegistrationLink = () => {
-    navigator.clipboard.writeText(registrationUrl.value);
-    alert('Registration link copied to clipboard!');
-};
 
 const copyRegistrationLink = () => {
     navigator.clipboard.writeText(registrationUrl.value);
