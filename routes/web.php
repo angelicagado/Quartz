@@ -1,7 +1,16 @@
 <?php
 
+use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\CertificateTemplateController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EvaluationFormController;
+use App\Http\Controllers\EventController;
+use App\Http\Controllers\EventParticipantController;
+use App\Http\Controllers\ParticipantController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\Teams\TeamInvitationController;
+use App\Http\Controllers\UserController;
 use App\Http\Middleware\EnsureTeamMembership;
 use Illuminate\Support\Facades\Route;
 
@@ -19,3 +28,35 @@ Route::middleware(['auth'])->group(function () {
 });
 
 require __DIR__.'/settings.php';
+
+// QUARTZ SYSTEM ROUTES
+Route::middleware(['auth', 'verified'])->group(function () {
+    // Admin & Super Admin routes
+    Route::middleware('role:super_admin|admin')->group(function () {
+        Route::resource('users', UserController::class);
+        Route::resource('roles', RoleController::class);
+        Route::resource('events', EventController::class);
+        Route::resource('events.participants', EventParticipantController::class)->only(['index', 'store', 'destroy']);
+        Route::post('events/{event}/participants/csv', [EventParticipantController::class, 'uploadCsv'])->name('events.participants.csv');
+        Route::resource('events.evaluations', EvaluationFormController::class)->only(['store']);
+        Route::resource('events.certificates', CertificateTemplateController::class)->only(['store']);
+        Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
+    });
+
+    // Event Organizer routes
+    Route::middleware('role:super_admin|admin|event_organizer')->group(function () {
+        Route::get('my-events', [EventController::class, 'myEvents'])->name('events.my');
+        Route::get('events/{event}/monitor', [EventController::class, 'monitor'])->name('events.monitor');
+        Route::post('events/{event}/attendance/scan', [AttendanceController::class, 'scan'])->name('attendance.scan');
+    });
+
+    // Participant routes
+    Route::middleware('role:super_admin|admin|event_organizer|participant')->group(function () {
+        Route::get('portal/events', [ParticipantController::class, 'index'])->name('portal.events');
+        Route::post('portal/events/{event}/register', [ParticipantController::class, 'register'])->name('portal.register');
+        Route::get('portal/events/{event}/qr', [ParticipantController::class, 'qrCode'])->name('portal.qr');
+        Route::get('portal/events/{event}/evaluation', [EvaluationFormController::class, 'showForParticipant'])->name('portal.evaluation.show');
+        Route::post('portal/events/{event}/evaluation', [EvaluationFormController::class, 'submit'])->name('portal.evaluation.submit');
+        Route::get('portal/events/{event}/certificate', [CertificateTemplateController::class, 'download'])->name('portal.certificate.download');
+    });
+});

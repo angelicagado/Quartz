@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
-import { BookOpen, FolderGit2, LayoutGrid } from '@lucide/vue';
+import { BarChart3, BookOpen, CalendarDays, FolderGit2, LayoutGrid, Ticket, Users } from '@lucide/vue';
 import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
@@ -30,6 +30,26 @@ const mainNavItems = computed<NavItem[]>(() => [
         title: 'Dashboard',
         href: dashboardUrl.value,
         icon: LayoutGrid,
+    },
+    {
+        title: 'Events',
+        href: '/events',
+        icon: CalendarDays,
+    },
+    {
+        title: 'Users',
+        href: '/users',
+        icon: Users,
+    },
+    {
+        title: 'Reports',
+        href: '/reports',
+        icon: BarChart3,
+    },
+    {
+        title: 'My Events',
+        href: '/portal/events',
+        icon: Ticket,
     },
 ]);
 
