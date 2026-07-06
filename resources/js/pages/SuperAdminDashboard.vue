@@ -1,5 +1,5 @@
 <template>
-  <AdminLayout>
+  <Head title="System Overview" />
     <div class="mx-auto max-w-7xl space-y-6 px-0 pb-10 font-['Outfit'] sm:space-y-8 sm:px-2">
       <!-- Header Profile Dashboard -->
       <div class="relative flex flex-col justify-between gap-6 overflow-hidden rounded-3xl border border-slate-800 bg-slate-900 p-6 text-white shadow-2xl transition-all duration-500 hover:shadow-[#C5A059]/5 sm:p-10 md:flex-row md:items-center lg:p-12">
@@ -135,13 +135,11 @@
         </div>
       </div>
     </div>
-  </AdminLayout>
 </template>
 
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
-import { ShieldCheck, Users, Activity, Settings } from 'lucide-vue-next';
-import AdminLayout from '@/layouts/AdminLayout.vue';
+import { Link, Head } from '@inertiajs/vue3';
+import { ShieldCheck, Users, Activity, Settings } from '@lucide/vue';
 
 const props = defineProps<{
     stats: {

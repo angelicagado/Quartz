@@ -1,5 +1,5 @@
 <template>
-  <AdminLayout>
+  <Head title="System Users" />
     <div class="mx-auto w-full max-w-7xl pb-10 font-['Outfit']">
       <!-- Header Section -->
       <div class="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-center">
@@ -250,14 +250,12 @@
         </div>
       </div>
     </div>
-  </AdminLayout>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { useForm, router } from '@inertiajs/vue3';
-import { Plus, Search, UserCheck, UserX, Shield, MoreVertical, X, Trash2, Settings } from 'lucide-vue-next';
-import AdminLayout from '@/layouts/AdminLayout.vue';
+import { useForm, router, Head } from '@inertiajs/vue3';
+import { Plus, Search, UserCheck, UserX, Shield, MoreVertical, X, Trash2, Settings } from '@lucide/vue';
 
 interface Role {
     id: number;

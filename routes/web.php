@@ -9,6 +9,7 @@ use App\Http\Controllers\EventParticipantController;
 use App\Http\Controllers\ParticipantController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SystemLogController;
 use App\Http\Controllers\Teams\TeamInvitationController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\EnsureTeamMembership;
@@ -41,6 +42,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('events.evaluations', EvaluationFormController::class)->only(['store']);
         Route::resource('events.certificates', CertificateTemplateController::class)->only(['store']);
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::get('super-admin/logs', [SystemLogController::class, 'index'])->name('super-admin.logs');
     });
 
     // Event Organizer routes
@@ -48,6 +50,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('my-events', [EventController::class, 'myEvents'])->name('events.my');
         Route::get('events/{event}/monitor', [EventController::class, 'monitor'])->name('events.monitor');
         Route::post('events/{event}/attendance/scan', [AttendanceController::class, 'scan'])->name('attendance.scan');
+
+        // Global Attendance Scanner
+        Route::get('attendance', [AttendanceController::class, 'index'])->name('attendance.index');
+        Route::post('attendance/scan', [AttendanceController::class, 'globalScan'])->name('attendance.global-scan');
     });
 
     // Participant routes

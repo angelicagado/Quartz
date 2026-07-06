@@ -23,8 +23,8 @@ class EventController extends Controller
             ->with('organizer')
             ->withCount(['eventParticipants', 'attendances'])
             ->latest()
-            ->paginate(15)
-            ->through(fn (Event $event) => [
+            ->get()
+            ->map(fn (Event $event) => [
                 'id' => $event->id,
                 'title' => $event->title,
                 'start_time' => $event->start_time,
@@ -167,8 +167,8 @@ class EventController extends Controller
             ->where('organizer_id', $user->id)
             ->withCount(['eventParticipants', 'attendances'])
             ->latest()
-            ->paginate(15)
-            ->through(fn (Event $event) => [
+            ->get()
+            ->map(fn (Event $event) => [
                 'id' => $event->id,
                 'title' => $event->title,
                 'start_time' => $event->start_time,

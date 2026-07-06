@@ -1,5 +1,5 @@
 <template>
-  <AdminLayout>
+  <Head title="Reports & Analytics" />
     <div class="mx-auto w-full max-w-7xl pb-10 font-['Outfit']">
       <div class="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
@@ -25,9 +25,8 @@
         </div>
       </div>
     </div>
-  </AdminLayout>
 </template>
 
 <script setup lang="ts">
-import AdminLayout from '@/layouts/AdminLayout.vue';
+import { Head } from '@inertiajs/vue3';
 </script>

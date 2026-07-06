@@ -79,7 +79,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { Calendar, Users, FileCheck, Award, MapPin, Clock } from 'lucide-vue-next';
+import { Calendar, Users, FileCheck, Award, MapPin, Clock } from '@lucide/vue';
 
 // Define the type locally if not imported
 interface Event {

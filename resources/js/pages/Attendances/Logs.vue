@@ -1,5 +1,5 @@
 <template>
-  <component :is="LayoutComponent">
+  <Head title="Live Attendance Logs" />
     <div class="mx-auto max-w-7xl animate-in space-y-8 pb-10 font-['Outfit'] duration-500 fade-in">
       <div class="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div class="space-y-1">
@@ -107,15 +107,12 @@
         </div>
       </div>
     </div>
-  </component>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { Link, usePage } from '@inertiajs/vue3';
-import { Activity, Search, Filter, Calendar, User, ArrowRight, Link as LinkIcon, Download } from 'lucide-vue-next';
-import AdminLayout from '@/layouts/AdminLayout.vue';
-import OrganizerLayout from '@/layouts/OrganizerLayout.vue';
+import { Link, usePage, Head } from '@inertiajs/vue3';
+import { Activity, Search, Filter, Calendar, User, ArrowRight, Link as LinkIcon, Download } from '@lucide/vue';
 
 interface Log {
     id: number;
@@ -147,7 +144,5 @@ const page = usePage();
 const auth = computed(() => page.props.auth as any);
 const role = computed(() => auth.value.user.role.name);
 
-const LayoutComponent = computed(() => {
-    return (role.value === 'admin' || role.value === 'super_admin') ? AdminLayout : OrganizerLayout;
-});
+const role = computed(() => auth.value.user.role.name);
 </script>

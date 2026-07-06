@@ -1,5 +1,5 @@
 <template>
-  <OrganizerLayout>
+  <Head title="Organizer Dashboard" />
     <div class="mx-auto max-w-7xl space-y-8 font-['Outfit']">
       <div class="relative flex flex-col justify-between gap-6 overflow-hidden rounded-3xl border border-slate-800 bg-slate-900 p-8 text-white shadow-2xl md:flex-row md:items-center lg:p-10">
         <div class="bg-gradient-radial absolute top-0 right-0 h-[500px] w-[500px] translate-x-1/3 -translate-y-1/2 rounded-full from-[#C5A059]/20 to-transparent blur-3xl"></div>
@@ -130,14 +130,12 @@
         </div>
       </div>
     </div>
-  </OrganizerLayout>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { Link, usePage } from '@inertiajs/vue3';
-import { ScanLine, Users, CalendarDays, Activity } from 'lucide-vue-next';
-import OrganizerLayout from '@/layouts/OrganizerLayout.vue';
+import { Link, usePage, Head } from '@inertiajs/vue3';
+import { ScanLine, Users, CalendarDays, Activity } from '@lucide/vue';
 
 const props = defineProps<{
     stats: {

@@ -80,7 +80,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
-import { LayoutDashboard, CalendarDays, ScanLine, Users, Menu, X, LogOut, Activity } from 'lucide-vue-next';
+import { LayoutDashboard, CalendarDays, ScanLine, Users, Menu, X, LogOut, Activity } from '@lucide/vue';
 
 const page = usePage();
 const user = computed(() => page.props.auth.user as any);

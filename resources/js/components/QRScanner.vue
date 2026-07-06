@@ -135,7 +135,7 @@
 <script setup lang="ts">
 import { ref, watch, onUnmounted, nextTick } from 'vue';
 import { Html5Qrcode } from 'html5-qrcode';
-import { ScanLine, CheckCircle, AlertCircle, Camera, Upload, Image as ImageIcon } from 'lucide-vue-next';
+import { ScanLine, CheckCircle, AlertCircle, Camera, Upload, Image as ImageIcon } from '@lucide/vue';
 
 const emit = defineEmits<{
   (e: 'scan', token: string, scanType: string): void;

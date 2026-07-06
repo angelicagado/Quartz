@@ -106,7 +106,7 @@
 
 <script setup lang="ts">
 import { useForm, Head } from '@inertiajs/vue3';
-import { Calendar, MapPin, User, Mail, ArrowRight } from 'lucide-vue-next';
+import { Calendar, MapPin, User, Mail, ArrowRight } from '@lucide/vue';
 
 interface Event {
     id: number;

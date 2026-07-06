@@ -1,5 +1,5 @@
 <template>
-  <component :is="LayoutComponent">
+  <Head title="Participants" />
     <div class="mx-auto max-w-7xl animate-in space-y-8 duration-500 fade-in font-['Outfit']">
       <div class="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
@@ -111,15 +111,12 @@
         </div>
       </div>
     </div>
-  </component>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { usePage } from '@inertiajs/vue3';
-import { Users, Search, Filter, MoreHorizontal, UserPlus } from 'lucide-vue-next';
-import AdminLayout from '@/layouts/AdminLayout.vue';
-import OrganizerLayout from '@/layouts/OrganizerLayout.vue';
+import { usePage, Head } from '@inertiajs/vue3';
+import { Users, Search, Filter, MoreHorizontal, UserPlus } from '@lucide/vue';
 
 interface Participant {
     id: number;
@@ -143,9 +140,7 @@ const page = usePage();
 const auth = computed(() => page.props.auth as any);
 const role = computed(() => auth.value.user.role.name);
 
-const LayoutComponent = computed(() => {
-    return (role.value === 'admin' || role.value === 'super_admin') ? AdminLayout : OrganizerLayout;
-});
+const role = computed(() => auth.value.user.role.name);
 
 const searchQuery = ref('');
 

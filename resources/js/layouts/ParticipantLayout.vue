@@ -111,7 +111,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
-import { CalendarDays, QrCode, User, Menu, X, LogOut, Award, FileText } from 'lucide-vue-next';
+import { CalendarDays, QrCode, User, Menu, X, LogOut, Award, FileText } from '@lucide/vue';
 
 const page = usePage();
 const user = computed(() => page.props.auth.user as any);

@@ -7,9 +7,119 @@ use App\Models\Event;
 use App\Models\EventParticipant;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class AttendanceController extends Controller
 {
+    /**
+     * Display the attendance scanner interface.
+     */
+    public function index(): Response
+    {
+        return Inertia::render('Attendances/Index');
+    }
+
+    /**
+     * Process a global QR code scan without a specific event bound to the route.
+     */
+    public function globalScan(Request $request): JsonResponse
+    {
+        $request->validate([
+            'qr_token' => ['required', 'string'],
+            'scan_type' => ['required', 'string'],
+        ]);
+
+        $token = $request->string('qr_token')->toString();
+        $scanType = $request->string('scan_type')->toString();
+
+        $participant = EventParticipant::query()
+            ->with(['event', 'user'])
+            ->where('qr_token', $token)
+            ->first();
+
+        if ($participant === null) {
+            return response()->json([
+                'status' => 'invalid',
+                'message' => 'Invalid QR code or participant not registered.',
+            ], 422);
+        }
+
+        $event = $participant->event;
+
+        if ($event->attendance_type === 'single' || $event->attendance_type === 'one-time') {
+            $alreadyScanned = Attendance::query()
+                ->where('event_id', $event->id)
+                ->where('user_id', $participant->user_id)
+                ->exists();
+
+            if ($alreadyScanned) {
+                return response()->json([
+                    'status' => 'already_scanned',
+                    'message' => 'Attendance already recorded for this participant.',
+                    'participant_name' => $participant->user->name,
+                    'event_title' => $event->title,
+                    'data' => [
+                        'scan_type' => 'one-time',
+                        'scanned_at' => now()->toIso8601String(),
+                    ],
+                ]);
+            }
+
+            $attendance = Attendance::create([
+                'event_id' => $event->id,
+                'user_id' => $participant->user_id,
+                'scan_type' => 'one-time',
+                'scanned_at' => now(),
+            ]);
+
+            $participant->update(['status' => 'attended']);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Attendance recorded successfully.',
+                'participant_name' => $participant->user->name,
+                'event_title' => $event->title,
+                'scanned_at' => now()->toDateTimeString(),
+                'data' => $attendance,
+            ]);
+        }
+
+        // am-pm attendance logic
+        $determinedScanType = $this->determineAmPmScanType($event->id, $participant->user_id);
+
+        if ($determinedScanType === null) {
+            return response()->json([
+                'status' => 'already_scanned',
+                'message' => 'All attendance slots have been recorded for this participant.',
+                'participant_name' => $participant->user->name,
+                'event_title' => $event->title,
+                'data' => [
+                    'scan_type' => $scanType,
+                    'scanned_at' => now()->toIso8601String(),
+                ],
+            ]);
+        }
+
+        $attendance = Attendance::create([
+            'event_id' => $event->id,
+            'user_id' => $participant->user_id,
+            'scan_type' => $determinedScanType,
+            'scanned_at' => now(),
+        ]);
+
+        $participant->update(['status' => 'attended']);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Attendance recorded: {$determinedScanType}.",
+            'participant_name' => $participant->user->name,
+            'event_title' => $event->title,
+            'scanned_at' => now()->toDateTimeString(),
+            'data' => $attendance,
+        ]);
+    }
+
     /**
      * Process a QR code scan to record attendance.
      *

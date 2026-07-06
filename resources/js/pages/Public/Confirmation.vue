@@ -93,7 +93,7 @@
 
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
-import { CheckCircle, Download, Calendar, MapPin, ArrowRight, User } from 'lucide-vue-next';
+import { CheckCircle, Download, Calendar, MapPin, ArrowRight, User } from '@lucide/vue';
 import QrcodeVue from 'qrcode.vue';
 
 interface Participant {

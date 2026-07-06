@@ -1,5 +1,5 @@
 <template>
-  <AdminLayout>
+  <Head title="System Logs" />
     <div class="mx-auto max-w-7xl animate-in space-y-8 pb-10 font-['Outfit'] duration-500 fade-in">
       <div class="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div class="space-y-1">
@@ -91,12 +91,11 @@
         </table>
       </div>
     </div>
-  </AdminLayout>
 </template>
 
 <script setup lang="ts">
-import { Activity, Calendar, ArrowRight } from 'lucide-vue-next';
-import AdminLayout from '@/layouts/AdminLayout.vue';
+import { Activity, Calendar, ArrowRight } from '@lucide/vue';
+import { Head } from '@inertiajs/vue3';
 
 interface Log {
     id: number;

@@ -1,5 +1,5 @@
 <template>
-  <component :is="LayoutComponent">
+  <Head :title="event.title" />
     <div class="mx-auto max-w-7xl animate-in space-y-8 pb-20 font-['Outfit'] duration-500 fade-in">
       <!-- Breadcrumbs / Back -->
       <Link
@@ -137,17 +137,13 @@
         </div>
       </div>
     </div>
-  </component>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { Link, usePage } from '@inertiajs/vue3';
-import { Calendar, MapPin, Clock, Download, Mail, ArrowLeft, MoreVertical } from 'lucide-vue-next';
+import { Link, usePage, Head } from '@inertiajs/vue3';
+import { Calendar, MapPin, Clock, Download, Mail, ArrowLeft, MoreVertical } from '@lucide/vue';
 import QrcodeVue from 'qrcode.vue';
-import AdminLayout from '@/layouts/AdminLayout.vue';
-import OrganizerLayout from '@/layouts/OrganizerLayout.vue';
-import ParticipantLayout from '@/layouts/ParticipantLayout.vue';
 import type { Event } from '@/types/Event';
 
 const props = defineProps<{
@@ -165,9 +161,8 @@ const copyRegistrationLink = () => {
     alert('Registration link copied to clipboard!');
 };
 
-const LayoutComponent = computed(() => {
-    if (role.value === 'super_admin' || role.value === 'admin') return AdminLayout;
-    if (role.value === 'organizer') return OrganizerLayout;
-    return ParticipantLayout;
-});
+const copyRegistrationLink = () => {
+    navigator.clipboard.writeText(registrationUrl.value);
+    alert('Registration link copied to clipboard!');
+};
 </script>

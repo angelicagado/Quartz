@@ -1,5 +1,5 @@
 <template>
-  <component :is="LayoutComponent">
+  <Head title="Attendance Scanner" />
     <div class="mx-auto max-w-5xl animate-in space-y-8 pb-20 font-['Outfit'] duration-500 fade-in">
       <div class="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div class="space-y-1">
@@ -87,25 +87,18 @@
         </div>
       </div>
     </div>
-  </component>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { usePage } from '@inertiajs/vue3';
+import { usePage, Head } from '@inertiajs/vue3';
 import axios from 'axios';
-import { ScanLine, History, Users, Activity } from 'lucide-vue-next';
+import { ScanLine, History, Users, Activity } from '@lucide/vue';
 import QRScanner from '@/components/QRScanner.vue';
-import AdminLayout from '@/layouts/AdminLayout.vue';
-import OrganizerLayout from '@/layouts/OrganizerLayout.vue';
 
 const page = usePage();
 const auth = computed(() => page.props.auth as any);
 const role = computed(() => auth.value.user.role.name);
-
-const LayoutComponent = computed(() => {
-    return (role.value === 'admin' || role.value === 'super_admin') ? AdminLayout : OrganizerLayout;
-});
 
 const recentScans = ref<any[]>([]);
 

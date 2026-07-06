@@ -1,5 +1,90 @@
+
+<script setup lang="ts">
+import { usePage, useForm, router, Head } from '@inertiajs/vue3';
+import { Plus, Search, Filter, X } from '@lucide/vue';
+import { ref, computed } from 'vue';
+
+import EventCard from '@/components/EventCard.vue';
+import ModalForm from '@/components/ModalForm.vue';
+
+import type { Event } from '@/types/Event';
+
+const props = defineProps<{
+    events: Event[];
+}>();
+
+const page = usePage();
+const auth = computed(() => page.props.auth as any);
+const role = computed(() => auth.value.user.role.name);
+
+
+
+const isCreateModalOpen = ref(false);
+const searchQuery = ref('');
+const activeFilter = ref('all');
+const isAdvancedFilterOpen = ref(false);
+const registrationTypeFilter = ref('all');
+const certificateFilter = ref('all');
+const evaluationFilter = ref('all');
+
+const form = useForm({
+    title: '',
+    description: '',
+    start_date: '',
+    end_date: '',
+    registration_type: 'public',
+    attendance_type: 'single',
+    evaluation_required: false,
+    certificate_enabled: false,
+});
+
+const filteredEvents = computed(() => {
+    return props.events.filter((event) => {
+        const matchesSearch = event.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+                              event.description.toLowerCase().includes(searchQuery.value.toLowerCase());
+
+        const isUpcoming = new Date(event.start_date) > new Date();
+        const matchesFilter = activeFilter.value === 'all' ||
+                              (activeFilter.value === 'upcoming' && isUpcoming) ||
+                              (activeFilter.value === 'past' && !isUpcoming);
+
+        const matchesRegistration = registrationTypeFilter.value === 'all' || event.registration_type === registrationTypeFilter.value;
+        const matchesCertificate = certificateFilter.value === 'all' ||
+                                   (certificateFilter.value === 'enabled' && event.certificate_enabled) ||
+                                   (certificateFilter.value === 'disabled' && !event.certificate_enabled);
+        const matchesEvaluation = evaluationFilter.value === 'all' ||
+                                  (evaluationFilter.value === 'required' && event.evaluation_required) ||
+                                  (evaluationFilter.value === 'not_required' && !event.evaluation_required);
+
+        return matchesSearch && matchesFilter && matchesRegistration && matchesCertificate && matchesEvaluation;
+    });
+});
+
+const submit = () => {
+    form.post('/events', {
+        onSuccess: () => {
+            isCreateModalOpen.value = false;
+            form.reset();
+        },
+    });
+};
+
+const resetFilters = () => {
+    searchQuery.value = '';
+    activeFilter.value = 'all';
+    registrationTypeFilter.value = 'all';
+    certificateFilter.value = 'all';
+    evaluationFilter.value = 'all';
+};
+
+const handleViewEvent = (event: Event) => {
+    const prefix = role.value === 'organizer' ? '/organizer' : '';
+    router.get(`${prefix}/events/${event.id}`);
+};
+</script>
+
 <template>
-  <component :is="LayoutComponent">
+  <Head title="Events" />
     <div class="mx-auto w-full max-w-7xl font-['Outfit']">
       <!-- Header Section -->
       <div class="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-center">
@@ -286,94 +371,4 @@
         </div>
       </form>
     </ModalForm>
-  </component>
 </template>
-
-<script setup lang="ts">
-import { ref, computed } from 'vue';
-import { usePage, useForm, router } from '@inertiajs/vue3';
-import { Plus, Search, Filter, X } from 'lucide-vue-next';
-import EventCard from '@/components/EventCard.vue';
-import ModalForm from '@/components/ModalForm.vue';
-import AdminLayout from '@/layouts/AdminLayout.vue';
-import OrganizerLayout from '@/layouts/OrganizerLayout.vue';
-import ParticipantLayout from '@/layouts/ParticipantLayout.vue';
-import type { Event } from '@/types/Event';
-
-const props = defineProps<{
-    events: Event[];
-}>();
-
-const page = usePage();
-const auth = computed(() => page.props.auth as any);
-const role = computed(() => auth.value.user.role.name);
-
-const LayoutComponent = computed(() => {
-    if (role.value === 'super_admin' || role.value === 'admin') return AdminLayout;
-    if (role.value === 'organizer') return OrganizerLayout;
-    return ParticipantLayout;
-});
-
-const isCreateModalOpen = ref(false);
-const searchQuery = ref('');
-const activeFilter = ref('all');
-const isAdvancedFilterOpen = ref(false);
-const registrationTypeFilter = ref('all');
-const certificateFilter = ref('all');
-const evaluationFilter = ref('all');
-
-const form = useForm({
-    title: '',
-    description: '',
-    start_date: '',
-    end_date: '',
-    registration_type: 'public',
-    attendance_type: 'single',
-    evaluation_required: false,
-    certificate_enabled: false,
-});
-
-const filteredEvents = computed(() => {
-    return props.events.filter((event) => {
-        const matchesSearch = event.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                              event.description.toLowerCase().includes(searchQuery.value.toLowerCase());
-
-        const isUpcoming = new Date(event.start_date) > new Date();
-        const matchesFilter = activeFilter.value === 'all' ||
-                              (activeFilter.value === 'upcoming' && isUpcoming) ||
-                              (activeFilter.value === 'past' && !isUpcoming);
-
-        const matchesRegistration = registrationTypeFilter.value === 'all' || event.registration_type === registrationTypeFilter.value;
-        const matchesCertificate = certificateFilter.value === 'all' ||
-                                   (certificateFilter.value === 'enabled' && event.certificate_enabled) ||
-                                   (certificateFilter.value === 'disabled' && !event.certificate_enabled);
-        const matchesEvaluation = evaluationFilter.value === 'all' ||
-                                  (evaluationFilter.value === 'required' && event.evaluation_required) ||
-                                  (evaluationFilter.value === 'not_required' && !event.evaluation_required);
-
-        return matchesSearch && matchesFilter && matchesRegistration && matchesCertificate && matchesEvaluation;
-    });
-});
-
-const submit = () => {
-    form.post('/events', {
-        onSuccess: () => {
-            isCreateModalOpen.value = false;
-            form.reset();
-        },
-    });
-};
-
-const resetFilters = () => {
-    searchQuery.value = '';
-    activeFilter.value = 'all';
-    registrationTypeFilter.value = 'all';
-    certificateFilter.value = 'all';
-    evaluationFilter.value = 'all';
-};
-
-const handleViewEvent = (event: Event) => {
-    const prefix = role.value === 'organizer' ? '/organizer' : '';
-    router.get(`${prefix}/events/${event.id}`);
-};
-</script>
