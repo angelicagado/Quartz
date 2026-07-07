@@ -169,7 +169,7 @@
                     class="flex items-center gap-2 font-serif text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100"
                 >
                     <Activity class="h-6 w-6 text-[#d4af37]" />
-                    Live Attendance Tracking
+                    Live Event Feed
                 </h2>
                 <div
                     class="flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1"
@@ -179,7 +179,7 @@
                     ></div>
                     <span
                         class="text-[10px] leading-none font-black tracking-widest text-emerald-600 uppercase"
-                        >Scanning Now</span
+                        >Happening Today</span
                     >
                 </div>
             </div>
@@ -189,38 +189,38 @@
             >
                 <div class="divide-y divide-slate-100 dark:divide-slate-800">
                     <div
-                        v-if="recentScans.length === 0"
+                        v-if="liveEvents.length === 0"
                         class="flex flex-col items-center gap-4 p-16 text-center font-light text-slate-400 italic"
                     >
                         <div
                             class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-50 dark:bg-slate-800"
                         >
-                            <ScanLine class="h-8 w-8 opacity-20" />
+                            <CalendarDays class="h-8 w-8 opacity-20" />
                         </div>
-                        <p>No check-ins performed by you today.</p>
+                        <p>No events scheduled for today.</p>
                     </div>
                     <div
                         v-else
-                        v-for="scan in recentScans"
-                        :key="scan.id"
+                        v-for="event in liveEvents"
+                        :key="event.id"
                         class="group flex items-center justify-between p-6 transition-all duration-300 hover:bg-slate-50 dark:hover:bg-slate-800/50"
                     >
                         <div class="flex items-center gap-5">
                             <div
                                 class="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-800 bg-slate-900 text-sm font-bold text-[#d4af37] shadow-lg transition-all group-hover:scale-110 group-hover:-rotate-3"
                             >
-                                {{ scan.scan_type === 'am_in' ? 'AM' : 'PM' }}
+                                EV
                             </div>
                             <div>
                                 <p
                                     class="text-lg leading-tight font-extrabold text-slate-900 dark:text-slate-100"
                                 >
-                                    {{ scan.participant?.name || 'Guest' }}
+                                    {{ event.title }}
                                 </p>
                                 <div class="mt-1 flex items-center gap-2">
                                     <span
                                         class="rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-bold tracking-tighter text-emerald-600 uppercase dark:bg-emerald-500/10 dark:text-emerald-400"
-                                        >Verified</span
+                                        >Current</span
                                     >
                                     <span
                                         class="px-1 text-xs text-slate-300 dark:text-slate-600"
@@ -229,7 +229,7 @@
                                     <p
                                         class="text-[11px] font-bold tracking-widest text-slate-400 uppercase"
                                     >
-                                        {{ scan.event?.title }}
+                                        {{ event.organizer?.name || 'No Organizer' }}
                                     </p>
                                 </div>
                             </div>
@@ -240,29 +240,39 @@
                             >
                                 {{
                                     new Date(
-                                        scan.scanned_at,
+                                        event.start_time,
                                     ).toLocaleTimeString([], {
                                         hour: '2-digit',
                                         minute: '2-digit',
-                                        second: '2-digit',
+                                    })
+                                }} - {{
+                                    new Date(
+                                        event.end_time,
+                                    ).toLocaleTimeString([], {
+                                        hour: '2-digit',
+                                        minute: '2-digit',
                                     })
                                 }}
                             </p>
                             <p
                                 class="mt-1 text-[10px] font-bold tracking-widest text-[#d4af37] uppercase"
                             >
-                                Successfully Logged
+                                {{
+                                    new Date(
+                                        event.start_time,
+                                    ).toLocaleDateString()
+                                }}
                             </p>
                         </div>
                     </div>
                 </div>
                 <Link
-                    v-if="recentScans.length > 0"
-                    href="/attendance"
+                    v-if="liveEvents.length > 0"
+                    href="/my-events"
                     class="group block w-full border-t border-slate-100 bg-slate-50/30 py-5 text-center text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase transition-all hover:bg-white hover:text-[#d4af37] dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800"
                 >
                     <span class="transition-all group-hover:tracking-[0.25em]"
-                        >View All Scan History</span
+                        >View All Events</span
                     >
                 </Link>
             </div>
@@ -281,7 +291,7 @@ const props = defineProps<{
         todaysEvents: number;
         totalScans: number;
     };
-    recentScans: any[];
+    liveEvents: any[];
 }>();
 
 const page = usePage();
