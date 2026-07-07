@@ -80,7 +80,7 @@ class EventController extends Controller
         $event->load([
             'organizer:id,name,email',
             'eventParticipants.user:id,name,email',
-            'evaluationForm',
+            'evaluationForm.questions',
             'certificateTemplate',
         ]);
 
@@ -101,7 +101,9 @@ class EventController extends Controller
                 'participants_count' => $event->event_participants_count,
                 'attendances_count' => $event->attendances_count,
                 'has_evaluation_form' => $event->evaluationForm !== null,
+                'evaluation_form' => $event->evaluationForm,
                 'has_certificate_template' => $event->certificateTemplate !== null,
+                'certificate_template' => $event->certificateTemplate,
             ],
         ]);
     }

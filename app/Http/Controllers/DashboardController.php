@@ -5,36 +5,19 @@ namespace App\Http\Controllers;
 use App\Models\Attendance;
 use App\Models\Event;
 use App\Models\TeamInvitation;
-use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function __invoke(Request $request): Response
+    public function __invoke(Request $request): Response|RedirectResponse
     {
         $user = $request->user();
 
         if ($user->hasRole(['super_admin', 'admin'])) {
-            return Inertia::render('SuperAdminDashboard', [
-                'stats' => [
-                    'totalUsers' => User::count(),
-                    'activeEvents' => Event::where('start_time', '<=', now())
-                        ->where('end_time', '>=', now())
-                        ->count(),
-                    'totalOrganizers' => User::role('event_organizer')->count(),
-                    'upcomingEvents' => Event::where('start_time', '>', now())->count(),
-                    'systemHealth' => '100%',
-                ],
-                'liveEvents' => Event::where(function ($query) {
-                    $query->whereDate('start_time', today())
-                        ->orWhere(function ($q) {
-                            $q->where('start_time', '<=', now())
-                                ->where('end_time', '>=', now());
-                        });
-                })->with('organizer')->orderBy('start_time')->take(5)->get(),
-            ]);
+            return redirect()->route('super-admin.dashboard');
         }
 
         if ($user->hasRole('event_organizer')) {

@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Route;
 Route::inertia('/', 'Welcome')->name('home');
 
 // Super admin dashboard lives at a fixed path, not scoped to a team.
-Route::middleware(['auth', 'verified', 'role:super_admin'])->group(function () {
+Route::middleware(['auth', 'verified', 'role:super_admin|admin'])->group(function () {
     Route::get('super-admin/dashboard', SuperAdminDashboardController::class)->name('super-admin.dashboard');
 });
 
@@ -43,7 +43,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('events.participants', EventParticipantController::class)->only(['index', 'store', 'destroy']);
         Route::post('events/{event}/participants/csv', [EventParticipantController::class, 'uploadCsv'])->name('events.participants.csv');
         Route::resource('events.evaluations', EvaluationFormController::class)->only(['store']);
-        Route::resource('events.certificates', CertificateTemplateController::class)->only(['store']);
+        Route::resource('events.certificates', CertificateTemplateController::class)->only(['store', 'destroy']);
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('super-admin/logs', [SystemLogController::class, 'index'])->name('super-admin.logs');
     });
@@ -66,6 +66,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('portal/events/{event}/qr', [ParticipantController::class, 'qrCode'])->name('portal.qr');
         Route::get('portal/events/{event}/evaluation', [EvaluationFormController::class, 'showForParticipant'])->name('portal.evaluation.show');
         Route::post('portal/events/{event}/evaluation', [EvaluationFormController::class, 'submit'])->name('portal.evaluation.submit');
-        Route::get('portal/events/{event}/certificate', [CertificateTemplateController::class, 'download'])->name('portal.certificate.download');
+        Route::get('portal/events/{event}/certificate/view', [CertificateTemplateController::class, 'view'])->name('portal.certificate.view');
+        Route::get('portal/events/{event}/certificate/download', [CertificateTemplateController::class, 'download'])->name('portal.certificate.download');
+        Route::get('portal/events/{event}/certificate/pdf', [CertificateTemplateController::class, 'downloadPdf'])->name('portal.certificate.downloadPdf');
     });
 });

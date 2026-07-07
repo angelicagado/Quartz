@@ -10,7 +10,7 @@ trait RedirectsToCurrentTeam
 {
     protected function redirectPathForCurrentTeam(Request $request, string $redirect): string
     {
-        if ($request->user()?->hasRole('super_admin')) {
+        if ($request->user()?->hasRole(['super_admin', 'admin'])) {
             return '/super-admin/dashboard';
         }
 

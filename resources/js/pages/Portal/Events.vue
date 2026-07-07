@@ -14,6 +14,7 @@ interface Event {
     status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
     registration_type: string;
     participants_count: number;
+    certificate_enabled: boolean;
 }
 
 interface PaginatedEvents {
@@ -286,6 +287,23 @@ const statusConfig: Record<string, { label: string; classes: string }> = {
                                     <CheckCircle2 class="size-3.5" />
                                     Registered
                                 </Button>
+                            </template>
+                            <template v-else-if="event.status === 'completed' && isRegistered(event.id) && event.certificate_enabled">
+                                <a :href="`/portal/events/${event.id}/certificate/view`" target="_blank" class="mr-2">
+                                    <Button size="sm" variant="outline">
+                                        View Cert
+                                    </Button>
+                                </a>
+                                <a :href="`/portal/events/${event.id}/certificate/download`">
+                                    <Button size="sm" variant="default" class="bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-sm hover:from-violet-700 hover:to-indigo-700">
+                                        Download (Image)
+                                    </Button>
+                                </a>
+                                <a :href="`/portal/events/${event.id}/certificate/pdf`" class="ml-2">
+                                    <Button size="sm" variant="outline">
+                                        PDF
+                                    </Button>
+                                </a>
                             </template>
                         </div>
                     </div>

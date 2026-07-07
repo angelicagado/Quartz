@@ -1,4 +1,4 @@
-import { createInertiaApp } from '@inertiajs/vue3';
+import { createInertiaApp, router } from '@inertiajs/vue3';
 import { initializeTheme } from '@/composables/useAppearance';
 import AppLayout from '@/layouts/AppLayout.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
@@ -32,3 +32,11 @@ initializeTheme();
 
 // This will listen for flash toast data from the server...
 initializeFlashToast();
+
+// Debug log for backend response body (Inertia page props)
+router.on('navigate', (event) => {
+    console.groupCollapsed(`[Inertia Debug] Page Loaded: ${event.detail.page.url}`);
+    console.log('Component:', event.detail.page.component);
+    console.log('Props (Backend Response):', event.detail.page.props);
+    console.groupEnd();
+});

@@ -277,10 +277,10 @@
 
 @keyframes spin-gradient {
     0% {
-        --gradient-angle: 60deg;
+        --gradient-angle: 0deg;
     }
     100% {
-        --gradient-angle: 180deg;
+        --gradient-angle: 360deg;
     }
 }
 
@@ -288,7 +288,8 @@
     background: linear-gradient(
         var(--gradient-angle),
         var(--color-slate-800),
+
         var(--color-primary-container)
     );
-    animation: spin-gradient 4s linear infinite alternate;
+    animation: spin-gradient 10s ease-in-out infinite alternate;
 }

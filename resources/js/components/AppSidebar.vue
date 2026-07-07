@@ -11,10 +11,8 @@ import {
 } from "@lucide/vue";
 import { computed } from "vue";
 import AppLogo from "@/components/AppLogo.vue";
-import NavFooter from "@/components/NavFooter.vue";
 import NavMain from "@/components/NavMain.vue";
 import NavUser from "@/components/NavUser.vue";
-import TeamSwitcher from "@/components/TeamSwitcher.vue";
 import {
   Sidebar,
   SidebarContent,
@@ -32,7 +30,7 @@ const page = usePage();
 const isSuperAdmin = computed(
   () =>
     (page.props.auth.user as { role?: { name?: string } } | null)?.role?.name ===
-    "super_admin",
+    "super_admin"
 );
 
 const dashboardUrl = computed(() => {
@@ -40,9 +38,7 @@ const dashboardUrl = computed(() => {
     return "/super-admin/dashboard";
   }
 
-  return page.props.currentTeam
-    ? dashboard(page.props.currentTeam.slug).url
-    : "/";
+  return page.props.currentTeam ? dashboard(page.props.currentTeam.slug).url : "/";
 });
 
 const mainNavItems = computed<NavItem[]>(() => [
@@ -82,18 +78,18 @@ const mainNavItems = computed<NavItem[]>(() => [
     icon: Ticket,
   },
 ]);
-
-const footerNavItems: NavItem[] = [];
 </script>
 
 <template>
   <Sidebar collapsible="icon" variant="inset">
-    <SidebarHeader class="animated-gradient rounded-lg">
+    <SidebarHeader
+      class="rounded-lg bg-linear-120 from-slate-800 from-40% to-primary-container"
+    >
       <SidebarMenu>
         <SidebarMenuItem>
           <SidebarMenuButton
             size="lg"
-            class="text-white hover:text-white hover:bg-transparent flex"
+            class="text-white hover:text-white hover:bg-transparent flex font-serif"
           >
             <Link :href="dashboardUrl">
               <AppLogo />

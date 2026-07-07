@@ -32,8 +32,13 @@ class ParticipantController extends Controller
             ->pluck('event_id');
 
         $events = Event::query()
-            ->where('registration_type', 'public')
-            ->where('end_time', '>=', now())
+            ->where(function ($query) {
+                $query->where('registration_type', 'public')
+                    ->where('end_time', '>=', now());
+            })
+            ->orWhereHas('eventParticipants', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
             ->withCount('eventParticipants')
             ->latest('start_time')
             ->paginate(12)
@@ -46,6 +51,8 @@ class ParticipantController extends Controller
                 'attendance_type' => $event->attendance_type,
                 'participants_count' => $event->event_participants_count,
                 'is_registered' => $registeredEventIds->contains($event->id),
+                'certificate_enabled' => $event->certificate_enabled,
+                'status' => $event->end_time < now() ? 'completed' : ($event->start_time <= now() ? 'ongoing' : 'upcoming'),
             ]);
 
         return Inertia::render('Portal/Events', [
