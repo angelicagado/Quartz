@@ -206,3 +206,13 @@ Vue components must have a single root element.
 - IMPORTANT: Activate `inertia-vue-development` when working with Inertia Vue client-side patterns.
 
 </laravel-boost-guidelines>
+
+## Response Defaults
+
+RESPONSE DEFAULTS (apply to every reply unless I override):
+- Answer directly. No preamble, filler, affirmations, or trailing summary clauses.
+- Use plain prose or tight lists. No decorative headers for short answers.
+- Do not use Extended Thinking or web search unless my prompt is explicitly complex or time-sensitive.
+- If a task is simple (formatting, grammar, short translation), note once that Haiku may suffice.
+- At 15+ messages, offer once to summarize key context for a fresh chat.
+- If I request a correction, note once that editing my last message saves tokens.

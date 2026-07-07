@@ -33,7 +33,7 @@ defineProps<{
 
     <div
         v-if="status"
-        class="mb-4 text-center text-sm font-medium text-green-600"
+        class="mb-4 rounded-lg border border-emerald-100 bg-emerald-50 py-3 text-center text-sm font-medium text-emerald-600"
     >
         {{ status }}
     </div>
@@ -52,7 +52,12 @@ defineProps<{
     >
         <div class="grid gap-6">
             <div class="grid gap-2">
-                <Label for="email">Email address</Label>
+                <Label
+                    for="email"
+                    class="font-medium tracking-wide text-slate-700"
+                >
+                    Email address
+                </Label>
                 <Input
                     id="email"
                     type="email"
@@ -62,17 +67,23 @@ defineProps<{
                     :tabindex="1"
                     autocomplete="email"
                     placeholder="email@example.com"
+                    class="h-12 rounded-xl border-slate-200 bg-slate-50 text-[15px] transition-all focus:border-[#C5A059] focus:ring-[#C5A059]"
                 />
                 <InputError :message="errors.email" />
             </div>
 
             <div class="grid gap-2">
-                <div class="flex items-center justify-between">
-                    <Label for="password">Password</Label>
+                <div class="flex items-center">
+                    <Label
+                        for="password"
+                        class="font-medium tracking-wide text-slate-700"
+                    >
+                        Password
+                    </Label>
                     <TextLink
                         v-if="canResetPassword"
                         :href="request()"
-                        class="text-sm"
+                        class="ml-auto text-sm font-medium text-[#C5A059] transition-colors hover:text-slate-900"
                         :tabindex="5"
                     >
                         Forgot password?
@@ -85,30 +96,36 @@ defineProps<{
                     :tabindex="2"
                     autocomplete="current-password"
                     placeholder="Password"
+                    class="h-12 rounded-xl border-slate-200 bg-slate-50 text-[15px] transition-all focus:border-[#C5A059] focus:ring-[#C5A059]"
                 />
                 <InputError :message="errors.password" />
             </div>
 
-            <div class="flex items-center justify-between">
-                <Label for="remember" class="flex items-center space-x-3">
-                    <Checkbox id="remember" name="remember" :tabindex="3" />
-                    <span>Remember me</span>
+            <div class="flex items-center space-x-3">
+                <Checkbox
+                    id="remember"
+                    name="remember"
+                    :tabindex="3"
+                    class="data-[state=checked]:border-[#C5A059] data-[state=checked]:bg-[#C5A059]"
+                />
+                <Label for="remember" class="font-normal text-slate-600">
+                    Remember me
                 </Label>
             </div>
 
             <Button
                 type="submit"
-                class="mt-4 w-full"
+                class="mt-4 h-12 w-full rounded-xl bg-slate-900 text-[15px] font-medium text-white shadow-md transition-all duration-300 hover:bg-[#C5A059] hover:shadow-lg active:scale-[0.98]"
                 :tabindex="4"
                 :disabled="processing"
                 data-test="login-button"
             >
-                <Spinner v-if="processing" />
-                Log in
+                <Spinner v-if="processing" class="mr-2" />
+                Sign In
             </Button>
         </div>
 
-        <div class="text-center text-sm text-muted-foreground">
+        <div class="mt-2 text-center text-[15px] text-slate-500">
             Don't have an account?
             <TextLink
                 :href="
@@ -119,6 +136,7 @@ defineProps<{
                     })
                 "
                 :tabindex="5"
+                class="font-medium text-[#C5A059] transition-colors hover:text-slate-900"
                 data-test="register-link"
             >
                 Sign up

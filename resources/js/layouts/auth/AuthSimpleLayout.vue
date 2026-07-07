@@ -1,44 +1,84 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
-import AppLogoIcon from '@/components/AppLogoIcon.vue';
-import { home } from '@/routes';
+import { computed } from 'vue';
 
 defineProps<{
     title?: string;
     description?: string;
 }>();
+
+const currentYear = computed(() => new Date().getFullYear());
 </script>
 
 <template>
-    <div
-        class="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10"
-    >
-        <div class="w-full max-w-sm">
-            <div class="flex flex-col gap-8">
-                <div class="flex flex-col items-center gap-4">
-                    <Link
-                        :href="home()"
-                        class="flex flex-col items-center gap-2 font-medium"
+    <div class="flex min-h-screen bg-[#F8F9FC] font-['Outfit']">
+        <!-- Left Side - Image/Branding (Hidden on mobile) -->
+        <div
+            class="relative hidden flex-col items-center justify-center overflow-hidden bg-slate-900 p-12 lg:flex lg:w-1/2"
+        >
+            <div
+                class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 opacity-90"
+            ></div>
+
+            <!-- Decorative Elements -->
+            <div
+                class="absolute top-0 right-0 h-96 w-96 rounded-bl-full bg-[#C5A059] opacity-[0.05] blur-3xl filter"
+            ></div>
+            <div
+                class="absolute bottom-0 left-0 h-96 w-96 rounded-tr-full bg-[#C5A059] opacity-[0.05] blur-3xl filter"
+            ></div>
+
+            <div
+                class="relative z-10 flex max-w-lg flex-col items-center space-y-8 text-center"
+            >
+                <img
+                    src="/images/quartzlogo.png"
+                    alt="QUARTZ"
+                    class="w-[85%] max-w-[400px] object-contain drop-shadow-2xl"
+                />
+                <p
+                    class="mt-8 text-lg leading-relaxed font-light tracking-wide text-slate-300"
+                >
+                    The premiere destination for professional event planning,
+                    attendance tracking, and certificate management.
+                </p>
+            </div>
+        </div>
+
+        <!-- Right Side - Auth Form -->
+        <div
+            class="relative flex w-full flex-col items-center justify-center p-6 sm:p-12 lg:w-1/2"
+        >
+            <!-- Mobile Logo Only -->
+            <div class="mb-8 flex justify-center lg:hidden">
+                <img
+                    src="/images/quartzlogo.png"
+                    alt="QUARTZ"
+                    class="w-48 object-contain"
+                />
+            </div>
+
+            <div
+                class="relative z-10 w-full max-w-md rounded-[2rem] border border-slate-100 bg-white p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] sm:p-10"
+            >
+                <div class="mb-8 text-center">
+                    <h1
+                        class="mb-2 text-3xl font-semibold tracking-tight text-slate-900"
                     >
-                        <div
-                            class="mb-1 flex h-9 w-9 items-center justify-center rounded-md"
-                        >
-                            <AppLogoIcon
-                                class="size-9 fill-current text-[var(--foreground)] dark:text-white"
-                            />
-                        </div>
-                        <span class="sr-only">{{ title }}</span>
-                    </Link>
-                    <div class="space-y-2 text-center">
-                        <h1 class="font-serif text-xl font-medium">
-                            {{ title }}
-                        </h1>
-                        <p class="text-center text-sm text-muted-foreground">
-                            {{ description }}
-                        </p>
-                    </div>
+                        {{ title }}
+                    </h1>
+                    <p class="text-[15px] text-slate-500">
+                        {{ description }}
+                    </p>
                 </div>
+
                 <slot />
+            </div>
+
+            <!-- Footer -->
+            <div class="absolute right-0 bottom-6 left-0 text-center">
+                <p class="text-sm text-slate-400">
+                    © {{ currentYear }} Quartz. All rights reserved.
+                </p>
             </div>
         </div>
     </div>
