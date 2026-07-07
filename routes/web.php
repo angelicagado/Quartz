@@ -13,21 +13,18 @@ use App\Http\Controllers\SuperAdminDashboardController;
 use App\Http\Controllers\SystemLogController;
 use App\Http\Controllers\Teams\TeamInvitationController;
 use App\Http\Controllers\UserController;
-use App\Http\Middleware\EnsureTeamMembership;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'Welcome')->name('home');
 
-// Registered before the {current_team} prefix so it is not captured as a team slug.
+// Super admin dashboard lives at a fixed path, not scoped to a team.
 Route::middleware(['auth', 'verified', 'role:super_admin'])->group(function () {
     Route::get('super-admin/dashboard', SuperAdminDashboardController::class)->name('super-admin.dashboard');
 });
 
-Route::prefix('{current_team}')
-    ->middleware(['auth', 'verified', EnsureTeamMembership::class])
-    ->group(function () {
-        Route::get('dashboard', DashboardController::class)->name('dashboard');
-    });
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('dashboard', DashboardController::class)->name('dashboard');
+});
 
 Route::middleware(['auth'])->group(function () {
     Route::get('invitations/{invitation}/accept', [TeamInvitationController::class, 'accept'])->name('invitations.accept');

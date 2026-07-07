@@ -30,7 +30,7 @@ const user = computed(() => page.props.auth.user);
 <template>
     <Head title="Profile settings" />
 
-    <h1 class="sr-only">Profile settings</h1>
+    <h1 class="sr-only font-serif">Profile settings</h1>
 
     <div class="flex flex-col space-y-6">
         <Heading

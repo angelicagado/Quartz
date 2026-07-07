@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Attendance;
+use App\Models\Event;
 use App\Models\TeamInvitation;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -11,6 +14,52 @@ class DashboardController extends Controller
 {
     public function __invoke(Request $request): Response
     {
+        $user = $request->user();
+
+        if ($user->hasRole(['super_admin', 'admin'])) {
+            return Inertia::render('SuperAdminDashboard', [
+                'stats' => [
+                    'totalUsers' => User::count(),
+                    'activeEvents' => Event::where('start_time', '<=', now())
+                        ->where('end_time', '>=', now())
+                        ->count(),
+                    'totalOrganizers' => User::role('event_organizer')->count(),
+                    'upcomingEvents' => Event::where('start_time', '>', now())->count(),
+                    'systemHealth' => '100%',
+                ],
+                'liveEvents' => Event::where(function ($query) {
+                    $query->whereDate('start_time', today())
+                        ->orWhere(function ($q) {
+                            $q->where('start_time', '<=', now())
+                                ->where('end_time', '>=', now());
+                        });
+                })->with('organizer')->orderBy('start_time')->take(5)->get(),
+            ]);
+        }
+
+        if ($user->hasRole('event_organizer')) {
+            return Inertia::render('OrganizerDashboard', [
+                'stats' => [
+                    'totalEvents' => Event::where('organizer_id', $user->id)->count(),
+                    'todaysEvents' => Event::where('organizer_id', $user->id)
+                        ->whereDate('start_time', today())
+                        ->count(),
+                    'totalScans' => Attendance::whereHas('event', function ($query) use ($user) {
+                        $query->where('organizer_id', $user->id);
+                    })->count(),
+                ],
+                'liveEvents' => Event::where('organizer_id', $user->id)
+                    ->where(function ($query) {
+                        $query->whereDate('start_time', today())
+                            ->orWhere(function ($q) {
+                                $q->where('start_time', '<=', now())
+                                    ->where('end_time', '>=', now());
+                            });
+                    })->with('organizer')->orderBy('start_time')->take(5)->get(),
+            ]);
+        }
+
+        // For participants and other roles, show the default dashboard
         $email = strtolower($request->user()->email);
 
         $pendingInvitations = TeamInvitation::query()

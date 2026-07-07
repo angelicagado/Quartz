@@ -105,7 +105,7 @@ function formatDate(dateStr: string) {
                 </Button>
             </Link>
             <div>
-                <h1 class="text-2xl font-bold tracking-tight text-foreground">Event Evaluation</h1>
+                <h1 class="font-serif text-2xl font-bold tracking-tight text-foreground">Event Evaluation</h1>
                 <p class="mt-0.5 text-sm text-muted-foreground">{{ event.title }}</p>
             </div>
         </div>
@@ -131,7 +131,7 @@ function formatDate(dateStr: string) {
                     </div>
                 </div>
                 <div>
-                    <h2 class="text-2xl font-bold text-foreground">Thank You!</h2>
+                    <h2 class="font-serif text-2xl font-bold text-foreground">Thank You!</h2>
                     <p class="mt-2 text-muted-foreground leading-relaxed max-w-sm">
                         Your evaluation has been submitted successfully. We appreciate your feedback!
                     </p>
@@ -145,7 +145,7 @@ function formatDate(dateStr: string) {
             <div v-else>
                 <div class="rounded-xl border border-border bg-card shadow-xs overflow-hidden">
                     <div class="border-b border-border bg-muted/30 px-6 py-4">
-                        <h2 class="font-semibold text-foreground">{{ form.title }}</h2>
+                        <h2 class="font-serif font-semibold text-foreground">{{ form.title }}</h2>
                         <p class="text-xs text-muted-foreground mt-0.5">{{ form.questions.length }} question{{ form.questions.length !== 1 ? 's' : '' }}</p>
                     </div>
 
