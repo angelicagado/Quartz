@@ -21,9 +21,21 @@ import type { NavItem } from '@/types';
 
 const page = usePage();
 
-const dashboardUrl = computed(() =>
-    page.props.currentTeam ? dashboard(page.props.currentTeam.slug).url : '/',
+const isSuperAdmin = computed(
+    () =>
+        (page.props.auth.user as { role?: { name?: string } } | null)?.role
+            ?.name === 'super_admin',
 );
+
+const dashboardUrl = computed(() => {
+    if (isSuperAdmin.value) {
+        return '/super-admin/dashboard';
+    }
+
+    return page.props.currentTeam
+        ? dashboard(page.props.currentTeam.slug).url
+        : '/';
+});
 
 const mainNavItems = computed<NavItem[]>(() => [
     {
