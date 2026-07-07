@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Attendance;
+use App\Models\Certificate;
 use App\Models\CertificateTemplate;
 use App\Models\EvaluationResponse;
 use App\Models\Event;
@@ -137,7 +138,7 @@ class CertificateTemplateController extends Controller
         }
 
         $manager = new ImageManager(new Driver);
-        $image = $manager->read($backgroundPath);
+        $image = $manager->decodePath($backgroundPath);
 
         $mapping = $template->dynamic_fields_mapping ?? [];
         $fontPath = 'C:\\Windows\\Fonts\\arial.ttf';
@@ -170,12 +171,26 @@ class CertificateTemplateController extends Controller
                 $font->size($size);
                 $font->color($color);
                 $font->align('left');
-                $font->valign('top');
             });
         }
 
         $filename = 'certificate_'.Str::slug($event->title).'_'.Str::slug($user->name).'.png';
-        $encoded = $image->toPng();
+        $encoded = $image->encodeUsingFileExtension('png');
+
+        $relativePath = 'certificates/event_'.$event->id.'_user_'.$user->id.'.png';
+        Storage::disk('public')->put($relativePath, $encoded->toString());
+
+        Certificate::firstOrCreate(
+            [
+                'event_id' => $event->id,
+                'user_id' => $user->id,
+            ],
+            [
+                'certificate_number' => 'CERT-'.$event->id.'-'.$user->id.'-'.Str::upper(Str::random(6)),
+                'issue_date' => now(),
+                'file_path' => 'public/'.$relativePath,
+            ]
+        );
 
         return response($encoded->toString())
             ->header('Content-Type', 'image/png')

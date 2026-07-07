@@ -3,18 +3,13 @@ import { Head, Link, useForm } from '@inertiajs/vue3';
 import { Award, CalendarDays, CheckCircle2, ChevronLeft, Star } from '@lucide/vue';
 import { ref } from 'vue';
 import { Button } from '@/components/ui/button';
-
-interface QuestionOption {
-    value: string;
-    label: string;
-}
+import ParticipantLayout from '@/layouts/ParticipantLayout.vue';
 
 interface Question {
-    id: number | string;
-    label: string;
-    type: 'text' | 'rating' | 'options';
-    required?: boolean;
-    options?: QuestionOption[];
+    id: number;
+    question_text: string;
+    question_type: 'text' | 'rating' | 'options';
+    options?: string[] | null;
 }
 
 interface EvaluationForm {
@@ -36,20 +31,13 @@ const props = defineProps<{
     alreadySubmitted: boolean;
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'My Events', href: '/portal/events' },
-            { title: 'Evaluation', href: '#' },
-        ],
-    },
-});
+defineOptions({ layout: ParticipantLayout });
 
-// Build initial answers from questions
-function buildInitialAnswers(): Record<string | number, string | number> {
-    const answers: Record<string | number, string | number> = {};
+// Build initial answers keyed by question id.
+function buildInitialAnswers(): Record<number, string | number> {
+    const answers: Record<number, string | number> = {};
     props.form?.questions?.forEach((q) => {
-        answers[q.id] = q.type === 'rating' ? 0 : '';
+        answers[q.id] = q.question_type === 'rating' ? 0 : '';
     });
     return answers;
 }
@@ -59,9 +47,29 @@ const evaluationForm = useForm({
 });
 
 function submitEvaluation() {
-    evaluationForm.post(`/portal/events/${props.event.id}/evaluation`, {
-        preserveScroll: true,
-    });
+    evaluationForm
+        .transform((data) => ({
+            responses: props.form.questions.map((q) => {
+                const answer = (data.answers as Record<number, string | number>)[
+                    q.id
+                ];
+
+                if (q.question_type === 'rating') {
+                    return {
+                        question_id: q.id,
+                        response_rating: Number(answer) || null,
+                    };
+                }
+
+                return {
+                    question_id: q.id,
+                    response_text: answer !== '' ? String(answer) : null,
+                };
+            }),
+        }))
+        .post(`/portal/events/${props.event.id}/evaluation`, {
+            preserveScroll: true,
+        });
 }
 
 // Star rating state
@@ -161,13 +169,12 @@ function formatDate(dateStr: string) {
                                         {{ index + 1 }}
                                     </span>
                                     <label :for="`q-${question.id}`" class="text-sm font-medium text-foreground leading-relaxed">
-                                        {{ question.label }}
-                                        <span v-if="question.required" class="ml-1 text-destructive">*</span>
+                                        {{ question.question_text }}
                                     </label>
                                 </div>
 
                                 <!-- Text -->
-                                <div v-if="question.type === 'text'" class="ml-9">
+                                <div v-if="question.question_type === 'text'" class="ml-9">
                                     <textarea
                                         :id="`q-${question.id}`"
                                         v-model="evaluationForm.answers[question.id]"
@@ -178,7 +185,7 @@ function formatDate(dateStr: string) {
                                 </div>
 
                                 <!-- Rating (5 Stars) -->
-                                <div v-else-if="question.type === 'rating'" class="ml-9">
+                                <div v-else-if="question.question_type === 'rating'" class="ml-9">
                                     <div class="flex items-center gap-1.5">
                                         <button
                                             v-for="star in 5"
@@ -205,13 +212,13 @@ function formatDate(dateStr: string) {
                                 </div>
 
                                 <!-- Options (Radio) -->
-                                <div v-else-if="question.type === 'options'" class="ml-9 space-y-2.5">
+                                <div v-else-if="question.question_type === 'options'" class="ml-9 space-y-2.5">
                                     <label
-                                        v-for="option in question.options"
-                                        :key="option.value"
+                                        v-for="option in question.options ?? []"
+                                        :key="option"
                                         :class="[
                                             'flex cursor-pointer items-center gap-3 rounded-lg border p-3.5 text-sm transition-all',
-                                            evaluationForm.answers[question.id] === option.value
+                                            evaluationForm.answers[question.id] === option
                                                 ? 'border-violet-500 bg-violet-50 dark:bg-violet-900/20 font-medium text-foreground'
                                                 : 'border-border hover:border-muted-foreground/30 hover:bg-muted/20 text-muted-foreground'
                                         ]"
@@ -219,11 +226,11 @@ function formatDate(dateStr: string) {
                                         <input
                                             type="radio"
                                             :name="`q-${question.id}`"
-                                            :value="option.value"
+                                            :value="option"
                                             v-model="evaluationForm.answers[question.id]"
                                             class="accent-violet-600"
                                         />
-                                        {{ option.label }}
+                                        {{ option }}
                                     </label>
                                 </div>
 

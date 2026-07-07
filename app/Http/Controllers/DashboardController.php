@@ -6,15 +6,21 @@ use App\Models\Attendance;
 use App\Models\Event;
 use App\Models\TeamInvitation;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function __invoke(Request $request): Response
+    public function __invoke(Request $request): Response|RedirectResponse
     {
         $user = $request->user();
+
+        // Participants (end users) land on their registered-events portal, not the team dashboard.
+        if ($user->hasRole('participant') && ! $user->hasAnyRole(['super_admin', 'admin', 'event_organizer'])) {
+            return redirect()->route('portal.my-events');
+        }
 
         if ($user->hasRole(['super_admin', 'admin'])) {
             return Inertia::render('SuperAdminDashboard', [

@@ -5,10 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\EventParticipant;
 use App\Models\User;
-use BaconQrCode\Renderer\Image\SvgImageBackEnd;
-use BaconQrCode\Renderer\ImageRenderer;
-use BaconQrCode\Renderer\RendererStyle\RendererStyle;
-use BaconQrCode\Writer;
+use App\Services\QrCodeService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -19,6 +16,8 @@ use Inertia\Response;
 
 class EventParticipantController extends Controller
 {
+    public function __construct(private QrCodeService $qrCodeService) {}
+
     /**
      * Display a list of participants for the specified event.
      */
@@ -86,7 +85,7 @@ class EventParticipantController extends Controller
             'status' => 'registered',
         ]);
 
-        $this->generateQrCode($participant);
+        $this->qrCodeService->generateFor($participant);
 
         return back()->with('success', 'Participant added successfully.');
     }
@@ -178,39 +177,12 @@ class EventParticipantController extends Controller
                 'status' => 'registered',
             ]);
 
-            $this->generateQrCode($participant);
+            $this->qrCodeService->generateFor($participant);
             $imported++;
         }
 
         fclose($handle);
 
         return back()->with('success', "CSV imported: {$imported} participants added, {$skipped} skipped.");
-    }
-
-    /**
-     * Generate a QR code SVG for the given participant and store it.
-     */
-    private function generateQrCode(EventParticipant $participant): void
-    {
-        $token = Str::random(40);
-
-        $participant->update(['qr_token' => $token]);
-
-        $scanUrl = route('attendance.scan', ['event' => $participant->event_id])
-            .'?token='.$token;
-
-        $renderer = new ImageRenderer(
-            new RendererStyle(300),
-            new SvgImageBackEnd
-        );
-
-        $writer = new Writer($renderer);
-        $svgContent = $writer->writeString($scanUrl);
-
-        $relativePath = 'qrcodes/event_'.$participant->event_id.'_participant_'.$participant->id.'.svg';
-
-        Storage::disk('public')->put($relativePath, $svgContent);
-
-        $participant->update(['qr_code_path' => 'public/'.$relativePath]);
     }
 }

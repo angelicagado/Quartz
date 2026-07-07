@@ -5,6 +5,7 @@ use App\Models\Team;
 use App\Models\TeamInvitation;
 use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
+use Spatie\Permission\Models\Role;
 
 test('registration screen can be rendered', function () {
     $response = $this->get(route('register'));
@@ -34,6 +35,8 @@ test('registration screen includes team invitation context', function () {
 });
 
 test('new users can register', function () {
+    Role::findOrCreate('participant');
+
     $response = $this->post(route('register.store'), [
         'name' => 'Test User',
         'email' => 'test@example.com',
