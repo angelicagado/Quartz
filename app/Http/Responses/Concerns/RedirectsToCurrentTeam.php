@@ -10,11 +10,15 @@ trait RedirectsToCurrentTeam
 {
     protected function redirectPathForCurrentTeam(Request $request, string $redirect): string
     {
+        if ($request->user()?->hasRole('super_admin')) {
+            return '/super-admin/dashboard';
+        }
+
         $team = $this->currentTeam($request);
 
         URL::defaults(['current_team' => $team->slug]);
 
-        return "/{$team->slug}{$redirect}";
+        return $redirect;
     }
 
     protected function currentTeam(Request $request): Team

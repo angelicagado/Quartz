@@ -10,7 +10,7 @@ const currentYear = computed(() => new Date().getFullYear());
 </script>
 
 <template>
-    <div class="flex min-h-screen bg-[#F8F9FC] font-['Outfit']">
+    <div class="flex min-h-screen bg-[#F8F9FC] font-body-md">
         <!-- Left Side - Image/Branding (Hidden on mobile) -->
         <div
             class="relative hidden flex-col items-center justify-center overflow-hidden bg-slate-900 p-12 lg:flex lg:w-1/2"

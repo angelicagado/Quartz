@@ -16,8 +16,8 @@ import type { TeamInvitationContext } from '@/types';
 
 defineOptions({
     layout: {
-        title: 'Log in to your account',
-        description: 'Enter your email and password below to log in',
+        title: 'Log in to your Account',
+        description: 'Enter your Email and Password below to log in',
     },
 });
 
@@ -54,9 +54,9 @@ defineProps<{
             <div class="grid gap-2">
                 <Label
                     for="email"
-                    class="font-medium tracking-wide text-slate-700"
+                    class="font-medium font-body-lg tracking-wide text-slate-700"
                 >
-                    Email address
+                    Email Address
                 </Label>
                 <Input
                     id="email"
@@ -83,7 +83,7 @@ defineProps<{
                     <TextLink
                         v-if="canResetPassword"
                         :href="request()"
-                        class="ml-auto text-sm font-medium text-[#C5A059] transition-colors hover:text-slate-900"
+                        class="ml-auto text-sm font-medium text-[#c19c56] transition-colors hover:text-slate-900 decoration-0"
                         :tabindex="5"
                     >
                         Forgot password?
