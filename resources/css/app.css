@@ -268,3 +268,27 @@
         @apply bg-background text-foreground;
     }
 }
+
+@property --gradient-angle {
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
+}
+
+@keyframes spin-gradient {
+    0% {
+        --gradient-angle: 60deg;
+    }
+    100% {
+        --gradient-angle: 180deg;
+    }
+}
+
+.animated-gradient {
+    background: linear-gradient(
+        var(--gradient-angle),
+        var(--color-slate-800),
+        var(--color-primary-container)
+    );
+    animation: spin-gradient 4s linear infinite alternate;
+}

@@ -76,7 +76,7 @@ const footerNavItems: NavItem[] = [];
 
 <template>
   <Sidebar collapsible="icon" variant="inset">
-    <SidebarHeader class="bg-linear-120 from-slate-800 from-50% to-[#d4af37] rounded-lg">
+    <SidebarHeader class="animated-gradient rounded-lg">
       <SidebarMenu>
         <SidebarMenuItem>
           <SidebarMenuButton

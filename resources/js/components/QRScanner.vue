@@ -248,7 +248,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onUnmounted, nextTick } from 'vue';
+import { ref, watch, onUnmounted, onMounted, nextTick } from 'vue';
 import { Html5Qrcode } from 'html5-qrcode';
 import {
     ScanLine,
@@ -285,17 +285,18 @@ const cleanupScanner = async () => {
     }
 };
 
-watch(
-    mode,
-    async (newMode) => {
-        await cleanupScanner();
-        if (newMode === 'camera') {
-            await nextTick();
-            scanner = new Html5Qrcode('qr-reader');
-        }
-    },
-    { immediate: true },
-);
+const setupScanner = async () => {
+    if (typeof window === 'undefined') return;
+    await cleanupScanner();
+    if (mode.value === 'camera') {
+        await nextTick();
+        scanner = new Html5Qrcode('qr-reader');
+    }
+};
+
+watch(mode, setupScanner);
+
+onMounted(setupScanner);
 
 onUnmounted(async () => {
     await cleanupScanner();
