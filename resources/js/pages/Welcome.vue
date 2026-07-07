@@ -102,9 +102,9 @@ const dashboardUrl = computed(() =>
         ></div>
       </div>
       <div
-        class="relative z-20 max-w-container-max mx-auto px-margin-desktop text-center flex flex-col md:flex-row items-center gap-8 max-md:px-margin-mobile"
+        class="relative z-20 max-w-container-max mx-auto px-margin-desktop flex flex-col md:flex-row items-center gap-8 max-md:px-margin-mobile"
       >
-        <div>
+        <div class="space-y-6">
           <h1
             class="text-display-lg font-display-lg text-on-surface max-w-4xl max-md:text-headline-lg-mobile max-md:font-headline-lg-mobile"
           >
@@ -134,7 +134,7 @@ const dashboardUrl = computed(() =>
           <img
             alt="Quartz Event Orchestration Logo"
             class="w-64 md:w-80 h-auto mb-8 drop-shadow-[0_0_30px_rgba(212,175,55,0.2)]"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBK27PP40zPa2lijtY-lapo-nxcz2WVWyn-V20M0ly186iy3S91v5WIPF3krW9s6uAiBulVJbG0XMd-mamGXQCGV_1g_a2BdJdwSM0-X-4lbxOJOJzNR3D5HEx1Pm5tE6_ulnXNstQBugu-uum6Ltv7SBZkOwtg8RZUiTf9wkBK67GlS6F0gjB-MgP7olpqSY5rFLlGrSeh_qKf-W4K-WtD2Wg02Xkc0inr-2_wQ_8KddbOgBPAgooJC9dyImlh_Nn7qQ"
+            src="/images/quartzlogo.png"
           />
         </div>
       </div>
@@ -338,7 +338,7 @@ const dashboardUrl = computed(() =>
         <div
           class="text-body-md font-body-md text-on-surface-variant text-center md:text-left"
         >
-          © 2024 Quartz Event Orchestration. Precision in Prestige.
+          © 2026 Quartz Event Management.
         </div>
         <div class="flex gap-6 text-label-sm font-label-sm">
           <a class="text-on-surface-variant hover:text-primary transition-colors" href="#"
