@@ -163,13 +163,12 @@ import { ref, computed } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import {
     CalendarDays,
-    QrCode,
+    Ticket,
     User,
     Menu,
     X,
     LogOut,
     Award,
-    FileText,
 } from '@lucide/vue';
 
 const page = usePage();
@@ -178,10 +177,9 @@ const user = computed(() => page.props.auth.user as any);
 const isMobileOpen = ref(false);
 
 const navItems = [
-    { name: 'My Events', href: '/participant/events', icon: CalendarDays },
-    { name: 'My QR Pass', href: '/participant/qr', icon: QrCode },
-    { name: 'Evaluations', href: '/participant/evaluations', icon: FileText },
-    { name: 'Certificates', href: '/participant/certificates', icon: Award },
+    { name: 'My Events', href: '/portal/my-events', icon: Ticket },
+    { name: 'Browse Events', href: '/portal/events', icon: CalendarDays },
+    { name: 'Certificates', href: '/portal/certificates', icon: Award },
 ];
 
 const isActive = (href: string) => page.url.startsWith(href);
