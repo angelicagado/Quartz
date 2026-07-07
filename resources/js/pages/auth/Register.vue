@@ -100,7 +100,7 @@ defineOptions({
 
             <Button
                 type="submit"
-                class="mt-2 w-full"
+                class="mt-2 h-12 w-full rounded-xl text-[15px]"
                 tabindex="5"
                 :disabled="processing"
                 data-test="register-user-button"
@@ -122,7 +122,7 @@ defineOptions({
                           })
                         : login()
                 "
-                class="underline underline-offset-4"
+                class="font-medium text-[#C5A059] transition-colors hover:text-slate-900 decoration-0"
                 :tabindex="6"
                 data-test="team-invitation-login-link"
             >

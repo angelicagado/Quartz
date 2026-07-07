@@ -108,7 +108,7 @@ defineProps<{
                     :tabindex="3"
                     class="data-[state=checked]:border-[#C5A059] data-[state=checked]:bg-[#C5A059]"
                 />
-                <Label for="remember" class="font-normal text-slate-600">
+                <Label for="remember" class="font-normal text-slate-700">
                     Remember me
                 </Label>
             </div>
@@ -136,7 +136,7 @@ defineProps<{
                     })
                 "
                 :tabindex="5"
-                class="font-medium text-[#C5A059] transition-colors hover:text-slate-900"
+                class="font-medium text-[#C5A059] transition-colors hover:text-slate-900 decoration-0"
                 data-test="register-link"
             >
                 Sign up

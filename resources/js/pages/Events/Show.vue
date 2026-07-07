@@ -1,7 +1,7 @@
 <template>
     <Head :title="event.title" />
     <div
-        class="mx-auto max-w-7xl animate-in space-y-8 pb-20 duration-500 fade-in"
+        class="mx-auto my-4 max-w-7xl animate-in space-y-8 pb-20 duration-500 fade-in"
     >
         <!-- Breadcrumbs / Back -->
         <Link
