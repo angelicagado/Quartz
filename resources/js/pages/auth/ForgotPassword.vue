@@ -48,19 +48,23 @@ defineProps<{
 
             <div class="my-6 flex items-center justify-start">
                 <Button
-                    class="w-full"
+                    class="h-12 w-full rounded-xl text-[15px]"
                     :disabled="processing"
                     data-test="email-password-reset-link-button"
                 >
                     <Spinner v-if="processing" />
-                    Email password reset link
+                    Email Password reset link
                 </Button>
             </div>
         </Form>
 
         <div class="space-x-1 text-center text-sm text-muted-foreground">
             <span>Or, return to</span>
-            <TextLink :href="login()">log in</TextLink>
+            <TextLink
+                :href="login()"
+                class="font-medium text-[#C5A059] transition-colors hover:text-slate-900 decoration-0"
+                >Log in</TextLink
+            >
         </div>
     </div>
 </template>

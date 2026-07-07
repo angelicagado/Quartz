@@ -28,10 +28,10 @@ const form = useForm({
   title: "",
   description: "",
   image_banner: null as File | null,
-  start_date: "",
-  end_date: "",
+  start_time: "",
+  end_time: "",
   registration_type: "public",
-  attendance_type: "single",
+  attendance_type: "one-time",
   evaluation_required: false,
   certificate_enabled: false,
 });
@@ -42,7 +42,7 @@ const filteredEvents = computed(() => {
       event.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       event.description.toLowerCase().includes(searchQuery.value.toLowerCase());
 
-    const isUpcoming = new Date(event.start_date) > new Date();
+    const isUpcoming = new Date(event.start_time) > new Date();
     const matchesFilter =
       activeFilter.value === "all" ||
       (activeFilter.value === "upcoming" && isUpcoming) ||
@@ -81,6 +81,32 @@ const hasActiveFilters = computed(() => {
 });
 
 const submit = () => {
+  form.clearErrors();
+
+  if (!form.start_time) {
+    form.setError(
+      "start_time",
+      "Please select both a date and a time for the start.",
+    );
+  }
+  if (!form.end_time) {
+    form.setError(
+      "end_time",
+      "Please select both a date and a time for the end.",
+    );
+  }
+  if (
+    form.start_time &&
+    form.end_time &&
+    new Date(form.end_time) <= new Date(form.start_time)
+  ) {
+    form.setError("end_time", "End date must be after the start date.");
+  }
+
+  if (form.errors.start_time || form.errors.end_time) {
+    return;
+  }
+
   form.post("/events", {
     onSuccess: () => {
       isCreateModalOpen.value = false;
@@ -392,12 +418,11 @@ const handleViewEvent = (event: Event) => {
               >
               <input
                 type="datetime-local"
-                v-model="form.start_date"
+                v-model="form.start_time"
                 class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 transition-all outline-none focus:border-[#d4af37] focus:bg-white focus:ring-2 focus:ring-[#d4af37]/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                required
               />
-              <p v-if="form.errors.start_date" class="mt-1 text-sm text-rose-500">
-                {{ form.errors.start_date }}
+              <p v-if="form.errors.start_time" class="mt-1 text-sm text-rose-500">
+                {{ form.errors.start_time }}
               </p>
             </div>
             <div>
@@ -407,12 +432,11 @@ const handleViewEvent = (event: Event) => {
               >
               <input
                 type="datetime-local"
-                v-model="form.end_date"
+                v-model="form.end_time"
                 class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 transition-all outline-none focus:border-[#d4af37] focus:bg-white focus:ring-2 focus:ring-[#d4af37]/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                required
               />
-              <p v-if="form.errors.end_date" class="mt-1 text-sm text-rose-500">
-                {{ form.errors.end_date }}
+              <p v-if="form.errors.end_time" class="mt-1 text-sm text-rose-500">
+                {{ form.errors.end_time }}
               </p>
             </div>
           </div>
@@ -427,9 +451,8 @@ const handleViewEvent = (event: Event) => {
                 v-model="form.registration_type"
                 class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 transition-all outline-none focus:border-[#d4af37] focus:bg-white focus:ring-2 focus:ring-[#d4af37]/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               >
-                <option value="public">Public</option>
-                <option value="private">Private (Invite Only)</option>
-                <option value="internal">Internal Staff</option>
+                <option value="public">Public (Open Registration)</option>
+                <option value="static">Static (Pre-registered Only)</option>
               </select>
             </div>
             <div>
@@ -441,10 +464,8 @@ const handleViewEvent = (event: Event) => {
                 v-model="form.attendance_type"
                 class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 transition-all outline-none focus:border-[#d4af37] focus:bg-white focus:ring-2 focus:ring-[#d4af37]/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               >
-                <option value="single">Single Scan Event</option>
-                <option value="am">AM Scan Only</option>
-                <option value="am_pm">AM & PM Scans</option>
-                <option value="am_pm_in_out">AM & PM (In/Out) Scans</option>
+                <option value="one-time">One-time Scan</option>
+                <option value="am-pm">AM &amp; PM Scans</option>
               </select>
             </div>
           </div>
