@@ -54,7 +54,7 @@
                     <Clock class="h-4 w-4 shrink-0 text-slate-400" />
                     <span class="truncate">
                         {{
-                            new Date(event.start_date).toLocaleDateString(
+                            new Date(event.start_time).toLocaleDateString(
                                 'en-US',
                                 {
                                     month: 'short',
@@ -67,7 +67,7 @@
                             >•</span
                         >
                         {{
-                            new Date(event.end_date).toLocaleDateString(
+                            new Date(event.end_time).toLocaleDateString(
                                 'en-US',
                                 {
                                     month: 'short',
@@ -146,8 +146,8 @@ import { Calendar, Users, FileCheck, Award, MapPin, Clock } from '@lucide/vue';
 interface Event {
     title: string;
     description: string;
-    start_date: string;
-    end_date: string;
+    start_time: string;
+    end_time: string;
     location?: string;
     participants_count?: number;
     evaluation_required?: boolean;
@@ -162,6 +162,6 @@ const props = defineProps<{
 defineEmits(['view']);
 
 const isUpcoming = computed(
-    () => new Date(props.event.start_date) > new Date(),
+    () => new Date(props.event.start_time) > new Date(),
 );
 </script>
