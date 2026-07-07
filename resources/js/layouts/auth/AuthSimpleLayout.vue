@@ -1,4 +1,4 @@
-<script setup lang="ts">
+    <script setup lang="ts">
 import { computed } from 'vue';
 
 defineProps<{
@@ -36,7 +36,7 @@ const currentYear = computed(() => new Date().getFullYear());
                     class="w-[85%] max-w-[400px] object-contain drop-shadow-2xl"
                 />
                 <p
-                    class="mt-8 text-lg leading-relaxed font-light tracking-wide text-slate-300"
+                    class="mt-8 text-lg leading-relaxed font-display-lg italic tracking-wide text-slate-200"
                 >
                     The premiere destination for professional event planning,
                     attendance tracking, and certificate management.
@@ -62,11 +62,11 @@ const currentYear = computed(() => new Date().getFullYear());
             >
                 <div class="mb-8 text-center">
                     <h1
-                        class="mb-2 text-3xl font-semibold tracking-tight text-slate-900"
+                        class="mb-2 text-3xl font-display-lg tracking-tight text-slate-900 "
                     >
                         {{ title }}
                     </h1>
-                    <p class="text-[15px] text-slate-500">
+                    <p class="text-[14px] text-slate-700">
                         {{ description }}
                     </p>
                 </div>
