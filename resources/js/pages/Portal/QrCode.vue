@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import { ArrowLeft, CalendarDays, Clock, QrCode } from '@lucide/vue';
-import { Button } from '@/components/ui/button';
+import ParticipantLayout from '@/layouts/ParticipantLayout.vue';
 
 interface Event {
     id: number;
@@ -13,9 +13,9 @@ interface Event {
 
 interface ParticipantData {
     id: number;
+    status: string;
     user: { name: string; email: string };
-    qr_code_path: string | null;
-    qr_token?: string;
+    qr_code_url: string | null;
 }
 
 defineProps<{
@@ -23,14 +23,7 @@ defineProps<{
     participant: ParticipantData;
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            { title: 'My Events', href: '/portal/events' },
-            { title: 'QR Code', href: '#' },
-        ],
-    },
-});
+defineOptions({ layout: ParticipantLayout });
 
 function formatDate(dateStr: string) {
     return new Date(dateStr).toLocaleDateString('en-US', {
@@ -98,13 +91,13 @@ function formatTime(dateStr: string) {
 
                 <!-- QR Code Section -->
                 <div class="flex flex-col items-center gap-4 p-8">
-                    <div v-if="participant.qr_code_path" class="relative">
+                    <div v-if="participant.qr_code_url" class="relative">
                         <!-- Decorative border frame -->
                         <div
                             class="absolute -inset-3 -z-10 rounded-2xl bg-gradient-to-br from-violet-200 to-indigo-200 dark:from-violet-900/40 dark:to-indigo-900/40"
                         />
                         <img
-                            :src="`/storage/${participant.qr_code_path}`"
+                            :src="participant.qr_code_url"
                             :alt="`QR Code for ${participant.user.name}`"
                             class="size-56 rounded-xl bg-white object-contain p-2 shadow-md"
                         />

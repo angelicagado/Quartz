@@ -13,8 +13,14 @@ use Inertia\Response;
 class DashboardController extends Controller
 {
     public function __invoke(Request $request): Response|RedirectResponse
+    public function __invoke(Request $request): Response|RedirectResponse
     {
         $user = $request->user();
+
+        // Participants (end users) land on their registered-events portal, not the team dashboard.
+        if ($user->hasRole('participant') && ! $user->hasAnyRole(['super_admin', 'admin', 'event_organizer'])) {
+            return redirect()->route('portal.my-events');
+        }
 
         if ($user->hasRole(['super_admin', 'admin'])) {
             return redirect()->route('super-admin.dashboard');

@@ -2,30 +2,32 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Certificate;
+use App\Models\EvaluationResponse;
 use App\Models\Event;
 use App\Models\EventParticipant;
 use App\Models\User;
-use BaconQrCode\Renderer\Image\SvgImageBackEnd;
-use BaconQrCode\Renderer\ImageRenderer;
-use BaconQrCode\Renderer\RendererStyle\RendererStyle;
-use BaconQrCode\Writer;
+use App\Services\QrCodeService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ParticipantController extends Controller
 {
+    public function __construct(private QrCodeService $qrCodeService) {}
+
     /**
      * Display a paginated list of publicly accessible events for the portal.
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
         /** @var User $user */
         $user = Auth::user();
+
+        $search = $request->string('search')->toString();
 
         $registeredEventIds = EventParticipant::query()
             ->where('user_id', $user->id)
@@ -42,13 +44,15 @@ class ParticipantController extends Controller
             ->withCount('eventParticipants')
             ->latest('start_time')
             ->paginate(12)
-            ->through(fn (Event $event) => [
+            ->withQueryString()
+            ->through(fn(Event $event) => [
                 'id' => $event->id,
                 'title' => $event->title,
                 'description' => $event->description,
                 'start_time' => $event->start_time,
                 'end_time' => $event->end_time,
-                'attendance_type' => $event->attendance_type,
+                'status' => $this->eventStatus($event),
+                'registration_type' => $event->registration_type,
                 'participants_count' => $event->event_participants_count,
                 'is_registered' => $registeredEventIds->contains($event->id),
                 'certificate_enabled' => $event->certificate_enabled,
@@ -57,7 +61,24 @@ class ParticipantController extends Controller
 
         return Inertia::render('Portal/Events', [
             'events' => $events,
+            'filters' => ['search' => $search],
         ]);
+    }
+
+    /**
+     * Derive a display status for an event from its schedule.
+     */
+    private function eventStatus(Event $event): string
+    {
+        if ($event->end_time->isPast()) {
+            return 'completed';
+        }
+
+        if ($event->start_time->isPast()) {
+            return 'ongoing';
+        }
+
+        return 'upcoming';
     }
 
     /**
@@ -87,7 +108,7 @@ class ParticipantController extends Controller
             'status' => 'registered',
         ]);
 
-        $this->generateQrCode($participant);
+        $this->qrCodeService->generateFor($participant);
 
         return redirect()->route('portal.qr', $event)
             ->with('success', 'You have successfully registered for this event!');
@@ -124,34 +145,95 @@ class ParticipantController extends Controller
                 'qr_code_url' => $participant->qr_code_path
                     ? Storage::url(str_replace('public/', '', $participant->qr_code_path))
                     : null,
+                'user' => [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                ],
             ],
         ]);
     }
 
     /**
-     * Generate a QR code SVG for the given participant and store it.
+     * Display the authenticated participant's registered events with per-event next actions.
      */
-    private function generateQrCode(EventParticipant $participant): void
+    public function myEvents(): Response
     {
-        $token = Str::random(40);
+        /** @var User $user */
+        $user = Auth::user();
 
-        $participant->update(['qr_token' => $token]);
+        $registrations = EventParticipant::query()
+            ->where('user_id', $user->id)
+            ->with(['event.evaluationForm.questions'])
+            ->latest()
+            ->get();
 
-        $scanUrl = route('attendance.scan', ['event' => $participant->event_id])
-            .'?token='.$token;
+        $events = $registrations->map(function (EventParticipant $participant) use ($user) {
+            $event = $participant->event;
 
-        $renderer = new ImageRenderer(
-            new RendererStyle(300),
-            new SvgImageBackEnd
-        );
+            $evaluationRequired = $event->evaluation_required;
+            $form = $event->evaluationForm;
+            $evaluationAvailable = $form !== null && $form->questions->isNotEmpty();
 
-        $writer = new Writer($renderer);
-        $svgContent = $writer->writeString($scanUrl);
+            $evaluationSubmitted = false;
+            if ($evaluationAvailable) {
+                $evaluationSubmitted = EvaluationResponse::query()
+                    ->whereIn('evaluation_question_id', $form->questions->pluck('id'))
+                    ->where('user_id', $user->id)
+                    ->exists();
+            }
 
-        $relativePath = 'qrcodes/event_'.$participant->event_id.'_participant_'.$participant->id.'.svg';
+            $certificateAvailable = $event->certificate_enabled
+                && $participant->status !== 'registered'
+                && (! $evaluationRequired || $evaluationSubmitted);
 
-        Storage::disk('public')->put($relativePath, $svgContent);
+            return [
+                'id' => $event->id,
+                'title' => $event->title,
+                'description' => $event->description,
+                'start_time' => $event->start_time,
+                'end_time' => $event->end_time,
+                'attendance_type' => $event->attendance_type,
+                'status' => $participant->status,
+                'has_qr' => $participant->qr_code_path !== null,
+                'evaluation_required' => $evaluationRequired,
+                'evaluation_available' => $evaluationAvailable,
+                'evaluation_submitted' => $evaluationSubmitted,
+                'certificate_available' => $certificateAvailable,
+            ];
+        });
 
-        $participant->update(['qr_code_path' => 'public/'.$relativePath]);
+        return Inertia::render('Portal/MyEvents', [
+            'events' => $events,
+        ]);
+    }
+
+    /**
+     * List the certificates the authenticated participant has earned.
+     */
+    public function certificates(): Response
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        $certificates = Certificate::query()
+            ->where('user_id', $user->id)
+            ->with('event:id,title,start_time')
+            ->latest('issue_date')
+            ->get()
+            ->map(fn(Certificate $certificate) => [
+                'id' => $certificate->id,
+                'certificate_number' => $certificate->certificate_number,
+                'issue_date' => $certificate->issue_date,
+                'event' => [
+                    'id' => $certificate->event->id,
+                    'title' => $certificate->event->title,
+                    'start_time' => $certificate->event->start_time,
+                ],
+                'download_url' => route('portal.certificate.download', $certificate->event_id),
+            ]);
+
+        return Inertia::render('Portal/Certificates', [
+            'certificates' => $certificates,
+        ]);
     }
 }

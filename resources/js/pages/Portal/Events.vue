@@ -4,6 +4,7 @@ import { CalendarDays, CheckCircle2, Search, Ticket } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import ParticipantLayout from '@/layouts/ParticipantLayout.vue';
 
 interface Event {
     id: number;
@@ -14,32 +15,26 @@ interface Event {
     status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
     registration_type: string;
     participants_count: number;
+    is_registered: boolean;
     certificate_enabled: boolean;
 }
 
 interface PaginatedEvents {
     data: Event[];
     links: { url: string | null; label: string; active: boolean }[];
-    meta: {
-        current_page: number;
-        last_page: number;
-        total: number;
-        from: number;
-        to: number;
-    };
+    current_page: number;
+    last_page: number;
+    total: number;
+    from: number | null;
+    to: number | null;
 }
 
 const props = defineProps<{
     events: PaginatedEvents;
-    registeredEventIds: number[];
     filters?: { search?: string };
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [{ title: 'My Events', href: '/portal/events' }],
-    },
-});
+defineOptions({ layout: ParticipantLayout });
 
 const search = ref(props.filters?.search ?? '');
 
@@ -57,10 +52,6 @@ watch(search, () => {
         );
     }, 300);
 });
-
-function isRegistered(eventId: number): boolean {
-    return props.registeredEventIds.includes(eventId);
-}
 
 function registerForEvent(eventId: number) {
     router.post(`/portal/events/${eventId}/register`);
@@ -218,7 +209,7 @@ const statusConfig: Record<string, { label: string; classes: string }> = {
 
                     <!-- Registered badge -->
                     <div
-                        v-if="isRegistered(event.id)"
+                        v-if="event.is_registered"
                         class="absolute top-3 right-3"
                     >
                         <span
@@ -270,7 +261,7 @@ const statusConfig: Record<string, { label: string; classes: string }> = {
                                 "
                             >
                                 <Button
-                                    v-if="!isRegistered(event.id)"
+                                    v-if="!event.is_registered"
                                     size="sm"
                                     class="bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-sm hover:from-violet-700 hover:to-indigo-700"
                                     @click="registerForEvent(event.id)"
@@ -288,18 +279,37 @@ const statusConfig: Record<string, { label: string; classes: string }> = {
                                     Registered
                                 </Button>
                             </template>
-                            <template v-else-if="event.status === 'completed' && isRegistered(event.id) && event.certificate_enabled">
-                                <a :href="`/portal/events/${event.id}/certificate/view`" target="_blank" class="mr-2">
+                            <template
+                                v-else-if="
+                                    event.status === 'completed' &&
+                                    isRegistered(event.id) &&
+                                    event.certificate_enabled
+                                "
+                            >
+                                <a
+                                    :href="`/portal/events/${event.id}/certificate/view`"
+                                    target="_blank"
+                                    class="mr-2"
+                                >
                                     <Button size="sm" variant="outline">
                                         View Cert
                                     </Button>
                                 </a>
-                                <a :href="`/portal/events/${event.id}/certificate/download`">
-                                    <Button size="sm" variant="default" class="bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-sm hover:from-violet-700 hover:to-indigo-700">
+                                <a
+                                    :href="`/portal/events/${event.id}/certificate/download`"
+                                >
+                                    <Button
+                                        size="sm"
+                                        variant="default"
+                                        class="bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-sm hover:from-violet-700 hover:to-indigo-700"
+                                    >
                                         Download (Image)
                                     </Button>
                                 </a>
-                                <a :href="`/portal/events/${event.id}/certificate/pdf`" class="ml-2">
+                                <a
+                                    :href="`/portal/events/${event.id}/certificate/pdf`"
+                                    class="ml-2"
+                                >
                                     <Button size="sm" variant="outline">
                                         PDF
                                     </Button>
@@ -339,12 +349,12 @@ const statusConfig: Record<string, { label: string; classes: string }> = {
 
         <!-- Pagination -->
         <div
-            v-if="events.meta && events.meta.last_page > 1"
+            v-if="events.last_page > 1"
             class="flex items-center justify-between"
         >
             <p class="text-sm text-muted-foreground">
-                Showing {{ events.meta.from }}–{{ events.meta.to }} of
-                {{ events.meta.total }} events
+                Showing {{ events.from }}–{{ events.to }} of
+                {{ events.total }} events
             </p>
             <div class="flex items-center gap-1">
                 <template v-for="link in events.links" :key="link.label">

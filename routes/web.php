@@ -61,6 +61,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Participant routes
     Route::middleware('role:super_admin|admin|event_organizer|participant')->group(function () {
+        Route::get('portal/my-events', [ParticipantController::class, 'myEvents'])->name('portal.my-events');
+        Route::get('portal/certificates', [ParticipantController::class, 'certificates'])->name('portal.certificates');
         Route::get('portal/events', [ParticipantController::class, 'index'])->name('portal.events');
         Route::post('portal/events/{event}/register', [ParticipantController::class, 'register'])->name('portal.register');
         Route::get('portal/events/{event}/qr', [ParticipantController::class, 'qrCode'])->name('portal.qr');
