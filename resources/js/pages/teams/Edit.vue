@@ -97,7 +97,7 @@ const confirmCancelInvitation = (invitation: TeamInvitation) => {
 <template>
     <Head :title="pageTitle" />
 
-    <h1 class="sr-only">{{ pageTitle }}</h1>
+    <h1 class="sr-only font-serif">{{ pageTitle }}</h1>
 
     <div class="flex flex-col space-y-10">
         <!-- Team Name Section -->

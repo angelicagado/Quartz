@@ -19,7 +19,7 @@ defineOptions({
 <template>
     <Head title="Appearance settings" />
 
-    <h1 class="sr-only">Appearance settings</h1>
+    <h1 class="sr-only font-serif">Appearance settings</h1>
 
     <div class="space-y-6">
         <Heading

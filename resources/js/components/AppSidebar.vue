@@ -1,6 +1,14 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
-import { BarChart3,  CalendarDays, LayoutGrid, Ticket, Users, QrCode, Activity } from '@lucide/vue';
+import {
+    BarChart3,
+    CalendarDays,
+    LayoutGrid,
+    Ticket,
+    Users,
+    QrCode,
+    Activity,
+} from '@lucide/vue';
 import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
@@ -63,9 +71,7 @@ const mainNavItems = computed<NavItem[]>(() => [
     },
 ]);
 
-const footerNavItems: NavItem[] = [
-
-];
+const footerNavItems: NavItem[] = [];
 </script>
 
 <template>

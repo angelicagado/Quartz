@@ -47,7 +47,7 @@ defineOptions({
 <template>
     <Head title="Teams" />
 
-    <h1 class="sr-only">Teams</h1>
+    <h1 class="sr-only font-serif">Teams</h1>
 
     <div class="flex flex-col space-y-6">
         <div class="flex items-center justify-between">
