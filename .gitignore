@@ -33,3 +33,6 @@ yarn-error.log
 .codex
 /.AGENTS.md
 /.CLAUDE.md
+
+# for migrating views
+moving-files/

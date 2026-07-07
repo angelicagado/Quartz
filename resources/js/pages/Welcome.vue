@@ -22,11 +22,11 @@ const dashboardUrl = computed(() =>
   </Head>
 
   <div
-    class="bg-background text-on-background font-body-md antialiased overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container min-h-screen"
+    class="bg-surface-dim text-on-surface font-body-md antialiased overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container min-h-screen"
   >
     <!-- TopNavBar -->
     <nav
-      class="docked full-width top-0 sticky z-50 bg-background/80 backdrop-blur-xl border-b border-outline-variant/10 shadow-md"
+      class="docked full-width top-0 sticky z-50 bg-surface-dim/80 backdrop-blur-xl border-b border-outline-variant/10 shadow-md"
     >
       <div
         class="max-w-container-max mx-auto flex justify-between items-center px-margin-desktop h-20 max-md:px-margin-mobile"
@@ -87,7 +87,7 @@ const dashboardUrl = computed(() =>
     >
       <!-- Abstract Background -->
       <div class="absolute inset-0 z-0">
-        <div class="absolute inset-0 bg-background/90 z-10"></div>
+        <div class="absolute inset-0 bg-surface-dim/90 z-10"></div>
         <div
           class="absolute inset-0 bg-cover bg-center z-0 mix-blend-overlay opacity-30"
           style="
