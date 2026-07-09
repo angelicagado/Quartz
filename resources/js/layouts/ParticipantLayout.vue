@@ -10,7 +10,7 @@
             >
                 <div class="flex items-center gap-2">
                     <img
-                        src="/quartzlogo.png"
+                        src="/images/quartzlogo.png"
                         alt="QUARTZ"
                         class="h-8 w-auto object-contain brightness-110 drop-shadow-md"
                     />
@@ -33,30 +33,90 @@
                     </Link>
                 </nav>
 
-                <div class="hidden items-center gap-4 md:flex">
-                    <div class="flex items-center gap-2">
-                        <div
-                            class="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-slate-800 text-[#d4af37]"
-                        >
-                            <User class="h-4 w-4" />
-                        </div>
-                    </div>
-                    <Link
-                        href="/logout"
-                        method="post"
-                        as="button"
-                        class="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-800 hover:text-rose-400"
-                    >
-                        <LogOut class="h-5 w-5" />
-                    </Link>
+                <!-- Desktop: avatar dropdown menu -->
+                <div class="hidden items-center gap-3 md:flex">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger as-child>
+                            <button
+                                class="flex items-center gap-2 rounded-full p-0.5 transition-colors hover:bg-slate-800"
+                            >
+                                <Avatar
+                                    class="h-9 w-9 border border-slate-700"
+                                >
+                                    <AvatarImage
+                                        v-if="avatarUrl"
+                                        :src="avatarUrl"
+                                        :alt="user?.name"
+                                    />
+                                    <AvatarFallback
+                                        class="bg-slate-800 text-sm font-semibold text-[#d4af37]"
+                                    >
+                                        {{ getInitials(user?.name) }}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <ChevronDown class="h-4 w-4 text-slate-400" />
+                            </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" class="w-56">
+                            <DropdownMenuLabel>
+                                <div class="flex flex-col">
+                                    <span class="truncate font-medium">{{
+                                        user?.name
+                                    }}</span>
+                                    <span
+                                        class="truncate text-xs font-normal text-muted-foreground"
+                                        >{{ user?.email }}</span
+                                    >
+                                </div>
+                            </DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem as-child>
+                                <Link
+                                    href="/portal/profile"
+                                    class="flex w-full cursor-pointer items-center"
+                                >
+                                    <User class="mr-2 h-4 w-4" />
+                                    Profile
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                                class="cursor-pointer text-rose-500 focus:text-rose-500"
+                                @select="showLogoutConfirm = true"
+                            >
+                                <LogOut class="mr-2 h-4 w-4" />
+                                Log out
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
 
-                <button
-                    @click="isMobileOpen = true"
-                    class="rounded-xl p-2 text-slate-400 transition-colors hover:bg-slate-800 hover:text-white md:hidden"
-                >
-                    <Menu class="h-6 w-6" />
-                </button>
+                <!-- Mobile: avatar (-> profile) + hamburger -->
+                <div class="flex items-center gap-2 md:hidden">
+                    <Link
+                        href="/portal/profile"
+                        class="rounded-full p-0.5 transition-colors hover:bg-slate-800"
+                    >
+                        <Avatar class="h-9 w-9 border border-slate-700">
+                            <AvatarImage
+                                v-if="avatarUrl"
+                                :src="avatarUrl"
+                                :alt="user?.name"
+                            />
+                            <AvatarFallback
+                                class="bg-slate-800 text-sm font-semibold text-[#d4af37]"
+                            >
+                                {{ getInitials(user?.name) }}
+                            </AvatarFallback>
+                        </Avatar>
+                    </Link>
+                    <button
+                        @click="isMobileOpen = true"
+                        class="rounded-xl p-2 text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
+                    >
+                        <Menu class="h-6 w-6" />
+                    </button>
+                </div>
             </div>
         </header>
 
@@ -76,14 +136,23 @@
                     <X class="h-5 w-5" />
                 </button>
 
-                <div
+                <Link
+                    href="/portal/profile"
+                    @click="isMobileOpen = false"
                     class="mt-8 mb-6 flex items-center gap-3 border-b border-slate-800 pb-6"
                 >
-                    <div
-                        class="flex h-12 w-12 items-center justify-center rounded-full border border-slate-700 bg-slate-800 text-[#d4af37]"
-                    >
-                        <User class="h-6 w-6" />
-                    </div>
+                    <Avatar class="h-12 w-12 border border-slate-700">
+                        <AvatarImage
+                            v-if="avatarUrl"
+                            :src="avatarUrl"
+                            :alt="user?.name"
+                        />
+                        <AvatarFallback
+                            class="bg-slate-800 text-base font-semibold text-[#d4af37]"
+                        >
+                            {{ getInitials(user?.name) }}
+                        </AvatarFallback>
+                    </Avatar>
                     <div>
                         <p class="font-medium text-white">
                             {{ user?.name || 'Participant Name' }}
@@ -92,7 +161,7 @@
                             {{ user?.email || 'user@example.com' }}
                         </p>
                     </div>
-                </div>
+                </Link>
 
                 <nav class="flex flex-1 flex-col gap-2">
                     <Link
@@ -113,15 +182,16 @@
                 </nav>
 
                 <div class="border-t border-slate-800 pt-6">
-                    <Link
-                        href="/logout"
-                        method="post"
-                        as="button"
+                    <button
+                        @click="
+                            isMobileOpen = false;
+                            showLogoutConfirm = true;
+                        "
                         class="flex w-full items-center justify-center gap-2 rounded-xl bg-rose-500/10 px-4 py-3 font-medium text-rose-400 transition-colors hover:bg-rose-500/20"
                     >
                         <LogOut class="h-5 w-5" />
                         Sign Out
-                    </Link>
+                    </button>
                 </div>
             </div>
         </div>
@@ -155,14 +225,40 @@
                 }}</span>
             </Link>
         </nav>
+
+        <!-- Logout confirmation -->
+        <Dialog v-model:open="showLogoutConfirm">
+            <DialogContent class="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Log out?</DialogTitle>
+                    <DialogDescription>
+                        You'll need to sign in again to access your events, QR
+                        passes, and certificates.
+                    </DialogDescription>
+                </DialogHeader>
+                <DialogFooter class="gap-2">
+                    <Button
+                        variant="secondary"
+                        @click="showLogoutConfirm = false"
+                    >
+                        Cancel
+                    </Button>
+                    <Button variant="destructive" @click="confirmLogout">
+                        <LogOut class="h-4 w-4" />
+                        Log out
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { Link, usePage } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import {
     CalendarDays,
+    ChevronDown,
     Ticket,
     User,
     Menu,
@@ -170,11 +266,40 @@ import {
     LogOut,
     Award,
 } from '@lucide/vue';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { getInitials } from '@/composables/useInitials';
+import { logout } from '@/routes';
 
 const page = usePage();
 const user = computed(() => page.props.auth.user as any);
+const avatarUrl = computed<string | null>(
+    () => user.value?.profile?.avatar ?? null,
+);
 
 const isMobileOpen = ref(false);
+const showLogoutConfirm = ref(false);
+
+function confirmLogout() {
+    showLogoutConfirm.value = false;
+    router.post(logout().url);
+}
 
 const navItems = [
     { name: 'My Events', href: '/portal/my-events', icon: Ticket },
