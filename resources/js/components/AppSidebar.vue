@@ -72,11 +72,7 @@ const mainNavItems = computed<NavItem[]>(() => [
     href: "/super-admin/logs",
     icon: Activity,
   },
-  {
-    title: "My Events",
-    href: "/portal/events",
-    icon: Ticket,
-  },
+
 ]);
 </script>
 

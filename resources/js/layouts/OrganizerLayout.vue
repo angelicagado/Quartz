@@ -147,7 +147,7 @@ const navItems = [
         href: '/organizer/dashboard',
         icon: LayoutDashboard,
     },
-    { name: 'My Events', href: '/organizer/events', icon: CalendarDays },
+
     { name: 'Scan QR Check-in', href: '/attendance', icon: ScanLine },
     { name: 'Live Attendance', href: '/live-attendance', icon: Activity },
     { name: 'Attendees list', href: '/organizer/attendees', icon: Users },

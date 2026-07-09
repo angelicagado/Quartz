@@ -177,7 +177,7 @@ const user = computed(() => page.props.auth.user as any);
 const isMobileOpen = ref(false);
 
 const navItems = [
-    { name: 'My Events', href: '/portal/my-events', icon: Ticket },
+
     { name: 'Browse Events', href: '/portal/events', icon: CalendarDays },
     { name: 'Certificates', href: '/portal/certificates', icon: Award },
 ];
