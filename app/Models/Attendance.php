@@ -12,12 +12,14 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property int $event_id
  * @property int $user_id
- * @property string $scan_type
+ * @property int|null $event_session_id
+ * @property string $type
  * @property Carbon $scanned_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Event $event
  * @property-read User $user
+ * @property-read EventSession|null $session
  */
 class Attendance extends Model
 {
@@ -30,7 +32,8 @@ class Attendance extends Model
     protected $fillable = [
         'event_id',
         'user_id',
-        'scan_type',
+        'event_session_id',
+        'type',
         'scanned_at',
     ];
 
@@ -58,5 +61,13 @@ class Attendance extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * The session this attendance record belongs to.
+     */
+    public function session(): BelongsTo
+    {
+        return $this->belongsTo(EventSession::class, 'event_session_id');
     }
 }

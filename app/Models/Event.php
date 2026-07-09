@@ -118,4 +118,12 @@ class Event extends Model
     {
         return $this->hasMany(EventParticipant::class);
     }
+
+    /**
+     * The sessions associated with this event.
+     */
+    public function sessions(): HasMany
+    {
+        return $this->hasMany(EventSession::class);
+    }
 }
