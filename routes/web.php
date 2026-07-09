@@ -67,6 +67,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('portal/profile', [ParticipantProfileController::class, 'edit'])->name('portal.profile.edit');
         Route::patch('portal/profile', [ParticipantProfileController::class, 'update'])->name('portal.profile.update');
         Route::get('portal/events', [ParticipantController::class, 'index'])->name('portal.events');
+        Route::get('portal/events/{event}', [ParticipantController::class, 'show'])->name('portal.events.show');
         Route::post('portal/events/{event}/register', [ParticipantController::class, 'register'])->name('portal.register');
         Route::get('portal/events/{event}/qr', [ParticipantController::class, 'qrCode'])->name('portal.qr');
         Route::get('portal/events/{event}/evaluation', [EvaluationFormController::class, 'showForParticipant'])->name('portal.evaluation.show');

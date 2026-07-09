@@ -40,9 +40,7 @@
                             <button
                                 class="flex items-center gap-2 rounded-full p-0.5 transition-colors hover:bg-slate-800"
                             >
-                                <Avatar
-                                    class="h-9 w-9 border border-slate-700"
-                                >
+                                <Avatar class="h-9 w-9 border border-slate-700">
                                     <AvatarImage
                                         v-if="avatarUrl"
                                         :src="avatarUrl"
@@ -302,7 +300,7 @@ function confirmLogout() {
 }
 
 const navItems = [
-
+    { name: 'My Events', href: '/portal/my-events', icon: Ticket },
     { name: 'Browse Events', href: '/portal/events', icon: CalendarDays },
     { name: 'Certificates', href: '/portal/certificates', icon: Award },
 ];
