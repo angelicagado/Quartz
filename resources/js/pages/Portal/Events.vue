@@ -119,7 +119,7 @@ const statusConfig: Record<string, { label: string; classes: string }> = {
 <template>
     <Head title="Event Portal" />
 
-    <div class="grid gap-6 p-4 sm:p-6 lg:grid-cols-[280px_minmax(0,1fr)]">
+    <div class="grid gap-6 p-4 sm:p-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-20">
         <ProfileRail />
         <div class="flex min-w-0 flex-1 flex-col gap-6">
         <!-- Header -->

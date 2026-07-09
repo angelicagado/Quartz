@@ -22,74 +22,63 @@ function formatDate(dateStr: string | null): string {
 
 <template>
     <aside class="hidden lg:block">
-        <div
-            class="sticky top-20 overflow-hidden rounded-2xl border border-border bg-card shadow-xs"
-        >
-            <!-- Header band -->
-            <div
-                class="h-20 bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700"
-            />
-
-            <div class="-mt-10 flex flex-col items-center px-5 pb-5 text-center">
-                <Avatar
-                    class="h-20 w-20 border-4 border-card shadow-md"
+        <div class="sticky top-20 flex flex-col">
+            <Avatar
+                class="h-48 w-48 max-w-full border border-border text-4xl"
+            >
+                <AvatarImage
+                    v-if="avatarUrl"
+                    :src="avatarUrl"
+                    :alt="user?.name"
+                />
+                <AvatarFallback
+                    class="bg-violet-100 font-bold text-violet-700 dark:bg-violet-900/40 dark:text-violet-300"
                 >
-                    <AvatarImage
-                        v-if="avatarUrl"
-                        :src="avatarUrl"
-                        :alt="user?.name"
-                    />
-                    <AvatarFallback
-                        class="bg-violet-100 text-xl font-bold text-violet-700 dark:bg-violet-900/40 dark:text-violet-300"
-                    >
-                        {{ getInitials(user?.name) }}
-                    </AvatarFallback>
-                </Avatar>
+                    {{ getInitials(user?.name) }}
+                </AvatarFallback>
+            </Avatar>
 
-                <h2
-                    class="mt-3 font-serif text-lg font-bold text-foreground"
+            <h2 class="mt-4 font-serif text-xl font-bold text-foreground">
+                {{ user?.name }}
+            </h2>
+
+            <p
+                v-if="profile?.bio"
+                class="mt-2 text-sm leading-relaxed text-muted-foreground"
+            >
+                {{ profile.bio }}
+            </p>
+
+            <div class="mt-4 space-y-2.5">
+                <div
+                    class="flex items-center gap-2.5 text-sm text-muted-foreground"
                 >
-                    {{ user?.name }}
-                </h2>
-
-                <p
-                    v-if="profile?.bio"
-                    class="mt-1 text-sm leading-relaxed text-muted-foreground"
-                >
-                    {{ profile.bio }}
-                </p>
-
-                <div class="mt-4 w-full space-y-2.5 text-left">
-                    <div
-                        class="flex items-center gap-2.5 text-sm text-muted-foreground"
-                    >
-                        <Mail class="size-4 shrink-0" />
-                        <span class="truncate">{{ user?.email }}</span>
-                    </div>
-                    <div
-                        v-if="profile?.phone"
-                        class="flex items-center gap-2.5 text-sm text-muted-foreground"
-                    >
-                        <Phone class="size-4 shrink-0" />
-                        <span class="truncate">{{ profile.phone }}</span>
-                    </div>
-                    <div
-                        v-if="profile?.birthdate"
-                        class="flex items-center gap-2.5 text-sm text-muted-foreground"
-                    >
-                        <CalendarDays class="size-4 shrink-0" />
-                        <span>{{ formatDate(profile.birthdate) }}</span>
-                    </div>
+                    <Mail class="size-4 shrink-0" />
+                    <span class="truncate">{{ user?.email }}</span>
                 </div>
-
-                <Link
-                    href="/portal/profile"
-                    class="mt-5 flex w-full items-center justify-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+                <div
+                    v-if="profile?.phone"
+                    class="flex items-center gap-2.5 text-sm text-muted-foreground"
                 >
-                    <Settings2 class="size-4" />
-                    Edit Profile
-                </Link>
+                    <Phone class="size-4 shrink-0" />
+                    <span class="truncate">{{ profile.phone }}</span>
+                </div>
+                <div
+                    v-if="profile?.birthdate"
+                    class="flex items-center gap-2.5 text-sm text-muted-foreground"
+                >
+                    <CalendarDays class="size-4 shrink-0" />
+                    <span>{{ formatDate(profile.birthdate) }}</span>
+                </div>
             </div>
+
+            <Link
+                href="/portal/profile"
+                class="mt-5 flex w-full items-center justify-center gap-2 rounded-xl border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+            >
+                <Settings2 class="size-4" />
+                Edit Profile
+            </Link>
         </div>
     </aside>
 </template>
