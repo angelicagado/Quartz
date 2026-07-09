@@ -5,7 +5,17 @@ import { ref, computed } from "vue";
 
 import EventCard from "@/components/EventCard.vue";
 
-import type { Event } from "@/types/Event";
+interface Event {
+  id: number;
+  title: string;
+  description: string;
+  start_time: string;
+  end_time: string;
+  registration_type?: string;
+  certificate_enabled?: boolean;
+  evaluation_required?: boolean;
+  [key: string]: any;
+}
 
 const props = defineProps<{
   events: Event[];
@@ -298,4 +308,5 @@ const handleViewEvent = (event: Event) => {
         </div>
       </div>
     </div>
+  </div>
 </template>

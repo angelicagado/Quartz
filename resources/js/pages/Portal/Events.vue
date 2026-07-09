@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
 import { CalendarDays, CheckCircle2, Search, Ticket } from '@lucide/vue';
-import { computed, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ParticipantLayout from '@/layouts/ParticipantLayout.vue';
@@ -285,7 +285,7 @@ const statusConfig: Record<string, { label: string; classes: string }> = {
                             <template
                                 v-else-if="
                                     event.status === 'completed' &&
-                                    isRegistered(event.id) &&
+                                    event.is_registered &&
                                     event.certificate_enabled
                                 "
                             >

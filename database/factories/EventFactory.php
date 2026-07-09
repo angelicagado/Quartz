@@ -24,7 +24,7 @@ class EventFactory extends Factory
             'description' => fake()->paragraph(),
             'start_time' => $start,
             'end_time' => (clone $start)->modify('+2 hours'),
-            'registration_type' => fake()->randomElement(['static', 'public']),
+            'registration_type' => 'open',
             'attendance_type' => fake()->randomElement(['one-time', 'am-pm']),
             'evaluation_required' => false,
             'certificate_enabled' => false,

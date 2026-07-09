@@ -36,12 +36,40 @@ test('self-registration assigns the participant role', function () {
     expect($user->hasRole('participant'))->toBeTrue();
 });
 
-test('a participant can register for a public event and gets a QR code', function () {
+test('the browse page lists open, upcoming events', function () {
+    $user = participantUser();
+
+    $open = Event::factory()->create(['registration_type' => 'open', 'end_time' => now()->addWeek()]);
+    Event::factory()->create(['registration_type' => 'closed', 'end_time' => now()->addWeek()]);
+
+    $this->actingAs($user)
+        ->get(route('portal.events'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Portal/Events')
+            ->has('events.data', 1)
+            ->where('events.data.0.id', $open->id)
+        );
+});
+
+test('the event details page renders for a participant', function () {
+    $user = participantUser();
+    $event = Event::factory()->create(['registration_type' => 'open']);
+
+    $this->actingAs($user)
+        ->get(route('portal.events.show', $event))
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Portal/EventShow')
+            ->where('event.id', $event->id)
+            ->where('event.is_registered', false)
+        );
+});
+
+test('a participant can register for an open event and gets a QR code', function () {
     Storage::fake('public');
 
     $user = participantUser();
     $event = Event::factory()->create([
-        'registration_type' => 'public',
+        'registration_type' => 'open',
         'end_time' => now()->addWeek(),
     ]);
 
@@ -67,7 +95,7 @@ test('a participant cannot register twice for the same event', function () {
     Storage::fake('public');
 
     $user = participantUser();
-    $event = Event::factory()->create(['registration_type' => 'public', 'end_time' => now()->addWeek()]);
+    $event = Event::factory()->create(['registration_type' => 'open', 'end_time' => now()->addWeek()]);
 
     EventParticipant::factory()->create([
         'event_id' => $event->id,
@@ -81,9 +109,9 @@ test('a participant cannot register twice for the same event', function () {
     expect(EventParticipant::where('event_id', $event->id)->where('user_id', $user->id)->count())->toBe(1);
 });
 
-test('a participant cannot register for a non-public event', function () {
+test('a participant cannot register for a closed event', function () {
     $user = participantUser();
-    $event = Event::factory()->create(['registration_type' => 'static', 'end_time' => now()->addWeek()]);
+    $event = Event::factory()->create(['registration_type' => 'closed', 'end_time' => now()->addWeek()]);
 
     $this->actingAs($user)
         ->post(route('portal.register', $event))

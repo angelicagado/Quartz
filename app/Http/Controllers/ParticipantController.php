@@ -6,6 +6,7 @@ use App\Models\Certificate;
 use App\Models\EvaluationResponse;
 use App\Models\Event;
 use App\Models\EventParticipant;
+use App\Models\EventSession;
 use App\Models\User;
 use App\Services\QrCodeService;
 use Illuminate\Http\RedirectResponse;
@@ -35,7 +36,7 @@ class ParticipantController extends Controller
 
         $events = Event::query()
             ->where(function ($query) {
-                $query->where('registration_type', 'public')
+                $query->whereIn('registration_type', ['open', 'scheduled', 'approval'])
                     ->where('end_time', '>=', now());
             })
             ->orWhereHas('eventParticipants', function ($query) use ($user) {
@@ -45,7 +46,7 @@ class ParticipantController extends Controller
             ->latest('start_time')
             ->paginate(12)
             ->withQueryString()
-            ->through(fn(Event $event) => [
+            ->through(fn (Event $event) => [
                 'id' => $event->id,
                 'title' => $event->title,
                 'description' => $event->description,
@@ -56,12 +57,52 @@ class ParticipantController extends Controller
                 'participants_count' => $event->event_participants_count,
                 'is_registered' => $registeredEventIds->contains($event->id),
                 'certificate_enabled' => $event->certificate_enabled,
-                'status' => $event->end_time < now() ? 'completed' : ($event->start_time <= now() ? 'ongoing' : 'upcoming'),
             ]);
 
         return Inertia::render('Portal/Events', [
             'events' => $events,
             'filters' => ['search' => $search],
+        ]);
+    }
+
+    /**
+     * Display the details of a single event for the portal.
+     */
+    public function show(Event $event): Response
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        $event->loadCount('eventParticipants')->load('sessions');
+
+        $isRegistered = EventParticipant::query()
+            ->where('event_id', $event->id)
+            ->where('user_id', $user->id)
+            ->exists();
+
+        return Inertia::render('Portal/EventShow', [
+            'event' => [
+                'id' => $event->id,
+                'title' => $event->title,
+                'description' => $event->description,
+                'start_time' => $event->start_time,
+                'end_time' => $event->end_time,
+                'registration_start_date' => $event->registration_start_date,
+                'registration_end_date' => $event->registration_end_date,
+                'registration_type' => $event->registration_type,
+                'status' => $this->eventStatus($event),
+                'participants_count' => $event->event_participants_count,
+                'certificate_enabled' => $event->certificate_enabled,
+                'evaluation_required' => $event->evaluation_required,
+                'is_registered' => $isRegistered,
+                'sessions' => $event->sessions->map(fn (EventSession $session) => [
+                    'id' => $session->id,
+                    'name' => $session->name,
+                    'start_time' => $session->start_time,
+                    'end_time' => $session->end_time,
+                    'requires_checkout' => $session->requires_checkout,
+                ]),
+            ],
         ]);
     }
 
@@ -89,8 +130,8 @@ class ParticipantController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
-        if ($event->registration_type !== 'public') {
-            return back()->with('error', 'This event is not open for public registration.');
+        if ($event->registration_type === 'closed') {
+            return back()->with('error', 'Registration for this event is closed.');
         }
 
         $alreadyRegistered = EventParticipant::query()
@@ -220,7 +261,7 @@ class ParticipantController extends Controller
             ->with('event:id,title,start_time')
             ->latest('issue_date')
             ->get()
-            ->map(fn(Certificate $certificate) => [
+            ->map(fn (Certificate $certificate) => [
                 'id' => $certificate->id,
                 'certificate_number' => $certificate->certificate_number,
                 'issue_date' => $certificate->issue_date,
