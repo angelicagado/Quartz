@@ -298,4 +298,5 @@ const handleViewEvent = (event: Event) => {
         </div>
       </div>
     </div>
+  </div>
 </template>
