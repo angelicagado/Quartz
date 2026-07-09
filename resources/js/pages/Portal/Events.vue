@@ -5,6 +5,7 @@ import { computed, ref, watch } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ParticipantLayout from '@/layouts/ParticipantLayout.vue';
+import ProfileRail from '@/components/portal/ProfileRail.vue';
 
 interface Event {
     id: number;
@@ -118,7 +119,9 @@ const statusConfig: Record<string, { label: string; classes: string }> = {
 <template>
     <Head title="Event Portal" />
 
-    <div class="flex h-full flex-1 flex-col gap-6 p-6">
+    <div class="grid gap-6 p-4 sm:p-6 lg:grid-cols-[280px_minmax(0,1fr)]">
+        <ProfileRail />
+        <div class="flex min-w-0 flex-1 flex-col gap-6">
         <!-- Header -->
         <div class="flex items-end justify-between gap-4">
             <div>
@@ -342,6 +345,7 @@ const statusConfig: Record<string, { label: string; classes: string }> = {
                     />
                 </template>
             </div>
+        </div>
         </div>
     </div>
 </template>
