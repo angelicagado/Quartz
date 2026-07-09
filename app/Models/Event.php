@@ -45,6 +45,8 @@ class Event extends Model
         'description',
         'start_time',
         'end_time',
+        'registration_start_date',
+        'registration_end_date',
         'registration_type',
         'attendance_type',
         'evaluation_required',
@@ -60,6 +62,8 @@ class Event extends Model
         return [
             'start_time' => 'datetime',
             'end_time' => 'datetime',
+            'registration_start_date' => 'datetime',
+            'registration_end_date' => 'datetime',
             'evaluation_required' => 'boolean',
             'certificate_enabled' => 'boolean',
         ];

@@ -72,7 +72,7 @@ function submit() {
     <div class="flex h-full flex-1 flex-col gap-6 p-6">
         <!-- Header -->
         <div class="flex items-center gap-4">
-            <Link href="/events">
+            <Link :href="`/events/${event.id}`">
                 <Button variant="ghost" size="icon-sm">
                     <ChevronLeft class="size-4" />
                 </Button>

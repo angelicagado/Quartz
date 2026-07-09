@@ -1,68 +1,5 @@
 <template>
-    <div class="mx-auto w-full max-w-2xl space-y-8">
-        <div
-            class="flex flex-col items-center justify-between gap-6 sm:flex-row"
-        >
-            <div class="space-y-1 text-center sm:text-left">
-                <h3
-                    class="flex items-center justify-center gap-2 font-serif text-xl font-bold text-white sm:justify-start"
-                >
-                    <Camera
-                        v-if="mode === 'camera'"
-                        class="h-5 w-5 text-[#d4af37]"
-                    />
-                    <Upload v-else class="h-5 w-5 text-[#d4af37]" />
-                    {{
-                        mode === 'camera' ? 'Live Camera Feed' : 'Image Upload'
-                    }}
-                </h3>
-                <div
-                    class="mt-2 flex rounded-xl border border-slate-700 bg-slate-800/50 p-1"
-                >
-                    <button
-                        @click="mode = 'camera'"
-                        class="rounded-lg px-4 py-1.5 text-[10px] font-bold tracking-tight uppercase transition-all"
-                        :class="
-                            mode === 'camera'
-                                ? 'bg-[#d4af37] text-white'
-                                : 'text-slate-500 hover:text-white'
-                        "
-                    >
-                        Camera
-                    </button>
-                    <button
-                        @click="mode = 'file'"
-                        class="rounded-lg px-4 py-1.5 text-[10px] font-bold tracking-tight uppercase transition-all"
-                        :class="
-                            mode === 'file'
-                                ? 'bg-[#d4af37] text-white'
-                                : 'text-slate-500 hover:text-white'
-                        "
-                    >
-                        Upload File
-                    </button>
-                </div>
-            </div>
-
-            <div
-                class="flex w-full items-center rounded-2xl border border-slate-700 bg-slate-800/50 p-1.5 sm:w-auto"
-            >
-                <button
-                    v-for="type in ['single', 'am_in', 'pm_in']"
-                    :key="type"
-                    @click="scanType = type"
-                    class="flex-1 rounded-xl px-6 py-2 text-xs font-bold tracking-widest uppercase transition-all duration-300 sm:flex-none"
-                    :class="
-                        scanType === type
-                            ? 'bg-[#d4af37] text-white shadow-lg'
-                            : 'text-slate-500 hover:text-slate-300'
-                    "
-                >
-                    {{ type.replace('_', ' ') }}
-                </button>
-            </div>
-        </div>
-
+    <div class="mx-auto w-full space-y-8">
         <div class="group relative">
             <div
                 class="relative flex aspect-video flex-col items-center justify-center overflow-hidden rounded-[2rem] border-2 border-slate-700 bg-slate-900 shadow-inner transition-all group-hover:border-[#d4af37]/30 sm:aspect-[16/9]"
@@ -70,6 +7,7 @@
                 <div
                     id="qr-reader"
                     class="absolute inset-0 h-full w-full [&>video]:object-cover"
+                    v-show="mode === 'camera'"
                 ></div>
 
                 <div
@@ -143,7 +81,7 @@
                             @click="error = null"
                             class="rounded-full border border-white/20 bg-white/5 px-4 py-2 text-[10px] tracking-widest text-white uppercase transition-colors hover:bg-white/10"
                         >
-                            Try Another Image
+                            Try Again
                         </button>
                     </div>
                     <div
@@ -173,6 +111,7 @@
                             class="absolute inset-0 z-20 h-full w-full cursor-pointer opacity-0"
                             accept="image/*"
                             @change="handleFileChange"
+                            ref="fileInputRef"
                         />
                         <div
                             class="flex h-24 w-24 items-center justify-center rounded-3xl border-2 border-dashed border-slate-700 bg-slate-800 transition-all group-hover/upload:border-[#d4af37] group-hover/upload:bg-slate-800/80"
@@ -207,24 +146,6 @@
             </div>
         </div>
 
-        <button
-            v-if="mode === 'camera' && !lastScan && !error"
-            class="group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl py-5 text-sm font-bold tracking-widest uppercase shadow-xl transition-all"
-            :class="
-                isScanning
-                    ? 'border border-slate-700 bg-slate-800 text-slate-400'
-                    : 'bg-gradient-to-r from-[#d4af37] to-[#b38d45] text-white hover:shadow-[#d4af37]/30 active:scale-[0.98]'
-            "
-            @click="startCamera"
-            :disabled="isScanning"
-        >
-            <div
-                class="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-1000 group-hover:translate-x-full"
-            ></div>
-            <Camera class="h-5 w-5" :class="{ 'animate-pulse': isScanning }" />
-            {{ isScanning ? 'Camera Active' : 'Start Camera Scanner' }}
-        </button>
-
         <div
             class="flex items-start gap-4 rounded-2xl border border-slate-800 bg-slate-900/50 p-4"
         >
@@ -240,7 +161,7 @@
                 >
                     Use the camera for real-time check-ins. If the camera is
                     unavailable on your device, use the upload feature to
-                    process QR screenshots.
+                    process QR screenshots. Select the active event first.
                 </p>
             </div>
         </div>
@@ -254,22 +175,28 @@ import {
     ScanLine,
     CheckCircle,
     AlertCircle,
-    Camera,
-    Upload,
     Image as ImageIcon,
 } from '@lucide/vue';
 
-const emit = defineEmits<{
-    (e: 'scan', token: string, scanType: string): void;
+const props = defineProps<{
+    mode: 'camera' | 'file';
 }>();
 
-const scanType = ref('single');
-const mode = ref<'camera' | 'file'>('camera');
+const emit = defineEmits<{
+    (e: 'scan', token: string): void;
+    (e: 'update:isScanning', value: boolean): void;
+}>();
+
 const isScanning = ref(false);
 const lastScan = ref<string | null>(null);
 const error = ref<string | null>(null);
+const fileInputRef = ref<HTMLInputElement | null>(null);
 
 let scanner: Html5Qrcode | null = null;
+
+watch(isScanning, (val) => {
+    emit('update:isScanning', val);
+});
 
 const cleanupScanner = async () => {
     if (scanner?.isScanning) {
@@ -288,13 +215,17 @@ const cleanupScanner = async () => {
 const setupScanner = async () => {
     if (typeof window === 'undefined') return;
     await cleanupScanner();
-    if (mode.value === 'camera') {
+    if (props.mode === 'camera') {
         await nextTick();
         scanner = new Html5Qrcode('qr-reader');
     }
 };
 
-watch(mode, setupScanner);
+watch(() => props.mode, async (newMode) => {
+    isScanning.value = false;
+    error.value = null;
+    await setupScanner();
+});
 
 onMounted(setupScanner);
 
@@ -321,6 +252,12 @@ const startCamera = async () => {
     } catch (err) {
         error.value = 'Could not access camera. Please check permissions.';
         isScanning.value = false;
+    }
+};
+
+const triggerFileUpload = () => {
+    if (fileInputRef.value) {
+        fileInputRef.value.click();
     }
 };
 
@@ -374,11 +311,16 @@ const handleFileChange = async (e: Event) => {
 const handleSuccess = (token: string) => {
     if (navigator.vibrate) navigator.vibrate(200);
     lastScan.value = token;
-    emit('scan', token, scanType.value);
+    emit('scan', token);
     setTimeout(() => {
         lastScan.value = null;
     }, 3000);
 };
+
+defineExpose({
+    startCamera,
+    triggerFileUpload,
+});
 </script>
 
 <style scoped>

@@ -46,7 +46,7 @@
               class="flex items-center gap-2.5 font-medium text-slate-600 dark:text-slate-300"
             >
               <Clock class="h-5 w-5 text-[#d4af37]" />
-              <span>{{ new Date(event.start_date).toLocaleString() }}</span>
+              <span>{{ new Date(event.start_time).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) }}</span>
             </div>
             <div
               class="flex items-center gap-2.5 font-medium text-slate-600 dark:text-slate-300"
@@ -92,13 +92,15 @@
               </span>
             </div>
             <div v-if="['admin', 'super_admin'].includes(role)" class="flex gap-2 w-full">
-              <button
+              <Link
+                :href="`/events/${event.id}/edit`"
                 class="flex flex-1 items-center justify-center rounded-2xl bg-slate-900 py-3 text-white shadow-lg transition-all hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200"
                 title="Edit Event"
               >
                 <Pencil class="h-5 w-5" />
-              </button>
+              </Link>
               <button
+                @click="deleteEvent"
                 class="flex flex-1 items-center justify-center rounded-2xl bg-red-500 py-3 text-white shadow-lg transition-all hover:bg-red-600 dark:bg-red-500/10 dark:text-red-500 dark:hover:bg-red-500/20"
                 title="Delete Event"
               >
@@ -243,7 +245,7 @@
 </template>
 
 <script setup lang="ts">
-import { Link, usePage, Head } from "@inertiajs/vue3";
+import { Link, usePage, Head, router } from "@inertiajs/vue3";
 import {
   Calendar,
   MapPin,
@@ -276,5 +278,11 @@ const registrationUrl = computed(
 const copyRegistrationLink = () => {
   navigator.clipboard.writeText(registrationUrl.value);
   alert("Registration link copied to clipboard!");
+};
+
+const deleteEvent = () => {
+  if (confirm("Are you sure you want to delete this event? This action cannot be undone.")) {
+    router.delete(`/events/${props.event.id}`);
+  }
 };
 </script>

@@ -1,15 +1,23 @@
 <template>
-    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <div class="flex items-center justify-between">
-            <div>
+    <div class="flex h-full flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div>
+            <div class="mb-4">
                 <h3 class="font-serif text-lg font-bold text-slate-900 dark:text-slate-100">
                     Evaluation Form
                 </h3>
-                <p class="text-sm text-slate-500 mt-1 dark:text-slate-400">
-                    {{ hasExistingForm ? `${form.questions.length} question(s) active` : 'No form created yet' }}
-                </p>
             </div>
             
+            <div class="mb-6">
+                <p class="text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+                    {{ hasExistingForm 
+                        ? `This event currently has an active evaluation form with ${form.questions.length} question(s). Attendees will be prompted to provide feedback.` 
+                        : 'No evaluation form has been created for this event yet. Create one to gather attendee feedback after the event.' 
+                    }}
+                </p>
+            </div>
+        </div>
+        
+        <div class="flex items-center justify-end border-t border-slate-100 pt-4 dark:border-slate-800">
             <Dialog>
                 <DialogTrigger as-child>
                     <button class="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white shadow-lg transition-all hover:bg-slate-800 focus:ring-2 focus:ring-slate-900 focus:ring-offset-2 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200">

@@ -17,7 +17,14 @@ class AttendanceController extends Controller
      */
     public function index(): Response
     {
-        return Inertia::render('Attendances/Index');
+        $events = Event::query()
+            ->where('end_time', '>=', now())
+            ->orderBy('start_time', 'asc')
+            ->get(['id', 'title', 'start_time', 'end_time', 'attendance_type']);
+
+        return Inertia::render('Attendances/Index', [
+            'events' => $events,
+        ]);
     }
 
     /**
