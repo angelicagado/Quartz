@@ -7,6 +7,7 @@ use App\Http\Controllers\EvaluationFormController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventParticipantController;
 use App\Http\Controllers\ParticipantController;
+use App\Http\Controllers\ParticipantProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SuperAdminDashboardController;
@@ -63,6 +64,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:super_admin|admin|event_organizer|participant')->group(function () {
         Route::get('portal/my-events', [ParticipantController::class, 'myEvents'])->name('portal.my-events');
         Route::get('portal/certificates', [ParticipantController::class, 'certificates'])->name('portal.certificates');
+        Route::get('portal/profile', [ParticipantProfileController::class, 'edit'])->name('portal.profile.edit');
+        Route::patch('portal/profile', [ParticipantProfileController::class, 'update'])->name('portal.profile.update');
         Route::get('portal/events', [ParticipantController::class, 'index'])->name('portal.events');
         Route::post('portal/events/{event}/register', [ParticipantController::class, 'register'])->name('portal.register');
         Route::get('portal/events/{event}/qr', [ParticipantController::class, 'qrCode'])->name('portal.qr');

@@ -3,6 +3,7 @@ import { Head, Link } from '@inertiajs/vue3';
 import { Award, Download } from '@lucide/vue';
 import { Button } from '@/components/ui/button';
 import ParticipantLayout from '@/layouts/ParticipantLayout.vue';
+import ProfileRail from '@/components/portal/ProfileRail.vue';
 
 interface CertificateItem {
     id: number;
@@ -34,7 +35,9 @@ function formatDate(dateStr: string): string {
 <template>
     <Head title="My Certificates" />
 
-    <div class="flex h-full flex-1 flex-col gap-6 p-6">
+    <div class="grid gap-6 p-4 sm:p-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-20">
+        <ProfileRail />
+        <div class="flex min-w-0 flex-1 flex-col gap-6">
         <!-- Header -->
         <div>
             <div class="mb-1 flex items-center gap-2">
@@ -121,6 +124,7 @@ function formatDate(dateStr: string): string {
                     View My Events
                 </Button>
             </Link>
+        </div>
         </div>
     </div>
 </template>
