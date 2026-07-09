@@ -29,8 +29,9 @@ class EventController extends Controller
                 'title' => $event->title,
                 'start_time' => $event->start_time,
                 'end_time' => $event->end_time,
+                'registration_start_date' => $event->registration_start_date,
+                'registration_end_date' => $event->registration_end_date,
                 'registration_type' => $event->registration_type,
-                'attendance_type' => $event->attendance_type,
                 'evaluation_required' => $event->evaluation_required,
                 'certificate_enabled' => $event->certificate_enabled,
                 'organizer' => $event->organizer ? [
@@ -66,7 +67,13 @@ class EventController extends Controller
      */
     public function store(StoreEventRequest $request): RedirectResponse
     {
-        $event = Event::create($request->validated());
+        $validated = $request->validated();
+        $sessions = $validated['sessions'];
+        unset($validated['sessions']);
+
+        $event = Event::create($validated);
+
+        $event->sessions()->createMany($sessions);
 
         return redirect()->route('events.show', $event)
             ->with('success', 'Event created successfully.');
@@ -82,6 +89,7 @@ class EventController extends Controller
             'eventParticipants.user:id,name,email',
             'evaluationForm.questions',
             'certificateTemplate',
+            'sessions',
         ]);
 
         $event->loadCount(['eventParticipants', 'attendances']);
@@ -93,8 +101,9 @@ class EventController extends Controller
                 'description' => $event->description,
                 'start_time' => $event->start_time,
                 'end_time' => $event->end_time,
+                'registration_start_date' => $event->registration_start_date,
+                'registration_end_date' => $event->registration_end_date,
                 'registration_type' => $event->registration_type,
-                'attendance_type' => $event->attendance_type,
                 'evaluation_required' => $event->evaluation_required,
                 'certificate_enabled' => $event->certificate_enabled,
                 'organizer' => $event->organizer,
@@ -104,6 +113,7 @@ class EventController extends Controller
                 'evaluation_form' => $event->evaluationForm,
                 'has_certificate_template' => $event->certificateTemplate !== null,
                 'certificate_template' => $event->certificateTemplate,
+                'sessions' => $event->sessions,
             ],
         ]);
     }
@@ -113,6 +123,8 @@ class EventController extends Controller
      */
     public function edit(Event $event): Response
     {
+        $event->load('sessions');
+
         $organizers = User::role('event_organizer')
             ->select(['id', 'name', 'email'])
             ->orderBy('name')
@@ -125,11 +137,13 @@ class EventController extends Controller
                 'description' => $event->description,
                 'start_time' => $event->start_time,
                 'end_time' => $event->end_time,
+                'registration_start_date' => $event->registration_start_date,
+                'registration_end_date' => $event->registration_end_date,
                 'registration_type' => $event->registration_type,
-                'attendance_type' => $event->attendance_type,
                 'evaluation_required' => $event->evaluation_required,
                 'certificate_enabled' => $event->certificate_enabled,
                 'organizer_id' => $event->organizer_id,
+                'sessions' => $event->sessions,
             ],
             'organizers' => $organizers,
         ]);
@@ -140,7 +154,33 @@ class EventController extends Controller
      */
     public function update(UpdateEventRequest $request, Event $event): RedirectResponse
     {
-        $event->update($request->validated());
+        $validated = $request->validated();
+        $sessionsData = $validated['sessions'];
+        unset($validated['sessions']);
+
+        $event->update($validated);
+
+        // Update sessions (delete removed, update existing, create new)
+        $existingSessionIds = $event->sessions()->pluck('id')->toArray();
+        $updatedSessionIds = [];
+
+        foreach ($sessionsData as $sessionData) {
+            if (isset($sessionData['id']) && in_array($sessionData['id'], $existingSessionIds)) {
+                // Update existing
+                $event->sessions()->where('id', $sessionData['id'])->update($sessionData);
+                $updatedSessionIds[] = $sessionData['id'];
+            } else {
+                // Create new
+                $newSession = $event->sessions()->create($sessionData);
+                $updatedSessionIds[] = $newSession->id;
+            }
+        }
+
+        // Delete sessions that were removed
+        $sessionsToDelete = array_diff($existingSessionIds, $updatedSessionIds);
+        if (!empty($sessionsToDelete)) {
+            $event->sessions()->whereIn('id', $sessionsToDelete)->delete();
+        }
 
         return redirect()->route('events.show', $event)
             ->with('success', 'Event updated successfully.');

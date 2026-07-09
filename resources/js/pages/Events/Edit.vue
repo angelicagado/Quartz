@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
-import { CalendarDays, ChevronLeft } from '@lucide/vue';
+import { CalendarDays, ChevronLeft, Plus, Trash2 } from '@lucide/vue';
 import { Link } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,6 +12,14 @@ interface Organizer {
     email: string;
 }
 
+interface EventSession {
+    id?: number;
+    name: string;
+    start_time: string;
+    end_time: string;
+    requires_checkout: boolean;
+}
+
 interface Event {
     id: number;
     title: string;
@@ -19,10 +27,12 @@ interface Event {
     organizer_id: number | null;
     start_time: string;
     end_time: string;
-    registration_type: 'public' | 'static';
-    attendance_type: 'one_time' | 'am_pm';
+    registration_start_date: string | null;
+    registration_end_date: string | null;
+    registration_type: 'open' | 'scheduled' | 'approval' | 'closed';
     evaluation_required: boolean;
     certificate_enabled: boolean;
+    sessions: EventSession[];
 }
 
 const props = defineProps<{
@@ -40,9 +50,10 @@ defineOptions({
 });
 
 // Format datetime-local value from ISO string
-function toDatetimeLocal(str: string): string {
+function toDatetimeLocal(str: string | null | undefined): string {
     if (!str) return '';
     const d = new Date(str);
+    if (isNaN(d.getTime())) return '';
     const pad = (n: number) => String(n).padStart(2, '0');
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
@@ -55,11 +66,67 @@ const form = useForm({
         : '',
     start_time: toDatetimeLocal(props.event.start_time),
     end_time: toDatetimeLocal(props.event.end_time),
+    registration_start_date: toDatetimeLocal(props.event.registration_start_date),
+    registration_end_date: toDatetimeLocal(props.event.registration_end_date),
     registration_type: props.event.registration_type,
-    attendance_type: props.event.attendance_type,
     evaluation_required: props.event.evaluation_required,
     certificate_enabled: props.event.certificate_enabled,
+    sessions: props.event.sessions && props.event.sessions.length > 0 
+        ? props.event.sessions.map(s => ({
+            id: s.id,
+            name: s.name,
+            start_time: toDatetimeLocal(s.start_time),
+            end_time: toDatetimeLocal(s.end_time),
+            requires_checkout: s.requires_checkout ? true : false,
+        }))
+        : [
+            {
+                name: "Main Session",
+                start_time: toDatetimeLocal(props.event.start_time),
+                end_time: toDatetimeLocal(props.event.end_time),
+                requires_checkout: false,
+            },
+        ],
 });
+
+function addSession() {
+  form.sessions.push({
+    name: "New Session",
+    start_time: form.start_time || "",
+    end_time: form.end_time || "",
+    requires_checkout: false,
+  });
+}
+
+function removeSession(index: number) {
+  form.sessions.splice(index, 1);
+}
+
+function applyPreset(preset: string) {
+  if (preset === 'one_time') {
+    form.sessions = [{
+      name: "Main Event",
+      start_time: form.start_time,
+      end_time: form.end_time,
+      requires_checkout: false,
+    }];
+  } else if (preset === 'am_pm') {
+    form.sessions = [
+      {
+        name: "Morning Session",
+        start_time: form.start_time,
+        end_time: "",
+        requires_checkout: true,
+      },
+      {
+        name: "Afternoon Session",
+        start_time: "",
+        end_time: form.end_time,
+        requires_checkout: true,
+      }
+    ];
+  }
+}
 
 function submit() {
     form.put(`/events/${props.event.id}`);
@@ -201,7 +268,7 @@ function submit() {
                     </div>
                     <div>
                         <h2 class="font-serif font-semibold text-foreground">
-                            Schedule
+                            Event Schedule
                         </h2>
                         <p class="text-xs text-muted-foreground">
                             Set the start and end date/time
@@ -211,7 +278,7 @@ function submit() {
                 <div class="grid gap-5 p-6 sm:grid-cols-2">
                     <div class="grid gap-2">
                         <Label for="start_time"
-                            >Start Date & Time
+                            >Event Start Time
                             <span class="text-destructive">*</span></Label
                         >
                         <Input
@@ -231,7 +298,7 @@ function submit() {
                     </div>
                     <div class="grid gap-2">
                         <Label for="end_time"
-                            >End Date & Time
+                            >Event End Time
                             <span class="text-destructive">*</span></Label
                         >
                         <Input
@@ -252,7 +319,54 @@ function submit() {
                 </div>
             </div>
 
-            <!-- Section 3: Configuration -->
+            <!-- Section 3: Sessions -->
+            <div class="overflow-hidden rounded-xl border border-border bg-card shadow-xs">
+              <div class="flex items-center justify-between border-b border-border bg-muted/30 px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <div class="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-teal-500 to-emerald-600">
+                    <CalendarDays class="size-4 text-white" />
+                  </div>
+                  <div>
+                    <h2 class="font-serif font-semibold text-foreground">Event Sessions</h2>
+                    <p class="text-xs text-muted-foreground">Manage attendance checkpoints</p>
+                  </div>
+                </div>
+                <div class="flex gap-2">
+                  <Button type="button" variant="outline" size="sm" @click="applyPreset('one_time')">Preset: 1 Scan</Button>
+                  <Button type="button" variant="outline" size="sm" @click="applyPreset('am_pm')">Preset: AM/PM</Button>
+                  <Button type="button" variant="outline" size="sm" @click="addSession"><Plus class="size-4 mr-1" /> Add Session</Button>
+                </div>
+              </div>
+              <div class="space-y-4 p-6">
+                <div v-for="(session, index) in form.sessions" :key="index" class="relative rounded-lg border border-border p-4 bg-background">
+                  <div class="absolute right-2 top-2">
+                    <Button type="button" variant="ghost" size="icon-sm" class="text-destructive hover:text-destructive/80" @click="removeSession(index)" v-if="form.sessions.length > 1">
+                      <Trash2 class="size-4" />
+                    </Button>
+                  </div>
+                  <div class="grid gap-4 sm:grid-cols-2 mt-2">
+                    <div class="col-span-2 grid gap-2">
+                      <Label>Session Name <span class="text-destructive">*</span></Label>
+                      <Input v-model="session.name" placeholder="e.g. Day 1 Morning" />
+                    </div>
+                    <div class="grid gap-2">
+                      <Label>Start Time <span class="text-destructive">*</span></Label>
+                      <Input v-model="session.start_time" type="datetime-local" />
+                    </div>
+                    <div class="grid gap-2">
+                      <Label>End Time <span class="text-destructive">*</span></Label>
+                      <Input v-model="session.end_time" type="datetime-local" />
+                    </div>
+                    <div class="col-span-2 flex items-center gap-2 mt-2">
+                      <input type="checkbox" v-model="session.requires_checkout" :id="'checkout-'+index" class="rounded border-input text-violet-600 focus:ring-violet-600">
+                      <Label :for="'checkout-'+index" class="cursor-pointer">Require Check-out (Participant must scan twice for this session)</Label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 4: Configuration -->
             <div
                 class="overflow-hidden rounded-xl border border-border bg-card shadow-xs"
             >
@@ -266,153 +380,34 @@ function submit() {
                     </div>
                     <div>
                         <h2 class="font-serif font-semibold text-foreground">
-                            Configuration
+                            Registration & Config
                         </h2>
                         <p class="text-xs text-muted-foreground">
-                            Registration type, attendance mode, and features
+                            Registration rules and features
                         </p>
                     </div>
                 </div>
                 <div class="space-y-6 p-6">
                     <!-- Registration Type -->
                     <div class="grid gap-3">
-                        <Label
-                            >Registration Type
-                            <span class="text-destructive">*</span></Label
-                        >
-                        <div class="grid grid-cols-2 gap-3">
-                            <label
-                                :class="[
-                                    'flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-all',
-                                    form.registration_type === 'public'
-                                        ? 'border-violet-500 bg-violet-50 ring-2 ring-violet-200 dark:bg-violet-900/20 dark:ring-violet-800'
-                                        : 'border-border hover:border-muted-foreground/30 hover:bg-muted/20',
-                                ]"
-                            >
-                                <input
-                                    type="radio"
-                                    v-model="form.registration_type"
-                                    value="public"
-                                    class="mt-0.5 accent-violet-600"
-                                />
-                                <div>
-                                    <p
-                                        class="text-sm font-medium text-foreground"
-                                    >
-                                        Public
-                                    </p>
-                                    <p
-                                        class="mt-0.5 text-xs text-muted-foreground"
-                                    >
-                                        Anyone can register for this event
-                                    </p>
-                                </div>
-                            </label>
-                            <label
-                                :class="[
-                                    'flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-all',
-                                    form.registration_type === 'static'
-                                        ? 'border-orange-500 bg-orange-50 ring-2 ring-orange-200 dark:bg-orange-900/20 dark:ring-orange-800'
-                                        : 'border-border hover:border-muted-foreground/30 hover:bg-muted/20',
-                                ]"
-                            >
-                                <input
-                                    type="radio"
-                                    v-model="form.registration_type"
-                                    value="static"
-                                    class="mt-0.5 accent-orange-600"
-                                />
-                                <div>
-                                    <p
-                                        class="text-sm font-medium text-foreground"
-                                    >
-                                        Static List
-                                    </p>
-                                    <p
-                                        class="mt-0.5 text-xs text-muted-foreground"
-                                    >
-                                        Upload a CSV of pre-registered
-                                        participants
-                                    </p>
-                                </div>
-                            </label>
-                        </div>
-                        <p
-                            v-if="form.errors.registration_type"
-                            class="text-xs text-destructive"
-                        >
-                            {{ form.errors.registration_type }}
-                        </p>
+                        <Label>Registration Rule <span class="text-destructive">*</span></Label>
+                        <select v-model="form.registration_type" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                        <option value="open">Open (Anyone can register anytime)</option>
+                        <option value="scheduled">Scheduled (Only during specific dates)</option>
+                        <option value="approval">Requires Approval (Admin must approve registrations)</option>
+                        <option value="closed">Closed / Admin Only (Self-registration disabled)</option>
+                        </select>
                     </div>
 
-                    <!-- Attendance Type -->
-                    <div class="grid gap-3">
-                        <Label
-                            >Attendance Type
-                            <span class="text-destructive">*</span></Label
-                        >
-                        <div class="grid grid-cols-2 gap-3">
-                            <label
-                                :class="[
-                                    'flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-all',
-                                    form.attendance_type === 'one_time'
-                                        ? 'border-teal-500 bg-teal-50 ring-2 ring-teal-200 dark:bg-teal-900/20 dark:ring-teal-800'
-                                        : 'border-border hover:border-muted-foreground/30 hover:bg-muted/20',
-                                ]"
-                            >
-                                <input
-                                    type="radio"
-                                    v-model="form.attendance_type"
-                                    value="one_time"
-                                    class="mt-0.5 accent-teal-600"
-                                />
-                                <div>
-                                    <p
-                                        class="text-sm font-medium text-foreground"
-                                    >
-                                        One-Time
-                                    </p>
-                                    <p
-                                        class="mt-0.5 text-xs text-muted-foreground"
-                                    >
-                                        Single scan for the whole event
-                                    </p>
-                                </div>
-                            </label>
-                            <label
-                                :class="[
-                                    'flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-all',
-                                    form.attendance_type === 'am_pm'
-                                        ? 'border-cyan-500 bg-cyan-50 ring-2 ring-cyan-200 dark:bg-cyan-900/20 dark:ring-cyan-800'
-                                        : 'border-border hover:border-muted-foreground/30 hover:bg-muted/20',
-                                ]"
-                            >
-                                <input
-                                    type="radio"
-                                    v-model="form.attendance_type"
-                                    value="am_pm"
-                                    class="mt-0.5 accent-cyan-600"
-                                />
-                                <div>
-                                    <p
-                                        class="text-sm font-medium text-foreground"
-                                    >
-                                        AM / PM
-                                    </p>
-                                    <p
-                                        class="mt-0.5 text-xs text-muted-foreground"
-                                    >
-                                        Separate scans for morning and afternoon
-                                    </p>
-                                </div>
-                            </label>
+                    <div v-if="form.registration_type === 'scheduled'" class="grid gap-5 sm:grid-cols-2 p-4 border rounded-lg bg-muted/10">
+                        <div class="grid gap-2">
+                        <Label>Reg. Start Date</Label>
+                        <Input v-model="form.registration_start_date" type="datetime-local" />
                         </div>
-                        <p
-                            v-if="form.errors.attendance_type"
-                            class="text-xs text-destructive"
-                        >
-                            {{ form.errors.attendance_type }}
-                        </p>
+                        <div class="grid gap-2">
+                        <Label>Reg. End Date</Label>
+                        <Input v-model="form.registration_end_date" type="datetime-local" />
+                        </div>
                     </div>
 
                     <!-- Toggles -->
@@ -497,7 +492,7 @@ function submit() {
             </div>
 
             <!-- Actions -->
-            <div class="flex items-center justify-end gap-3">
+            <div class="flex items-center justify-end gap-3 pb-10">
                 <Link :href="`/events/${event.id}`">
                     <Button variant="outline" type="button">Cancel</Button>
                 </Link>
