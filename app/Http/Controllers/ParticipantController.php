@@ -144,6 +144,10 @@ class ParticipantController extends Controller
             return back()->with('error', 'You are already registered for this event.');
         }
 
+        if ($event->hasReachedCapacity()) {
+            return back()->with('error', 'This event has reached its maximum participant capacity.');
+        }
+
         $participant = EventParticipant::create([
             'event_id' => $event->id,
             'user_id' => $user->id,
