@@ -21,6 +21,7 @@
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
         @fonts
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 
         @vite(['resources/css/app.css', 'resources/js/app.ts', "resources/js/pages/{$page['component']}.vue"])
         <x-inertia::head>

@@ -39,10 +39,10 @@ const dashboardUrl = computed(() =>
                 <div
                     class="hidden items-center gap-gutter font-body-md text-body-md md:flex"
                 >
-                    <a
+                    <Link
                         class="text-on-surface-variant transition-colors duration-300 hover:text-primary"
-                        href="#"
-                        >Events</a
+                        href="/events"
+                        >Events</Link
                     >
                     <!-- <a
             class="text-on-surface-variant hover:text-primary transition-colors duration-300"

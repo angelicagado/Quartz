@@ -43,7 +43,7 @@ const props = defineProps<{
 defineOptions({
     layout: {
         breadcrumbs: [
-            { title: 'Events', href: '/events' },
+            { title: 'Events', href: '/admin/events' },
             { title: 'Edit Event', href: '#' },
         ],
     },
@@ -129,7 +129,7 @@ function applyPreset(preset: string) {
 }
 
 function submit() {
-    form.put(`/events/${props.event.id}`);
+    form.put(`/admin/events/${props.event.id}`);
 }
 </script>
 
@@ -139,7 +139,7 @@ function submit() {
     <div class="flex h-full flex-1 flex-col gap-6 p-6">
         <!-- Header -->
         <div class="flex items-center gap-4">
-            <Link :href="`/events/${event.id}`">
+            <Link :href="`/admin/events/${event.id}`">
                 <Button variant="ghost" size="icon-sm">
                     <ChevronLeft class="size-4" />
                 </Button>
@@ -493,7 +493,7 @@ function submit() {
 
             <!-- Actions -->
             <div class="flex items-center justify-end gap-3 pb-10">
-                <Link :href="`/events/${event.id}`">
+                <Link :href="`/admin/events/${event.id}`">
                     <Button variant="outline" type="button">Cancel</Button>
                 </Link>
                 <Button

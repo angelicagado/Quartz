@@ -19,8 +19,8 @@ const props = defineProps<{
 defineOptions({
   layout: {
     breadcrumbs: [
-      { title: "Events", href: "/events" },
-      { title: "Create Event", href: "/events/create" },
+      { title: "Events", href: "/admin/events" },
+      { title: "Create Event", href: "/admin/events/create" },
     ],
   },
 });
@@ -86,7 +86,7 @@ function applyPreset(preset: string) {
 }
 
 function submit() {
-  form.post("/events");
+  form.post("/admin/events");
 }
 </script>
 
@@ -96,7 +96,7 @@ function submit() {
   <div class="flex h-full flex-1 flex-col gap-6 p-6">
     <!-- Header -->
     <div class="flex items-center gap-4">
-      <Link href="/events">
+      <Link href="/admin/events">
         <Button variant="ghost" size="icon-sm">
           <ChevronLeft class="size-4" />
         </Button>
@@ -383,7 +383,7 @@ function submit() {
 
       <!-- Actions -->
       <div class="flex items-center justify-end gap-3 pb-10">
-        <Link href="/events">
+        <Link href="/admin/events">
           <Button variant="outline" type="button">Cancel</Button>
         </Link>
         <Button

@@ -5,7 +5,7 @@
   >
     <!-- Breadcrumbs / Back -->
     <Link
-      :href="role === 'organizer' ? '/organizer/events' : '/events'"
+      :href="role === 'organizer' ? '/organizer/events' : '/admin/events'"
       class="group inline-flex items-center gap-2 text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
     >
       <ArrowLeft class="h-4 w-4 transition-transform group-hover:-translate-x-1" />
@@ -93,7 +93,7 @@
             </div>
             <div v-if="['admin', 'super_admin'].includes(role)" class="flex gap-2 w-full">
               <Link
-                :href="`/events/${event.id}/edit`"
+                :href="`/admin/events/${event.id}/edit`"
                 class="flex flex-1 items-center justify-center rounded-2xl bg-slate-900 py-3 text-white shadow-lg transition-all hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200"
                 title="Edit Event"
               >
@@ -282,7 +282,7 @@ const copyRegistrationLink = () => {
 
 const deleteEvent = () => {
   if (confirm("Are you sure you want to delete this event? This action cannot be undone.")) {
-    router.delete(`/events/${props.event.id}`);
+    router.delete(`/admin/events/${props.event.id}`);
   }
 };
 </script>

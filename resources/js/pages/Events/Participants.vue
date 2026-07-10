@@ -52,10 +52,10 @@ const props = defineProps<{
 defineOptions({
     layout: (props: { event?: Event }) => ({
         breadcrumbs: [
-            { title: 'Events', href: '/events' },
+            { title: 'Events', href: '/admin/events' },
             {
                 title: props.event?.title ?? 'Event',
-                href: `/events/${props.event?.id}`,
+                href: `/admin/events/${props.event?.id}`,
             },
             { title: 'Participants', href: '#' },
         ],
@@ -70,7 +70,7 @@ watch(search, () => {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
         router.get(
-            `/events/${props.event.id}/participants`,
+            `/admin/events/${props.event.id}/participants`,
             { search: search.value },
             {
                 preserveState: true,
@@ -85,7 +85,7 @@ const addForm = useForm({
 });
 
 function addParticipant() {
-    addForm.post(`/events/${props.event.id}/participants`, {
+    addForm.post(`/admin/events/${props.event.id}/participants`, {
         onSuccess: () => {
             showAddModal.value = false;
             addForm.reset();
@@ -97,7 +97,7 @@ function addParticipant() {
 function removeParticipant(participantId: number) {
     if (confirm('Remove this participant?')) {
         router.delete(
-            `/events/${props.event.id}/participants/${participantId}`,
+            `/admin/events/${props.event.id}/participants/${participantId}`,
             {
                 preserveScroll: true,
             },
@@ -113,7 +113,7 @@ function removeParticipant(participantId: number) {
         <!-- Header -->
         <div class="flex items-start justify-between gap-4">
             <div class="flex items-start gap-4">
-                <Link :href="`/events/${event.id}`">
+                <Link :href="`/admin/events/${event.id}`">
                     <Button variant="ghost" size="icon-sm" class="mt-1">
                         <ChevronLeft class="size-4" />
                     </Button>
@@ -132,7 +132,7 @@ function removeParticipant(participantId: number) {
             <div class="flex shrink-0 items-center gap-2">
                 <Link
                     v-if="event.registration_type === 'static'"
-                    :href="`/events/${event.id}/participants/upload`"
+                    :href="`/admin/events/${event.id}/participants/upload`"
                 >
                     <Button variant="outline" size="sm" class="gap-2">
                         <Upload class="size-4" />
@@ -269,7 +269,7 @@ function removeParticipant(participantId: number) {
                                     >
                                         <Link
                                             v-if="participant.qr_code_path"
-                                            :href="`/events/${event.id}/participants/${participant.id}/qr`"
+                                            :href="`/admin/events/${event.id}/participants/${participant.id}/qr`"
                                             target="_blank"
                                         >
                                             <Button

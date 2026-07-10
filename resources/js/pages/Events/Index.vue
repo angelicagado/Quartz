@@ -87,7 +87,12 @@ const resetFilters = () => {
 };
 
 const handleViewEvent = (event: Event) => {
-  const prefix = role.value === "organizer" ? "/organizer" : "";
+  let prefix = "";
+  if (["super_admin", "admin"].includes(role.value)) {
+    prefix = "/admin";
+  } else if (role.value === "organizer") {
+    prefix = "/organizer";
+  }
   router.get(`${prefix}/events/${event.id}`);
 };
 </script>
@@ -122,7 +127,7 @@ const handleViewEvent = (event: Event) => {
         </div>
         <Link
           v-if="['admin', 'super_admin'].includes(role)"
-          href="/events/create"
+          href="/admin/events/create"
           class="hidden items-center gap-2 rounded-xl bg-linear-to-br from-slate-800 from-40% to-[#d4af37] px-5 py-2.5 font-medium text-white shadow-[0_4px_12px_rgba(30,41,59,0.25)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-[0_6px_16px_rgba(30,41,59,0.35)] active:translate-y-0 md:flex"
         >
           <Plus class="h-5 w-5" />
@@ -130,7 +135,7 @@ const handleViewEvent = (event: Event) => {
         </Link>
         <Link
           v-if="['admin', 'super_admin'].includes(role)"
-          href="/events/create"
+          href="/admin/events/create"
           class="flex h-11 w-11 items-center justify-center rounded-full bg-[#1E293B] text-white shadow-md hover:bg-slate-800 active:scale-[0.98] md:hidden"
         >
           <Plus class="h-5 w-5" />
@@ -253,7 +258,7 @@ const handleViewEvent = (event: Event) => {
     <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       <!-- Create New Card (Admin Only) -->
       <Link
-        href="/events/create"
+        href="/admin/events/create"
         v-if="['admin', 'super_admin'].includes(role) && !hasActiveFilters"
         class="group flex min-h-[360px] cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50/50 p-8 transition-all duration-300 hover:-translate-y-1 hover:border-[#d4af37]/50 hover:bg-white hover:shadow-lg dark:border-slate-700 dark:bg-slate-800/50 dark:hover:bg-slate-800"
       >

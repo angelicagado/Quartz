@@ -265,7 +265,7 @@ const saveForm = () => {
     // If the storeEvaluationRoute exists, use it. Otherwise, construct a common fallback.
     const url = typeof storeEvaluationRoute !== 'undefined' 
         ? storeEvaluationRoute.url(props.event.id) 
-        : `/events/${props.event.id}/evaluations`;
+        : `/admin/events/${props.event.id}/evaluations`;
         
     form.post(url, {
         preserveScroll: true,
@@ -281,7 +281,7 @@ const deleteForm = () => {
     }
     
     // We assume a DELETE endpoint exists
-    router.delete(`/events/${props.event.id}/evaluations`, {
+    router.delete(`/admin/events/${props.event.id}/evaluations`, {
         preserveScroll: true,
         onSuccess: () => {
             form.reset();

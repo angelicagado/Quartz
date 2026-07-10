@@ -286,7 +286,7 @@ const handleScan = async (token: string) => {
     console.log("Sending scan to backend:", cleanToken, "Event:", selectedEventId.value);
     
     // We use the specific event scan route instead of globalScan
-    const response = await axios.post(`/events/${selectedEventId.value}/attendance/scan`, {
+    const response = await axios.post(`/admin/events/${selectedEventId.value}/attendance/scan`, {
       token: cleanToken,
     });
 
