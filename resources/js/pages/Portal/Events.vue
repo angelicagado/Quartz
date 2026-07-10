@@ -276,16 +276,6 @@ const statusConfig: Record<string, { label: string; classes: string }> = {
                                 >
                                     Register
                                 </Button>
-                                <Button
-                                    v-else
-                                    size="sm"
-                                    variant="outline"
-                                    disabled
-                                    class="border-green-200 text-green-600 dark:border-green-800 dark:text-green-400"
-                                >
-                                    <CheckCircle2 class="size-3.5" />
-                                    Registered
-                                </Button>
                             </template>
                         </div>
                     </div>
