@@ -99,9 +99,8 @@ function formatTime(dateStr: string): string {
 </script>
 
 <template>
-    <Head :title="event.title" />
-
     <div class="mx-auto flex w-full max-w-3xl flex-col gap-6 p-4 sm:p-6">
+        <Head :title="event.title" />
         <!-- Back Link -->
         <Link
             href="/portal/events"

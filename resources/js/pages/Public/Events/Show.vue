@@ -46,11 +46,10 @@ const submitRegister = () => {
 </script>
 
 <template>
-    <Head :title="event.title" />
-
     <div
         class="min-h-screen overflow-x-hidden bg-surface-dim font-body-md text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container"
     >
+        <Head :title="event.title" />
         <!-- TopNavBar -->
         <nav
             class="docked full-width sticky top-0 z-50 border-b border-outline-variant/10 bg-surface-dim/80 shadow-md backdrop-blur-xl"

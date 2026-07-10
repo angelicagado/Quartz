@@ -44,11 +44,10 @@ function formatTime(dateStr: string) {
 </script>
 
 <template>
-    <Head :title="`QR Code — ${event.title}`" />
-
     <div
         class="flex h-full flex-1 flex-col items-center justify-center gap-6 p-6"
     >
+        <Head :title="`QR Code — ${event.title}`" />
         <div class="w-full max-w-md">
             <!-- Back Link -->
             <Link
