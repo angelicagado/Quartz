@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import { ArrowLeft, CalendarDays, Clock, QrCode } from '@lucide/vue';
+import { ArrowLeft, CalendarDays, Clock, QrCode, Download } from '@lucide/vue';
 import ParticipantLayout from '@/layouts/ParticipantLayout.vue';
 
 interface Event {
@@ -101,6 +101,15 @@ function formatTime(dateStr: string) {
                             :alt="`QR Code for ${participant.user.name}`"
                             class="size-56 rounded-xl bg-white object-contain p-2 shadow-md"
                         />
+                        
+                        <!-- Download Button -->
+                        <a 
+                            :href="participant.qr_code_url" 
+                            download="ticket.png" 
+                            class="absolute -bottom-4 right-0 flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg transition-transform hover:scale-105 hover:bg-primary/90"
+                        >
+                            <Download class="size-4" /> Download
+                        </a>
                     </div>
                     <div
                         v-else
