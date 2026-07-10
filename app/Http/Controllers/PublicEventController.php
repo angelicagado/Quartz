@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Models\EventParticipant;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -43,6 +45,14 @@ class PublicEventController extends Controller
     {
         $event->load('organizer:id,name');
 
+        $participant = null;
+        if (Auth::check()) {
+            $participant = EventParticipant::query()
+                ->where('event_id', $event->id)
+                ->where('user_id', Auth::id())
+                ->first();
+        }
+
         return Inertia::render('Public/Events/Show', [
             'event' => [
                 'id' => $event->id,
@@ -53,6 +63,8 @@ class PublicEventController extends Controller
                 'registration_start_date' => $event->registration_start_date,
                 'registration_end_date' => $event->registration_end_date,
                 'registration_type' => $event->registration_type,
+                'is_registered' => $participant !== null,
+                'qr_code_url' => $participant?->qr_code_url,
                 'organizer' => $event->organizer ? [
                     'name' => $event->organizer->name,
                 ] : null,
