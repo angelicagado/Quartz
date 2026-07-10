@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, Link, usePage } from '@inertiajs/vue3';
+import { Head, Link, usePage, useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { dashboard, login, register } from '@/routes';
 import { register as portalRegister } from '@/routes/portal';
@@ -14,6 +14,8 @@ const props = defineProps<{
         registration_start_date: string;
         registration_end_date: string;
         registration_type: string;
+        is_registered?: boolean;
+        qr_code_url?: string;
         organizer: { name: string } | null;
     };
 }>();
@@ -30,6 +32,14 @@ const formatDate = (dateString: string) => {
         day: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
+    });
+};
+
+const form = useForm({});
+
+const submitRegister = () => {
+    form.post(portalRegister({ event: props.event.id }).url, {
+        preserveScroll: true,
     });
 };
 </script>
@@ -129,17 +139,30 @@ const formatDate = (dateString: string) => {
                             </div>
                             
                             <div class="shrink-0">
-                                <Link 
-                                    :href="portalRegister({ event: event.id }).url"
-                                    method="post"
-                                    as="button"
-                                    class="inline-flex items-center justify-center rounded-lg bg-primary px-8 py-3 text-base font-semibold text-on-primary transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 w-full md:w-auto"
-                                >
-                                    Register Now
-                                </Link>
-                                <p v-if="!page.props.auth?.user" class="text-xs text-on-surface-variant text-center mt-2">
-                                    Requires account login
-                                </p>
+                                <div v-if="event.is_registered" class="mt-4 md:mt-0 overflow-hidden rounded-xl border border-primary/20 bg-surface-dim p-6 text-center shadow-sm">
+                                    <h3 class="mb-4 text-lg font-bold text-on-surface">Your Ticket</h3>
+                                    <div v-if="event.qr_code_url" class="flex flex-col items-center justify-center gap-4">
+                                        <div class="relative inline-block rounded-xl bg-white p-3 shadow-sm">
+                                            <img :src="event.qr_code_url" alt="QR Code Ticket" class="size-40 object-contain" />
+                                        </div>
+                                        <a :href="event.qr_code_url" download="ticket.png" class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary/90">
+                                            <span class="material-symbols-outlined text-[18px]">download</span> Download
+                                        </a>
+                                    </div>
+                                </div>
+                                <div v-else>
+                                    <button 
+                                        @click="submitRegister"
+                                        :disabled="form.processing || event.registration_type === 'closed'"
+                                        class="inline-flex items-center justify-center rounded-lg bg-primary px-8 py-3 text-base font-semibold text-on-primary transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 w-full md:w-auto disabled:opacity-50"
+                                    >
+                                        <span v-if="form.processing" class="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+                                        {{ event.registration_type === 'closed' ? 'Registration Closed' : 'Register Now' }}
+                                    </button>
+                                    <p v-if="!page.props.auth?.user" class="text-xs text-on-surface-variant text-center mt-2">
+                                        Requires account login
+                                    </p>
+                                </div>
                             </div>
                         </div>
 
