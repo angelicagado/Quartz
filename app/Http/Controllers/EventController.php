@@ -82,7 +82,7 @@ class EventController extends Controller
     /**
      * Display the specified event with participants and attendance counts.
      */
-    public function show(Event $event): Response
+    public function show(Request $request, Event $event): Response
     {
         $event->load([
             'organizer:id,name,email',
@@ -93,6 +93,22 @@ class EventController extends Controller
         ]);
 
         $event->loadCount(['eventParticipants', 'attendances']);
+
+        $participantsQuery = $event->eventParticipants()->with('user');
+
+        $statusFilter = $request->string('status')->toString();
+        if ($statusFilter && $statusFilter !== 'all') {
+            $participantsQuery->where('status', $statusFilter);
+        }
+
+        $sort = $request->string('sort')->toString();
+        if ($sort === 'earliest') {
+            $participantsQuery->oldest();
+        } else {
+            $participantsQuery->latest();
+        }
+
+        $participants = $participantsQuery->paginate(15)->withQueryString();
 
         return Inertia::render('Events/Show', [
             'event' => [
@@ -114,6 +130,11 @@ class EventController extends Controller
                 'has_certificate_template' => $event->certificateTemplate !== null,
                 'certificate_template' => $event->certificateTemplate,
                 'sessions' => $event->sessions,
+            ],
+            'participants' => $participants,
+            'filters' => [
+                'status' => $statusFilter,
+                'sort' => $sort,
             ],
         ]);
     }
