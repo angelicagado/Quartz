@@ -2,9 +2,12 @@
 import { Head, Link, router } from '@inertiajs/vue3';
 import {
     ArrowLeft,
+    Award,
     CalendarDays,
     CheckCircle2,
     Clock,
+    Download,
+    FileText,
     QrCode,
     Users,
 } from '@lucide/vue';
@@ -68,6 +71,13 @@ const canRegister = computed(
         props.event.registration_type !== 'closed' &&
         props.event.status !== 'completed' &&
         props.event.status !== 'cancelled',
+);
+
+const canDownloadCertificate = computed(
+    () =>
+        props.event.is_registered &&
+        props.event.certificate_enabled &&
+        props.event.status === 'completed',
 );
 
 function register() {
@@ -259,6 +269,34 @@ function formatTime(dateStr: string): string {
                             View my QR code
                         </Button>
                     </Link>
+
+                    <template v-if="canDownloadCertificate">
+                        <a
+                            :href="`/portal/events/${event.id}/certificate/view`"
+                            target="_blank"
+                        >
+                            <Button variant="outline">
+                                <Award class="size-4" />
+                                View certificate
+                            </Button>
+                        </a>
+                        <a
+                            :href="`/portal/events/${event.id}/certificate/download`"
+                        >
+                            <Button
+                                class="bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-sm hover:from-violet-700 hover:to-indigo-700"
+                            >
+                                <Download class="size-4" />
+                                Download image
+                            </Button>
+                        </a>
+                        <a :href="`/portal/events/${event.id}/certificate/pdf`">
+                            <Button variant="outline">
+                                <FileText class="size-4" />
+                                PDF
+                            </Button>
+                        </a>
+                    </template>
 
                     <p
                         v-if="event.registration_type === 'closed' && !event.is_registered"

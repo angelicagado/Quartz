@@ -226,11 +226,16 @@ const statusConfig: Record<string, { label: string; classes: string }> = {
 
                 <!-- Content -->
                 <div class="flex flex-1 flex-col p-5">
-                    <h3
-                        class="line-clamp-2 font-serif leading-snug font-semibold text-foreground transition-colors group-hover:text-violet-600 dark:group-hover:text-violet-400"
+                    <Link
+                        :href="`/portal/events/${event.id}`"
+                        class="cursor-pointer"
                     >
-                        {{ event.title }}
-                    </h3>
+                        <h3
+                            class="line-clamp-2 font-serif leading-snug font-semibold text-foreground transition-colors hover:text-violet-600 group-hover:text-violet-600 dark:hover:text-violet-400 dark:group-hover:text-violet-400"
+                        >
+                            {{ event.title }}
+                        </h3>
+                    </Link>
 
                     <div
                         class="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground"
@@ -281,42 +286,6 @@ const statusConfig: Record<string, { label: string; classes: string }> = {
                                     <CheckCircle2 class="size-3.5" />
                                     Registered
                                 </Button>
-                            </template>
-                            <template
-                                v-else-if="
-                                    event.status === 'completed' &&
-                                    event.is_registered &&
-                                    event.certificate_enabled
-                                "
-                            >
-                                <a
-                                    :href="`/portal/events/${event.id}/certificate/view`"
-                                    target="_blank"
-                                    class="mr-2"
-                                >
-                                    <Button size="sm" variant="outline">
-                                        View Cert
-                                    </Button>
-                                </a>
-                                <a
-                                    :href="`/portal/events/${event.id}/certificate/download`"
-                                >
-                                    <Button
-                                        size="sm"
-                                        variant="default"
-                                        class="bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-sm hover:from-violet-700 hover:to-indigo-700"
-                                    >
-                                        Download (Image)
-                                    </Button>
-                                </a>
-                                <a
-                                    :href="`/portal/events/${event.id}/certificate/pdf`"
-                                    class="ml-2"
-                                >
-                                    <Button size="sm" variant="outline">
-                                        PDF
-                                    </Button>
-                                </a>
                             </template>
                         </div>
                     </div>
