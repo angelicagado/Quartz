@@ -178,7 +178,7 @@ class EventController extends Controller
 
         // Delete sessions that were removed
         $sessionsToDelete = array_diff($existingSessionIds, $updatedSessionIds);
-        if (!empty($sessionsToDelete)) {
+        if (! empty($sessionsToDelete)) {
             $event->sessions()->whereIn('id', $sessionsToDelete)->delete();
         }
 

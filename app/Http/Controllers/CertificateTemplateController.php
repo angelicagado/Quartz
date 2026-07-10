@@ -14,6 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Intervention\Image\Drivers\Gd\Driver;
@@ -26,7 +27,7 @@ class CertificateTemplateController extends Controller
      */
     public function store(Request $request, Event $event): RedirectResponse
     {
-        \Illuminate\Support\Facades\Log::info('Store Certificate Request:', $request->all());
+        Log::info('Store Certificate Request:', $request->all());
 
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -49,7 +50,7 @@ class CertificateTemplateController extends Controller
                 $backgroundPath = $file->store('certificate_backgrounds', 'public');
 
                 if ($backgroundPath !== false) {
-                    $backgroundPath = 'public/' . $backgroundPath;
+                    $backgroundPath = 'public/'.$backgroundPath;
                 } else {
                     $backgroundPath = null;
                 }
@@ -143,7 +144,7 @@ class CertificateTemplateController extends Controller
                 ->with('error', 'No certificate template is configured for this event.');
         }
 
-        $backgroundPath = storage_path('app/' . $template->background_path);
+        $backgroundPath = storage_path('app/'.$template->background_path);
         if (! file_exists($backgroundPath)) {
             return redirect()->route('portal.events')
                 ->with('error', 'Certificate background image not found.');
@@ -228,12 +229,12 @@ class CertificateTemplateController extends Controller
             return $result;
         }
 
-        $filename = 'certificate_' . Str::slug($event->title) . '_' . Str::slug($user->name) . '.png';
+        $filename = 'certificate_'.Str::slug($event->title).'_'.Str::slug($user->name).'.png';
         $encoded = $result->toPng();
 
         return response($encoded->toString())
             ->header('Content-Type', 'image/png')
-            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+            ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
     }
 
     /**
@@ -251,20 +252,20 @@ class CertificateTemplateController extends Controller
 
         // Convert the image to base64 to embed in the PDF
         $base64 = base64_encode($result->toPng()->toString());
-        $imgSrc = 'data:image/png;base64,' . $base64;
+        $imgSrc = 'data:image/png;base64,'.$base64;
 
         $html = '<style>
             @page { margin: 0px; size: landscape; }
             body { margin: 0px; padding: 0px; }
             img { width: 100%; height: 100%; object-fit: cover; }
         </style>';
-        $html .= '<body><img src="' . $imgSrc . '" /></body>';
+        $html .= '<body><img src="'.$imgSrc.'" /></body>';
 
         $pdf = DomPDF::loadHTML($html)->setPaper('a4', 'landscape');
-        $filename = 'certificate_' . Str::slug($event->title) . '_' . Str::slug($user->name) . '.pdf';
+        $filename = 'certificate_'.Str::slug($event->title).'_'.Str::slug($user->name).'.pdf';
 
         return response($pdf->output())
             ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+            ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
     }
 }

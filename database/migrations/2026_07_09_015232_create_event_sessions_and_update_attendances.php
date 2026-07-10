@@ -26,7 +26,7 @@ return new class extends Migration
         Schema::table('attendances', function (Blueprint $table) {
             // Drop scan_type column. Since SQLite doesn't fully support dropColumn elegantly sometimes, Laravel 11 handles it.
             $table->dropColumn('scan_type');
-            
+
             // Add session and type
             $table->foreignId('event_session_id')->nullable()->constrained()->cascadeOnDelete();
             $table->string('type')->default('check_in'); // check_in or check_out

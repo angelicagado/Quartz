@@ -12,7 +12,6 @@ use App\Services\QrCodeService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -183,9 +182,7 @@ class ParticipantController extends Controller
             'participant' => [
                 'id' => $participant->id,
                 'status' => $participant->status,
-                'qr_code_url' => $participant->qr_code_path
-                    ? Storage::url(str_replace('public/', '', $participant->qr_code_path))
-                    : null,
+                'qr_code_url' => $participant->qr_code_url,
                 'user' => [
                     'name' => $user->name,
                     'email' => $user->email,
