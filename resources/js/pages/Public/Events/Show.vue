@@ -15,6 +15,9 @@ const props = defineProps<{
         registration_start_date: string;
         registration_end_date: string;
         registration_type: string;
+        attendance_type: string;
+        certificate_enabled: boolean;
+        evaluation_required: boolean;
         is_registered?: boolean;
         qr_code_url?: string;
         organizer: { name: string } | null;
@@ -102,93 +105,250 @@ const submitRegister = () => {
         </nav>
 
         <!-- Main Content -->
-        <main class="relative bg-surface-container-lowest py-16 min-h-[80vh]">
-            <div class="mx-auto max-w-4xl px-margin-desktop max-md:px-margin-mobile">
+        <main class="relative min-h-[80vh] bg-surface-container-lowest py-16">
+            <div
+                class="mx-auto max-w-4xl px-margin-desktop max-md:px-margin-mobile"
+            >
                 <div class="mb-6">
-                    <Link href="/events" class="inline-flex items-center text-primary hover:underline font-medium">
-                        <span class="material-symbols-outlined text-[20px] mr-1">arrow_back</span>
+                    <Link
+                        href="/events"
+                        class="inline-flex items-center font-medium text-primary hover:underline"
+                    >
+                        <span class="material-symbols-outlined mr-1 text-[20px]"
+                            >arrow_back</span
+                        >
                         Back to Events
                     </Link>
                 </div>
-                
-                <div class="glass-card overflow-hidden rounded-2xl transition-all duration-500 hover:border-primary/30">
+
+                <div
+                    class="glass-card overflow-hidden rounded-2xl transition-all duration-500 hover:border-primary/30"
+                >
                     <!-- Event Banner Placeholder -->
-                    <div class="relative h-64 bg-gradient-to-br from-violet-500 via-purple-600 to-indigo-700">
+                    <div
+                        class="relative h-64 bg-gradient-to-br from-violet-500 via-purple-600 to-indigo-700"
+                    >
                         <div class="absolute inset-0 opacity-20">
-                            <div class="absolute top-8 right-8 size-32 rounded-full bg-white/30 blur-2xl" />
-                            <div class="absolute bottom-8 left-8 size-24 rounded-full bg-white/20 blur-xl" />
+                            <div
+                                class="absolute top-8 right-8 size-32 rounded-full bg-white/30 blur-2xl"
+                            />
+                            <div
+                                class="absolute bottom-8 left-8 size-24 rounded-full bg-white/20 blur-xl"
+                            />
                         </div>
                     </div>
 
                     <div class="p-8 md:p-12">
-                        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-6 mb-8">
+                        <div
+                            class="mb-8 flex flex-col gap-6 md:flex-row md:items-start md:justify-between"
+                        >
                             <div class="flex-1">
-                                <h1 class="mb-4 font-headline-lg font-serif text-headline-lg text-on-surface">
+                                <h1
+                                    class="mb-4 font-headline-lg font-serif text-headline-lg text-on-surface"
+                                >
                                     {{ event.title }}
                                 </h1>
-                                <div class="flex flex-wrap gap-4 text-sm text-on-surface-variant">
-                                    <div v-if="event.organizer" class="flex items-center gap-2">
-                                        <span class="material-symbols-outlined text-[18px] text-primary">person</span>
-                                        <span><strong>Organizer:</strong> {{ event.organizer.name }}</span>
+                                <div
+                                    class="flex flex-wrap gap-4 text-sm text-on-surface-variant"
+                                >
+                                    <div
+                                        v-if="event.organizer"
+                                        class="flex items-center gap-2"
+                                    >
+                                        <span
+                                            class="material-symbols-outlined text-[18px] text-primary"
+                                            >person</span
+                                        >
+                                        <span
+                                            ><strong>Organizer:</strong>
+                                            {{ event.organizer.name }}</span
+                                        >
                                     </div>
                                     <div class="flex items-center gap-2">
-                                        <span class="material-symbols-outlined text-[18px] text-primary">event_available</span>
-                                        <span><strong>Type:</strong> <span class="capitalize">{{ event.registration_type }}</span></span>
+                                        <span
+                                            class="material-symbols-outlined text-[18px] text-primary"
+                                            >event_available</span
+                                        >
+                                        <span
+                                            ><strong>Registration:</strong>
+                                            <span class="capitalize">{{
+                                                event.registration_type
+                                            }}</span></span
+                                        >
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span
+                                            class="material-symbols-outlined text-[18px] text-primary"
+                                            >groups</span
+                                        >
+                                        <span
+                                            ><strong>Attendance:</strong>
+                                            <span class="capitalize">{{
+                                                event.attendance_type
+                                            }}</span></span
+                                        >
+                                    </div>
+                                    <div
+                                        v-if="event.certificate_enabled"
+                                        class="flex items-center gap-2 text-green-600 dark:text-green-400"
+                                    >
+                                        <span
+                                            class="material-symbols-outlined text-[18px]"
+                                            >workspace_premium</span
+                                        >
+                                        <span
+                                            ><strong
+                                                >Certificate Available</strong
+                                            ></span
+                                        >
+                                    </div>
+                                    <div
+                                        v-if="event.evaluation_required"
+                                        class="flex items-center gap-2 text-amber-600 dark:text-amber-400"
+                                    >
+                                        <span
+                                            class="material-symbols-outlined text-[18px]"
+                                            >assignment</span
+                                        >
+                                        <span
+                                            ><strong
+                                                >Evaluation Form</strong
+                                            ></span
+                                        >
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="shrink-0">
-                                <div v-if="event.is_registered" class="mt-4 md:mt-0 overflow-hidden rounded-xl border border-primary/20 bg-surface-dim p-6 text-center shadow-sm">
-                                    <h3 class="mb-4 text-lg font-bold text-on-surface">Your Ticket</h3>
-                                    <div v-if="event.qr_code_url" class="flex flex-col items-center justify-center gap-4">
-                                        <div class="relative inline-block rounded-xl bg-white p-3 shadow-sm">
-                                            <img :src="event.qr_code_url" alt="QR Code Ticket" class="size-40 object-contain" />
+                                <div
+                                    v-if="event.is_registered"
+                                    class="mt-4 overflow-hidden rounded-xl border border-primary/20 bg-surface-dim p-6 text-center shadow-sm md:mt-0"
+                                >
+                                    <h3
+                                        class="mb-4 text-lg font-bold text-on-surface"
+                                    >
+                                        Your Ticket
+                                    </h3>
+                                    <div
+                                        v-if="event.qr_code_url"
+                                        class="flex flex-col items-center justify-center gap-4"
+                                    >
+                                        <div
+                                            class="relative inline-block rounded-xl bg-white p-3 shadow-sm"
+                                        >
+                                            <img
+                                                :src="event.qr_code_url"
+                                                alt="QR Code Ticket"
+                                                class="size-40 object-contain"
+                                            />
                                         </div>
-                                        <button @click="downloadQrAsPng(event.qr_code_url)" class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary/90">
-                                            <span class="material-symbols-outlined text-[18px]">download</span> Download
+                                        <button
+                                            @click="
+                                                downloadQrAsPng(
+                                                    event.qr_code_url,
+                                                )
+                                            "
+                                            class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary/90"
+                                        >
+                                            <span
+                                                class="material-symbols-outlined text-[18px]"
+                                                >download</span
+                                            >
+                                            Download
                                         </button>
                                     </div>
                                 </div>
                                 <div v-else>
-                                    <button 
+                                    <button
                                         @click="submitRegister"
-                                        :disabled="form.processing || event.registration_type === 'closed'"
-                                        class="inline-flex items-center justify-center rounded-lg bg-primary px-8 py-3 text-base font-semibold text-on-primary transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 w-full md:w-auto disabled:opacity-50"
+                                        :disabled="
+                                            form.processing ||
+                                            event.registration_type === 'closed'
+                                        "
+                                        class="inline-flex w-full items-center justify-center rounded-lg bg-primary px-8 py-3 text-base font-semibold text-on-primary transition-colors hover:bg-primary/90 focus:ring-2 focus:ring-primary/50 focus:outline-none disabled:opacity-50 md:w-auto"
                                     >
-                                        <span v-if="form.processing" class="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
-                                        {{ event.registration_type === 'closed' ? 'Registration Closed' : 'Register Now' }}
+                                        <span
+                                            v-if="form.processing"
+                                            class="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
+                                        ></span>
+                                        {{
+                                            event.registration_type === 'closed'
+                                                ? 'Registration Closed'
+                                                : 'Register Now'
+                                        }}
                                     </button>
-                                    <p v-if="!page.props.auth?.user" class="text-xs text-on-surface-variant text-center mt-2">
+                                    <p
+                                        v-if="!page.props.auth?.user"
+                                        class="mt-2 text-center text-xs text-on-surface-variant"
+                                    >
                                         Requires account login
                                     </p>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="grid md:grid-cols-3 gap-8 mb-8 border-y border-outline-variant/10 py-8">
+                        <div
+                            class="mb-8 grid gap-8 border-y border-outline-variant/10 py-8 md:grid-cols-3"
+                        >
                             <div class="space-y-1">
-                                <div class="font-medium text-on-surface mb-2 flex items-center gap-2">
-                                    <span class="material-symbols-outlined text-[20px] text-primary">calendar_clock</span>
+                                <div
+                                    class="mb-2 flex items-center gap-2 font-medium text-on-surface"
+                                >
+                                    <span
+                                        class="material-symbols-outlined text-[20px] text-primary"
+                                        >calendar_clock</span
+                                    >
                                     Event Timing
                                 </div>
-                                <div class="text-sm text-on-surface-variant"><strong>Start:</strong> {{ formatDate(event.start_time) }}</div>
-                                <div class="text-sm text-on-surface-variant"><strong>End:</strong> {{ formatDate(event.end_time) }}</div>
+                                <div class="text-sm text-on-surface-variant">
+                                    <strong>Start:</strong>
+                                    {{ formatDate(event.start_time) }}
+                                </div>
+                                <div class="text-sm text-on-surface-variant">
+                                    <strong>End:</strong>
+                                    {{ formatDate(event.end_time) }}
+                                </div>
                             </div>
                             <div class="space-y-1">
-                                <div class="font-medium text-on-surface mb-2 flex items-center gap-2">
-                                    <span class="material-symbols-outlined text-[20px] text-primary">how_to_reg</span>
+                                <div
+                                    class="mb-2 flex items-center gap-2 font-medium text-on-surface"
+                                >
+                                    <span
+                                        class="material-symbols-outlined text-[20px] text-primary"
+                                        >how_to_reg</span
+                                    >
                                     Registration Period
                                 </div>
-                                <div class="text-sm text-on-surface-variant"><strong>Opens:</strong> {{ formatDate(event.registration_start_date) }}</div>
-                                <div class="text-sm text-on-surface-variant"><strong>Closes:</strong> {{ formatDate(event.registration_end_date) }}</div>
+                                <div class="text-sm text-on-surface-variant">
+                                    <strong>Opens:</strong>
+                                    {{
+                                        formatDate(
+                                            event.registration_start_date,
+                                        )
+                                    }}
+                                </div>
+                                <div class="text-sm text-on-surface-variant">
+                                    <strong>Closes:</strong>
+                                    {{
+                                        formatDate(event.registration_end_date)
+                                    }}
+                                </div>
                             </div>
                         </div>
 
                         <div>
-                            <h3 class="text-xl font-semibold mb-4 text-on-surface">About this Event</h3>
-                            <div class="prose prose-invert max-w-none text-on-surface-variant whitespace-pre-wrap">
-                                {{ event.description || 'No detailed description provided for this event.' }}
+                            <h3
+                                class="mb-4 text-xl font-semibold text-on-surface"
+                            >
+                                About this Event
+                            </h3>
+                            <div
+                                class="prose prose-invert max-w-none whitespace-pre-wrap text-on-surface-variant"
+                            >
+                                {{
+                                    event.description ||
+                                    'No detailed description provided for this event.'
+                                }}
                             </div>
                         </div>
                     </div>
@@ -212,9 +372,21 @@ const submitRegister = () => {
                     © 2026 Quartz Event Management.
                 </div>
                 <div class="flex gap-6 font-label-sm text-label-sm">
-                    <a class="text-on-surface-variant transition-colors hover:text-primary" href="#">Privacy Policy</a>
-                    <a class="text-on-surface-variant transition-colors hover:text-primary" href="#">Terms of Service</a>
-                    <a class="text-on-surface-variant transition-colors hover:text-primary" href="#">Contact Us</a>
+                    <a
+                        class="text-on-surface-variant transition-colors hover:text-primary"
+                        href="#"
+                        >Privacy Policy</a
+                    >
+                    <a
+                        class="text-on-surface-variant transition-colors hover:text-primary"
+                        href="#"
+                        >Terms of Service</a
+                    >
+                    <a
+                        class="text-on-surface-variant transition-colors hover:text-primary"
+                        href="#"
+                        >Contact Us</a
+                    >
                 </div>
             </div>
         </footer>

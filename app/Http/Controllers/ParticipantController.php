@@ -89,6 +89,7 @@ class ParticipantController extends Controller
                 'registration_start_date' => $event->registration_start_date,
                 'registration_end_date' => $event->registration_end_date,
                 'registration_type' => $event->registration_type,
+                'attendance_type' => $event->attendance_type,
                 'status' => $this->eventStatus($event),
                 'participants_count' => $event->event_participants_count,
                 'certificate_enabled' => $event->certificate_enabled,

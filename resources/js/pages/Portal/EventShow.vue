@@ -8,6 +8,9 @@ import {
     Download,
     QrCode,
     Users,
+    Ticket,
+    Award,
+    FileText,
 } from '@lucide/vue';
 import { computed } from 'vue';
 import { Button } from '@/components/ui/button';
@@ -31,6 +34,7 @@ interface Event {
     registration_start_date: string | null;
     registration_end_date: string | null;
     registration_type: string;
+    attendance_type: string;
     status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
     participants_count: number;
     certificate_enabled: boolean;
@@ -49,19 +53,23 @@ defineOptions({ layout: ParticipantLayout });
 const statusConfig: Record<string, { label: string; classes: string }> = {
     upcoming: {
         label: 'Upcoming',
-        classes: 'bg-blue-100/80 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300',
+        classes:
+            'bg-blue-100/80 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300',
     },
     ongoing: {
         label: 'Live Now',
-        classes: 'bg-green-100/80 text-green-700 dark:bg-green-900/50 dark:text-green-300',
+        classes:
+            'bg-green-100/80 text-green-700 dark:bg-green-900/50 dark:text-green-300',
     },
     completed: {
         label: 'Completed',
-        classes: 'bg-gray-100/80 text-gray-600 dark:bg-gray-800/80 dark:text-gray-400',
+        classes:
+            'bg-gray-100/80 text-gray-600 dark:bg-gray-800/80 dark:text-gray-400',
     },
     cancelled: {
         label: 'Cancelled',
-        classes: 'bg-red-100/80 text-red-700 dark:bg-red-900/50 dark:text-red-300',
+        classes:
+            'bg-red-100/80 text-red-700 dark:bg-red-900/50 dark:text-red-300',
     },
 };
 
@@ -199,6 +207,74 @@ function formatTime(dateStr: string): string {
                     </div>
                 </div>
 
+                <!-- Event Configurations -->
+                <div
+                    class="grid grid-cols-2 gap-4 border-t border-border pt-6 sm:grid-cols-4"
+                >
+                    <div class="flex flex-col gap-1">
+                        <div
+                            class="flex items-center gap-1.5 text-xs text-muted-foreground"
+                        >
+                            <Ticket class="size-3.5" />
+                            <span>Registration</span>
+                        </div>
+                        <p
+                            class="text-sm font-medium text-foreground capitalize"
+                        >
+                            {{ event.registration_type }}
+                        </p>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <div
+                            class="flex items-center gap-1.5 text-xs text-muted-foreground"
+                        >
+                            <Users class="size-3.5" />
+                            <span>Attendance</span>
+                        </div>
+                        <p
+                            class="text-sm font-medium text-foreground capitalize"
+                        >
+                            {{ event.attendance_type }}
+                        </p>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <div
+                            class="flex items-center gap-1.5 text-xs text-muted-foreground"
+                        >
+                            <Award class="size-3.5" />
+                            <span>Certificate</span>
+                        </div>
+                        <p class="text-sm font-medium text-foreground">
+                            <span
+                                v-if="event.certificate_enabled"
+                                class="text-green-600 dark:text-green-400"
+                                >Available</span
+                            >
+                            <span v-else class="text-muted-foreground"
+                                >None</span
+                            >
+                        </p>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <div
+                            class="flex items-center gap-1.5 text-xs text-muted-foreground"
+                        >
+                            <FileText class="size-3.5" />
+                            <span>Evaluation</span>
+                        </div>
+                        <p class="text-sm font-medium text-foreground">
+                            <span
+                                v-if="event.evaluation_required"
+                                class="text-amber-600 dark:text-amber-400"
+                                >Required</span
+                            >
+                            <span v-else class="text-muted-foreground"
+                                >None</span
+                            >
+                        </p>
+                    </div>
+                </div>
+
                 <!-- Description -->
                 <div>
                     <h2
@@ -247,32 +323,57 @@ function formatTime(dateStr: string): string {
                 </div>
 
                 <!-- Ticket Widget -->
-                <div v-if="event.is_registered" class="mt-4 overflow-hidden rounded-xl border-2 border-primary/20 bg-primary/5 p-6 text-center dark:bg-primary/10">
-                    <h3 class="mb-4 text-lg font-bold text-foreground">Your Event Ticket</h3>
-                    
-                    <div v-if="event.qr_code_url" class="flex flex-col items-center justify-center gap-4">
-                        <div class="relative inline-block rounded-xl bg-white p-3 shadow-sm">
-                            <img :src="event.qr_code_url" alt="Your QR Code Ticket" class="size-48 object-contain" />
+                <div
+                    v-if="event.is_registered"
+                    class="mt-4 overflow-hidden rounded-xl border-2 border-primary/20 bg-primary/5 p-6 text-center dark:bg-primary/10"
+                >
+                    <h3 class="mb-4 text-lg font-bold text-foreground">
+                        Your Event Ticket
+                    </h3>
+
+                    <div
+                        v-if="event.qr_code_url"
+                        class="flex flex-col items-center justify-center gap-4"
+                    >
+                        <div
+                            class="relative inline-block rounded-xl bg-white p-3 shadow-sm"
+                        >
+                            <img
+                                :src="event.qr_code_url"
+                                alt="Your QR Code Ticket"
+                                class="size-48 object-contain"
+                            />
                         </div>
-                        <button @click="downloadQrAsPng(event.qr_code_url)" class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+                        <button
+                            @click="downloadQrAsPng(event.qr_code_url)"
+                            class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                        >
                             <Download class="size-4" /> Download Ticket
                         </button>
                     </div>
                     <div v-else class="flex flex-col items-center gap-2">
                         <QrCode class="size-12 text-muted-foreground/40" />
-                        <p class="text-sm text-muted-foreground">Generating your QR code...</p>
+                        <p class="text-sm text-muted-foreground">
+                            Generating your QR code...
+                        </p>
                     </div>
                 </div>
 
                 <!-- Actions -->
-                <div v-else class="flex flex-wrap items-center gap-3 border-t border-border pt-5">
+                <div
+                    v-else
+                    class="flex flex-wrap items-center gap-3 border-t border-border pt-5"
+                >
                     <Button
                         v-if="canRegister"
                         class="bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-sm hover:from-violet-700 hover:to-indigo-700"
                         @click="register"
                         :disabled="form.processing"
                     >
-                        <span v-if="form.processing" class="mr-2 size-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+                        <span
+                            v-if="form.processing"
+                            class="mr-2 size-4 animate-spin rounded-full border-2 border-white border-t-transparent"
+                        ></span>
                         Register for this event
                     </Button>
 

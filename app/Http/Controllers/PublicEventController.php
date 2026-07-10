@@ -63,6 +63,9 @@ class PublicEventController extends Controller
                 'registration_start_date' => $event->registration_start_date,
                 'registration_end_date' => $event->registration_end_date,
                 'registration_type' => $event->registration_type,
+                'attendance_type' => $event->attendance_type,
+                'certificate_enabled' => $event->certificate_enabled,
+                'evaluation_required' => $event->evaluation_required,
                 'is_registered' => $participant !== null,
                 'qr_code_url' => $participant?->qr_code_url,
                 'organizer' => $event->organizer ? [
