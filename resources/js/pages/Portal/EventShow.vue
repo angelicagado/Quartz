@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link, useForm } from '@inertiajs/vue3';
 import {
     ArrowLeft,
     CalendarDays,
     CheckCircle2,
     Clock,
+    Download,
     QrCode,
     Users,
 } from '@lucide/vue';
@@ -34,6 +35,7 @@ interface Event {
     certificate_enabled: boolean;
     evaluation_required: boolean;
     is_registered: boolean;
+    qr_code_url?: string;
     sessions: Session[];
 }
 
@@ -70,8 +72,12 @@ const canRegister = computed(
         props.event.status !== 'cancelled',
 );
 
+const form = useForm({});
+
 function register() {
-    router.post(`/portal/events/${props.event.id}/register`);
+    form.post(`/portal/events/${props.event.id}/register`, {
+        preserveScroll: true,
+    });
 }
 
 function formatDate(dateStr: string): string {
@@ -240,28 +246,38 @@ function formatTime(dateStr: string): string {
                     </ul>
                 </div>
 
+                <!-- Ticket Widget -->
+                <div v-if="event.is_registered" class="mt-4 overflow-hidden rounded-xl border-2 border-primary/20 bg-primary/5 p-6 text-center dark:bg-primary/10">
+                    <h3 class="mb-4 text-lg font-bold text-foreground">Your Event Ticket</h3>
+                    
+                    <div v-if="event.qr_code_url" class="flex flex-col items-center justify-center gap-4">
+                        <div class="relative inline-block rounded-xl bg-white p-3 shadow-sm">
+                            <img :src="event.qr_code_url" alt="Your QR Code Ticket" class="size-48 object-contain" />
+                        </div>
+                        <a :href="event.qr_code_url" download="ticket.png" class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+                            <Download class="size-4" /> Download Ticket
+                        </a>
+                    </div>
+                    <div v-else class="flex flex-col items-center gap-2">
+                        <QrCode class="size-12 text-muted-foreground/40" />
+                        <p class="text-sm text-muted-foreground">Generating your QR code...</p>
+                    </div>
+                </div>
+
                 <!-- Actions -->
-                <div class="flex flex-wrap items-center gap-3 border-t border-border pt-5">
+                <div v-else class="flex flex-wrap items-center gap-3 border-t border-border pt-5">
                     <Button
                         v-if="canRegister"
                         class="bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-sm hover:from-violet-700 hover:to-indigo-700"
                         @click="register"
+                        :disabled="form.processing"
                     >
+                        <span v-if="form.processing" class="mr-2 size-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
                         Register for this event
                     </Button>
 
-                    <Link
-                        v-if="event.is_registered"
-                        :href="`/portal/events/${event.id}/qr`"
-                    >
-                        <Button variant="outline">
-                            <QrCode class="size-4" />
-                            View my QR code
-                        </Button>
-                    </Link>
-
                     <p
-                        v-if="event.registration_type === 'closed' && !event.is_registered"
+                        v-if="event.registration_type === 'closed'"
                         class="text-sm text-muted-foreground"
                     >
                         Registration is closed for this event.
