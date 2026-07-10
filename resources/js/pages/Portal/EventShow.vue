@@ -12,6 +12,7 @@ import {
 import { computed } from 'vue';
 import { Button } from '@/components/ui/button';
 import ParticipantLayout from '@/layouts/ParticipantLayout.vue';
+import { downloadQrAsPng } from '@/lib/downloadQr';
 
 interface Session {
     id: number;
@@ -254,9 +255,9 @@ function formatTime(dateStr: string): string {
                         <div class="relative inline-block rounded-xl bg-white p-3 shadow-sm">
                             <img :src="event.qr_code_url" alt="Your QR Code Ticket" class="size-48 object-contain" />
                         </div>
-                        <a :href="event.qr_code_url" download="ticket.png" class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+                        <button @click="downloadQrAsPng(event.qr_code_url)" class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
                             <Download class="size-4" /> Download Ticket
-                        </a>
+                        </button>
                     </div>
                     <div v-else class="flex flex-col items-center gap-2">
                         <QrCode class="size-12 text-muted-foreground/40" />

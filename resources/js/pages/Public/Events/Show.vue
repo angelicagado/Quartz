@@ -3,6 +3,7 @@ import { Head, Link, usePage, useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { dashboard, login, register } from '@/routes';
 import { register as portalRegister } from '@/routes/portal';
+import { downloadQrAsPng } from '@/lib/downloadQr';
 
 const props = defineProps<{
     event: {
@@ -145,9 +146,9 @@ const submitRegister = () => {
                                         <div class="relative inline-block rounded-xl bg-white p-3 shadow-sm">
                                             <img :src="event.qr_code_url" alt="QR Code Ticket" class="size-40 object-contain" />
                                         </div>
-                                        <a :href="event.qr_code_url" download="ticket.png" class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary/90">
+                                        <button @click="downloadQrAsPng(event.qr_code_url)" class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary/90">
                                             <span class="material-symbols-outlined text-[18px]">download</span> Download
-                                        </a>
+                                        </button>
                                     </div>
                                 </div>
                                 <div v-else>

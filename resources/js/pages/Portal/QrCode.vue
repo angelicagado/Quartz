@@ -2,6 +2,7 @@
 import { Head, Link } from '@inertiajs/vue3';
 import { ArrowLeft, CalendarDays, Clock, QrCode, Download } from '@lucide/vue';
 import ParticipantLayout from '@/layouts/ParticipantLayout.vue';
+import { downloadQrAsPng } from '@/lib/downloadQr';
 
 interface Event {
     id: number;
@@ -103,13 +104,12 @@ function formatTime(dateStr: string) {
                         />
                         
                         <!-- Download Button -->
-                        <a 
-                            :href="participant.qr_code_url" 
-                            download="ticket.png" 
+                        <button 
+                            @click="downloadQrAsPng(participant.qr_code_url)" 
                             class="absolute -bottom-4 right-0 flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg transition-transform hover:scale-105 hover:bg-primary/90"
                         >
                             <Download class="size-4" /> Download
-                        </a>
+                        </button>
                     </div>
                     <div
                         v-else
