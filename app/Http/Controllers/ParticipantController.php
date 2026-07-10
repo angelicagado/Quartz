@@ -75,10 +75,10 @@ class ParticipantController extends Controller
 
         $event->loadCount('eventParticipants')->load('sessions');
 
-        $isRegistered = EventParticipant::query()
+        $participant = EventParticipant::query()
             ->where('event_id', $event->id)
             ->where('user_id', $user->id)
-            ->exists();
+            ->first();
 
         return Inertia::render('Portal/EventShow', [
             'event' => [
@@ -94,7 +94,8 @@ class ParticipantController extends Controller
                 'participants_count' => $event->event_participants_count,
                 'certificate_enabled' => $event->certificate_enabled,
                 'evaluation_required' => $event->evaluation_required,
-                'is_registered' => $isRegistered,
+                'is_registered' => $participant !== null,
+                'qr_code_url' => $participant?->qr_code_url,
                 'sessions' => $event->sessions->map(fn (EventSession $session) => [
                     'id' => $session->id,
                     'name' => $session->name,
@@ -151,8 +152,7 @@ class ParticipantController extends Controller
 
         $this->qrCodeService->generateFor($participant);
 
-        return redirect()->route('portal.qr', $event)
-            ->with('success', 'You have successfully registered for this event!');
+        return back()->with('success', 'You have successfully registered for this event!');
     }
 
     /**
