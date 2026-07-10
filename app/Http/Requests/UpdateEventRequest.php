@@ -37,6 +37,7 @@ class UpdateEventRequest extends FormRequest
             'sessions.*.requires_checkout' => ['boolean'],
             'evaluation_required' => ['boolean'],
             'certificate_enabled' => ['boolean'],
+            'max_participants' => ['nullable', 'integer', 'min:1'],
             'organizer_id' => ['nullable', 'exists:users,id'],
         ];
     }

@@ -22,6 +22,7 @@ use Illuminate\Support\Carbon;
  * @property string $attendance_type
  * @property bool $evaluation_required
  * @property bool $certificate_enabled
+ * @property int|null $max_participants
  * @property int|null $organizer_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
@@ -51,6 +52,7 @@ class Event extends Model
         'attendance_type',
         'evaluation_required',
         'certificate_enabled',
+        'max_participants',
         'organizer_id',
     ];
 
@@ -66,7 +68,20 @@ class Event extends Model
             'registration_end_date' => 'datetime',
             'evaluation_required' => 'boolean',
             'certificate_enabled' => 'boolean',
+            'max_participants' => 'integer',
         ];
+    }
+
+    /**
+     * Determine if the event has reached its maximum participant capacity.
+     */
+    public function hasReachedCapacity(): bool
+    {
+        if (is_null($this->max_participants)) {
+            return false;
+        }
+
+        return $this->eventParticipants()->where('status', 'confirmed')->count() >= $this->max_participants;
     }
 
     /**
