@@ -138,7 +138,25 @@
         <h2 class="font-serif text-2xl font-bold text-slate-900 dark:text-slate-100">
           Registered Participants
         </h2>
-        <div class="flex items-center gap-3">
+        <div class="flex flex-wrap items-center gap-3">
+          <select
+            v-model="filtersForm.status"
+            class="rounded-xl border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 focus:border-[#d4af37] focus:ring-[#d4af37] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+          >
+            <option value="all">All Status</option>
+            <option value="registered">Pending</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="attended">Attended</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <select
+            v-model="filtersForm.sort"
+            class="rounded-xl border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 focus:border-[#d4af37] focus:ring-[#d4af37] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+          >
+            <option value="latest">Latest First</option>
+            <option value="earliest">Earliest First</option>
+          </select>
+
           <button
             class="p-2 text-slate-400 transition-colors hover:text-slate-900 dark:hover:text-slate-200"
           >
@@ -178,7 +196,7 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-50 dark:divide-slate-800/50">
-            <tr v-if="!event.participants?.length">
+            <tr v-if="!participants.data?.length">
               <td
                 colspan="3"
                 class="px-8 py-12 text-center font-light text-slate-400 italic"
@@ -188,7 +206,7 @@
             </tr>
             <tr
               v-else
-              v-for="participant in event.participants"
+              v-for="participant in participants.data"
               :key="participant.id"
               class="group transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/50"
             >
@@ -240,6 +258,31 @@
           </tbody>
         </table>
       </div>
+      
+      <!-- Pagination -->
+      <div v-if="participants.links?.length > 3" class="flex justify-center pt-4">
+        <div class="flex gap-1">
+          <template v-for="(link, p) in participants.links" :key="p">
+            <div
+              v-if="link.url === null"
+              class="rounded-xl px-4 py-2 text-sm text-slate-400"
+              v-html="link.label"
+            />
+            <Link
+              v-else
+              :href="link.url"
+              class="rounded-xl px-4 py-2 text-sm font-medium transition-colors"
+              :class="
+                link.active
+                  ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+                  : 'bg-white text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+              "
+              v-html="link.label"
+            />
+          </template>
+        </div>
+      </div>
+
     </div>
   </div>
 </template>
@@ -258,14 +301,33 @@ import {
   Trash2,
 } from "@lucide/vue";
 import QrcodeVue from "qrcode.vue";
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 import CertificateBuilder from "./Partials/CertificateBuilder.vue";
 import EvaluationFormBuilder from "./Partials/EvaluationFormBuilder.vue";
 import type { Event } from "@/types/Event";
 
 const props = defineProps<{
-  event: Event & { participants: any[] };
+  event: Event;
+  participants: any;
+  filters: { status: string; sort: string };
 }>();
+
+const filtersForm = ref({
+  status: props.filters.status || 'all',
+  sort: props.filters.sort || 'latest',
+});
+
+watch(
+  filtersForm,
+  (newFilters) => {
+    router.get(
+      window.location.pathname,
+      { status: newFilters.status, sort: newFilters.sort },
+      { preserveState: true, preserveScroll: true, replace: true }
+    );
+  },
+  { deep: true }
+);
 
 const page = usePage();
 const auth = computed(() => page.props.auth as any);

@@ -30,6 +30,7 @@ interface Event {
     registration_start_date: string | null;
     registration_end_date: string | null;
     registration_type: 'open' | 'scheduled' | 'approval' | 'closed';
+    max_participants: number | null;
     evaluation_required: boolean;
     certificate_enabled: boolean;
     sessions: EventSession[];
@@ -69,6 +70,7 @@ const form = useForm({
     registration_start_date: toDatetimeLocal(props.event.registration_start_date),
     registration_end_date: toDatetimeLocal(props.event.registration_end_date),
     registration_type: props.event.registration_type,
+    max_participants: props.event.max_participants,
     evaluation_required: props.event.evaluation_required,
     certificate_enabled: props.event.certificate_enabled,
     sessions: props.event.sessions && props.event.sessions.length > 0 
@@ -408,6 +410,23 @@ function submit() {
                         <Label>Reg. End Date</Label>
                         <Input v-model="form.registration_end_date" type="datetime-local" />
                         </div>
+                    </div>
+
+                    <div class="grid gap-3">
+                        <Label for="max_participants">Max Participants (Leave empty for unlimited)</Label>
+                        <Input
+                            id="max_participants"
+                            v-model="form.max_participants"
+                            type="number"
+                            min="1"
+                            placeholder="e.g. 100"
+                            :class="{
+                                'border-destructive': form.errors.max_participants,
+                            }"
+                        />
+                        <p v-if="form.errors.max_participants" class="text-xs text-destructive">
+                            {{ form.errors.max_participants }}
+                        </p>
                     </div>
 
                     <!-- Toggles -->

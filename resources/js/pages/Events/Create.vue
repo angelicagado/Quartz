@@ -34,6 +34,7 @@ const form = useForm({
   registration_start_date: "",
   registration_end_date: "",
   registration_type: "open" as "open" | "scheduled" | "approval" | "closed",
+  max_participants: null as number | null,
   evaluation_required: false,
   certificate_enabled: false,
   sessions: [
@@ -318,6 +319,23 @@ function submit() {
               <Label>Reg. End Date</Label>
               <Input v-model="form.registration_end_date" type="datetime-local" />
             </div>
+          </div>
+
+          <div class="grid gap-3">
+            <Label for="max_participants">Max Participants (Leave empty for unlimited)</Label>
+            <Input
+              id="max_participants"
+              v-model="form.max_participants"
+              type="number"
+              min="1"
+              placeholder="e.g. 100"
+              :class="{
+                'border-destructive': form.errors.max_participants,
+              }"
+            />
+            <p v-if="form.errors.max_participants" class="text-xs text-destructive">
+              {{ form.errors.max_participants }}
+            </p>
           </div>
 
           <!-- Toggles -->
