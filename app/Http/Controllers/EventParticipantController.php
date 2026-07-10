@@ -91,6 +91,20 @@ class EventParticipantController extends Controller
     }
 
     /**
+     * Update participant status.
+     */
+    public function update(Request $request, Event $event, EventParticipant $participant): RedirectResponse
+    {
+        $validated = $request->validate([
+            'status' => ['required', 'string', 'in:registered,confirmed,attended,cancelled'],
+        ]);
+
+        $participant->update($validated);
+
+        return back()->with('success', 'Participant status updated successfully.');
+    }
+
+    /**
      * Remove a participant from the event.
      */
     public function destroy(Event $event, EventParticipant $eventParticipant): RedirectResponse

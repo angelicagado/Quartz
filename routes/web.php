@@ -44,7 +44,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('users', UserController::class);
         Route::resource('roles', RoleController::class);
         Route::resource('admin/events', EventController::class)->names('events')->parameters(['admin/events' => 'event']);
-        Route::resource('events.participants', EventParticipantController::class)->only(['index', 'store', 'destroy']);
+        Route::resource('events.participants', EventParticipantController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::post('events/{event}/participants/csv', [EventParticipantController::class, 'uploadCsv'])->name('events.participants.csv');
         Route::resource('events.evaluations', EvaluationFormController::class)->only(['store']);
         Route::resource('events.certificates', CertificateTemplateController::class)->only(['store', 'destroy']);

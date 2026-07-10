@@ -186,7 +186,12 @@
               <th
                 class="px-8 py-5 text-xs font-bold tracking-widest text-slate-400 uppercase"
               >
-                Registration
+                Date & Time
+              </th>
+              <th
+                class="px-8 py-5 text-xs font-bold tracking-widest text-slate-400 uppercase"
+              >
+                Registration Status
               </th>
               <th
                 class="px-8 py-5 text-right text-xs font-bold tracking-widest text-slate-400 uppercase"
@@ -198,7 +203,7 @@
           <tbody class="divide-y divide-slate-50 dark:divide-slate-800/50">
             <tr v-if="!participants.data?.length">
               <td
-                colspan="3"
+                colspan="4"
                 class="px-8 py-12 text-center font-light text-slate-400 italic"
               >
                 No one has registered for this event yet.
@@ -236,23 +241,43 @@
                 </div>
               </td>
               <td class="px-8 py-6">
+                <div class="text-sm text-slate-600 dark:text-slate-300">
+                  {{ new Date(participant.created_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) }}
+                </div>
+              </td>
+              <td class="px-8 py-6">
                 <span
                   class="rounded-full px-3 py-1 text-[10px] font-black tracking-tighter uppercase"
-                  :class="
-                    participant.registration_status === 'confirmed'
-                      ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400'
-                      : 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400'
-                  "
+                  :class="{
+                    'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400': participant.status === 'confirmed',
+                    'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400': participant.status === 'registered',
+                    'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400': participant.status === 'attended',
+                    'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400': participant.status === 'cancelled'
+                  }"
                 >
-                  {{ participant.registration_status }}
+                  {{ participant.status === 'registered' ? 'pending' : participant.status }}
                 </span>
               </td>
               <td class="px-8 py-6 text-right">
-                <button
-                  class="p-2 text-slate-300 transition-colors hover:text-slate-600 dark:hover:text-slate-400"
-                >
-                  <MoreVertical class="h-5 w-5" />
-                </button>
+                <div class="flex items-center justify-end gap-2">
+                  <select
+                    v-model="participant.status"
+                    @change="updateParticipantStatus(participant)"
+                    class="rounded-lg border-slate-200 bg-white px-2 py-1 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                  >
+                    <option value="registered">Pending</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="attended">Attended</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                  <button
+                    @click="deleteParticipant(participant)"
+                    class="p-2 text-red-400 transition-colors hover:text-red-600 dark:hover:text-red-400"
+                    title="Remove Participant"
+                  >
+                    <Trash2 class="h-4 w-4" />
+                  </button>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -345,6 +370,22 @@ const copyRegistrationLink = () => {
 const deleteEvent = () => {
   if (confirm("Are you sure you want to delete this event? This action cannot be undone.")) {
     router.delete(`/admin/events/${props.event.id}`);
+  }
+};
+
+const updateParticipantStatus = (participant: any) => {
+  router.put(`/events/${props.event.id}/participants/${participant.id}`, { status: participant.status }, {
+    preserveScroll: true,
+    preserveState: true,
+  });
+};
+
+const deleteParticipant = (participant: any) => {
+  if (confirm(`Are you sure you want to remove ${participant.user?.name || 'this participant'}?`)) {
+    router.delete(`/events/${props.event.id}/participants/${participant.id}`, {
+      preserveScroll: true,
+      preserveState: true,
+    });
   }
 };
 </script>
