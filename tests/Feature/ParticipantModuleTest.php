@@ -51,6 +51,30 @@ test('the browse page lists open, upcoming events', function () {
         );
 });
 
+test('the browse search filters events by title', function () {
+    $user = participantUser();
+
+    $match = Event::factory()->create([
+        'title' => 'Laravel Conference 2026',
+        'registration_type' => 'open',
+        'end_time' => now()->addWeek(),
+    ]);
+    Event::factory()->create([
+        'title' => 'Cooking Workshop',
+        'registration_type' => 'open',
+        'end_time' => now()->addWeek(),
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('portal.events', ['search' => 'Laravel']))
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Portal/Events')
+            ->has('events.data', 1)
+            ->where('events.data.0.id', $match->id)
+            ->where('filters.search', 'Laravel')
+        );
+});
+
 test('the event details page renders for a participant', function () {
     $user = participantUser();
     $event = Event::factory()->create(['registration_type' => 'open']);
