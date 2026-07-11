@@ -13,10 +13,12 @@ import {
     FileText,
     MapPin,
 } from '@lucide/vue';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import ParticipantLayout from '@/layouts/ParticipantLayout.vue';
 import { downloadQrAsPng } from '@/lib/downloadQr';
+import axios from 'axios';
 
 interface Session {
     id: number;
@@ -110,6 +112,65 @@ function formatTime(dateStr: string): string {
         hour: '2-digit',
         minute: '2-digit',
     });
+}
+
+const isDownloading = ref(false);
+const showCertSuccessModal = ref(false);
+const showCertErrorModal = ref(false);
+
+async function downloadFile(url: string, filename: string) {
+    if (isDownloading.value) return;
+    isDownloading.value = true;
+    try {
+        const response = await axios.get(url, { responseType: 'blob' });
+        // If the backend redirects with an error, axios follows it and receives the HTML page.
+        if (response.data.type && response.data.type.includes('text/html')) {
+             throw new Error("Failed to download. Please make sure you meet all requirements.");
+        }
+        
+        const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        
+        showCertSuccessModal.value = true;
+    } catch (error) {
+        showCertErrorModal.value = true;
+    } finally {
+        isDownloading.value = false;
+    }
+}
+
+async function viewCertificate(url: string) {
+    if (isDownloading.value) return;
+    isDownloading.value = true;
+    
+    const newWindow = window.open('about:blank', '_blank');
+    if (newWindow) {
+        newWindow.document.write('<div style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;">Loading certificate...</div>');
+    }
+    
+    try {
+        const response = await axios.get(url, { responseType: 'blob' });
+        if (response.data.type && response.data.type.includes('text/html')) {
+             throw new Error("Failed to view certificate.");
+        }
+        
+        const blobUrl = window.URL.createObjectURL(new Blob([response.data], { type: response.data.type }));
+        if (newWindow) {
+            newWindow.location.href = blobUrl;
+        } else {
+            window.location.href = blobUrl;
+        }
+    } catch (error) {
+        if (newWindow) newWindow.close();
+        showCertErrorModal.value = true;
+    } finally {
+        isDownloading.value = false;
+    }
 }
 </script>
 
@@ -417,6 +478,50 @@ function formatTime(dateStr: string): string {
                     </div>
                 </div>
 
+                <!-- Certificate Widget -->
+                <div
+                    v-if="event.certificate_available"
+                    class="mt-4 overflow-hidden rounded-xl border-2 border-green-500/20 bg-green-500/5 p-6 text-center dark:bg-green-500/10"
+                >
+                    <h3 class="mb-4 text-lg font-bold text-foreground">
+                        Your Certificate
+                    </h3>
+                    <p class="text-sm text-muted-foreground mb-4">
+                        Congratulations! Your certificate of completion is ready.
+                    </p>
+                    <div class="flex flex-wrap items-center justify-center gap-3">
+                        <Button 
+                            @click="viewCertificate(`/portal/events/${event.id}/certificate/view`)" 
+                            :disabled="isDownloading"
+                            variant="outline" 
+                            class="gap-2"
+                        >
+                            <span v-if="isDownloading" class="size-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                            <Award v-else class="size-4" /> 
+                            View
+                        </Button>
+                        <Button 
+                            @click="downloadFile(`/portal/events/${event.id}/certificate/download`, `certificate_${event.id}.png`)" 
+                            :disabled="isDownloading"
+                            class="bg-gradient-to-r from-violet-600 to-indigo-600 text-white gap-2 hover:from-violet-700 hover:to-indigo-700"
+                        >
+                            <span v-if="isDownloading" class="size-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+                            <Download v-else class="size-4" /> 
+                            Image
+                        </Button>
+                        <Button 
+                            @click="downloadFile(`/portal/events/${event.id}/certificate/pdf`, `certificate_${event.id}.pdf`)" 
+                            :disabled="isDownloading"
+                            variant="secondary"
+                            class="gap-2 bg-white text-gray-800 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 shadow-sm"
+                        >
+                            <span v-if="isDownloading" class="size-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                            <Download v-else class="size-4" /> 
+                            PDF
+                        </Button>
+                    </div>
+                </div>
+
                 <!-- Evaluation Widget -->
                 <div
                     v-if="event.is_registered && event.evaluation_required && event.status === 'completed'"
@@ -475,5 +580,53 @@ function formatTime(dateStr: string): string {
                 </div>
             </div>
         </div>
+
+        <!-- Certificate Success Modal -->
+        <Dialog :open="showCertSuccessModal" @update:open="showCertSuccessModal = $event">
+            <DialogContent class="sm:max-w-md text-center">
+                <div class="flex flex-col items-center gap-4 py-6">
+                    <div class="relative">
+                        <div class="flex size-20 items-center justify-center rounded-full bg-gradient-to-br from-green-400 to-teal-500 shadow-lg shadow-green-200 dark:shadow-green-900/30">
+                            <CheckCircle2 class="size-10 text-white" />
+                        </div>
+                    </div>
+                    <DialogHeader>
+                        <DialogTitle class="text-2xl font-serif text-center">Download Complete</DialogTitle>
+                        <DialogDescription class="text-center text-base mt-2">
+                            Your certificate has been downloaded successfully.
+                        </DialogDescription>
+                    </DialogHeader>
+                </div>
+                <DialogFooter class="sm:justify-center">
+                    <Button type="button" @click="showCertSuccessModal = false" class="w-full sm:w-auto">
+                        Close
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+
+        <!-- Certificate Error Modal -->
+        <Dialog :open="showCertErrorModal" @update:open="showCertErrorModal = $event">
+            <DialogContent class="sm:max-w-md text-center">
+                <div class="flex flex-col items-center gap-4 py-6">
+                    <div class="relative">
+                        <div class="flex size-20 items-center justify-center rounded-full bg-gradient-to-br from-red-400 to-rose-500 shadow-lg shadow-red-200 dark:shadow-red-900/30">
+                            <span class="text-4xl font-bold text-white">!</span>
+                        </div>
+                    </div>
+                    <DialogHeader>
+                        <DialogTitle class="text-2xl font-serif text-center">Download Failed</DialogTitle>
+                        <DialogDescription class="text-center text-base mt-2">
+                            We couldn't download your certificate. Please make sure you meet all requirements (like attending the event and completing the evaluation).
+                        </DialogDescription>
+                    </DialogHeader>
+                </div>
+                <DialogFooter class="sm:justify-center">
+                    <Button type="button" variant="outline" @click="showCertErrorModal = false" class="w-full sm:w-auto">
+                        Close
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </div>
 </template>

@@ -98,6 +98,11 @@ class ParticipantController extends Controller
                 ->exists();
         }
 
+        $certificateAvailable = $event->certificate_enabled
+            && $participant !== null
+            && $participant->status !== 'registered'
+            && (! $event->evaluation_required || $evaluationSubmitted);
+
         return Inertia::render('Portal/EventShow', [
             'event' => [
                 'id' => $event->id,
@@ -113,6 +118,7 @@ class ParticipantController extends Controller
                 'status' => $this->eventStatus($event),
                 'participants_count' => $event->event_participants_count,
                 'certificate_enabled' => $event->certificate_enabled,
+                'certificate_available' => $certificateAvailable,
                 'evaluation_required' => $event->evaluation_required,
                 'evaluation_available' => $evaluationAvailable,
                 'evaluation_submitted' => $evaluationSubmitted,
@@ -207,12 +213,22 @@ class ParticipantController extends Controller
                 ->with('error', 'You are not registered for this event.');
         }
 
+        $event->load('sessions');
+
         return Inertia::render('Portal/QrCode', [
             'event' => [
                 'id' => $event->id,
                 'title' => $event->title,
                 'start_time' => $event->start_time,
                 'end_time' => $event->end_time,
+                'attendance_type' => $event->attendance_type,
+                'sessions_count' => $event->sessions->count(),
+                'sessions' => $event->sessions->map(fn ($session) => [
+                    'id' => $session->id,
+                    'name' => $session->name,
+                    'start_time' => $session->start_time,
+                    'end_time' => $session->end_time,
+                ]),
             ],
             'participant' => [
                 'id' => $participant->id,
