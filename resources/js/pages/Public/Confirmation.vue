@@ -123,12 +123,12 @@
                                     </span>
                                 </div>
                                 <div
-                                    v-if="participant.event.location"
+                                    v-if="participant.event.address"
                                     class="flex items-center gap-3 text-slate-600 dark:text-slate-300"
                                 >
                                     <MapPin class="h-4 w-4 text-[#d4af37]" />
                                     <span class="text-sm">
-                                        {{ participant.event.location }}
+                                        {{ participant.event.address }}
                                     </span>
                                 </div>
                             </div>
@@ -172,7 +172,7 @@ interface Participant {
     event: {
         title: string;
         start_date: string;
-        location: string;
+        address: string;
     };
 }
 

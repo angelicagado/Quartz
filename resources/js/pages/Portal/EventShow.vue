@@ -11,6 +11,7 @@ import {
     Ticket,
     Award,
     FileText,
+    MapPin,
 } from '@lucide/vue';
 import { computed } from 'vue';
 import { Button } from '@/components/ui/button';
@@ -23,12 +24,15 @@ interface Session {
     start_time: string;
     end_time: string;
     requires_checkout: boolean;
+    has_check_in?: boolean;
+    has_check_out?: boolean;
 }
 
 interface Event {
     id: number;
     title: string;
     description: string | null;
+    address: string | null;
     start_time: string;
     end_time: string;
     registration_start_date: string | null;
@@ -39,7 +43,10 @@ interface Event {
     participants_count: number;
     certificate_enabled: boolean;
     evaluation_required: boolean;
+    evaluation_available: boolean;
+    evaluation_submitted: boolean;
     is_registered: boolean;
+    registration_status?: string;
     qr_code_url?: string;
     sessions: Session[];
 }
@@ -180,6 +187,17 @@ function formatTime(dateStr: string): string {
                             </p>
                         </div>
                     </div>
+                    <div v-if="event.address" class="flex items-start gap-3">
+                        <MapPin
+                            class="mt-0.5 size-4 shrink-0 text-muted-foreground"
+                        />
+                        <div>
+                            <p class="text-xs text-muted-foreground">Location</p>
+                            <p class="text-sm font-medium text-foreground">
+                                {{ event.address }}
+                            </p>
+                        </div>
+                    </div>
                     <div class="flex items-start gap-3">
                         <Clock
                             class="mt-0.5 size-4 shrink-0 text-muted-foreground"
@@ -209,7 +227,7 @@ function formatTime(dateStr: string): string {
 
                 <!-- Event Configurations -->
                 <div
-                    class="grid grid-cols-2 gap-4 border-t border-border pt-6 sm:grid-cols-4"
+                    class="grid grid-cols-2 gap-4 border-t border-border pt-6 sm:grid-cols-3 md:grid-cols-5"
                 >
                     <div class="flex flex-col gap-1">
                         <div
@@ -222,6 +240,23 @@ function formatTime(dateStr: string): string {
                             class="text-sm font-medium text-foreground capitalize"
                         >
                             {{ event.registration_type }}
+                        </p>
+                        <p v-if="event.registration_start_date && event.registration_end_date" class="text-[10px] text-muted-foreground mt-0.5">
+                            {{ new Date(event.registration_start_date).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) }} <br/>
+                            - {{ new Date(event.registration_end_date).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) }}
+                        </p>
+                    </div>
+                    <div v-if="event.max_participants" class="flex flex-col gap-1">
+                        <div
+                            class="flex items-center gap-1.5 text-xs text-muted-foreground"
+                        >
+                            <Users class="size-3.5" />
+                            <span>Max Capacity</span>
+                        </div>
+                        <p
+                            class="text-sm font-medium text-foreground"
+                        >
+                            {{ event.max_participants }}
                         </p>
                     </div>
                     <div class="flex flex-col gap-1">
@@ -312,12 +347,35 @@ function formatTime(dateStr: string): string {
                                     {{ formatTime(session.end_time) }}
                                 </p>
                             </div>
-                            <span
-                                v-if="session.requires_checkout"
-                                class="shrink-0 rounded-full bg-amber-100/80 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
-                            >
-                                Check-out required
-                            </span>
+                            <div class="flex items-center gap-2">
+                                <template v-if="event.is_registered && event.registration_status !== 'pending' && event.registration_status !== 'cancelled'">
+                                    <span
+                                        v-if="session.has_check_in && (!session.requires_checkout || session.has_check_out)"
+                                        class="shrink-0 inline-flex items-center gap-1 rounded-full bg-green-100/80 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900/40 dark:text-green-300"
+                                    >
+                                        <CheckCircle2 class="size-3" /> Attended
+                                    </span>
+                                    <span
+                                        v-else-if="session.has_check_in && session.requires_checkout && !session.has_check_out"
+                                        class="shrink-0 inline-flex items-center gap-1 rounded-full bg-blue-100/80 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
+                                    >
+                                        Checked In
+                                    </span>
+                                    <span
+                                        v-else
+                                        class="shrink-0 rounded-full bg-gray-100/80 px-2 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-800/80 dark:text-gray-400"
+                                    >
+                                        Pending Attendance
+                                    </span>
+                                </template>
+
+                                <span
+                                    v-if="session.requires_checkout"
+                                    class="shrink-0 rounded-full bg-amber-100/80 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
+                                >
+                                    Check-out required
+                                </span>
+                            </div>
                         </li>
                     </ul>
                 </div>
@@ -357,6 +415,37 @@ function formatTime(dateStr: string): string {
                             Generating your QR code...
                         </p>
                     </div>
+                </div>
+
+                <!-- Evaluation Widget -->
+                <div
+                    v-if="event.is_registered && event.evaluation_required && event.status === 'completed'"
+                    class="mt-4 overflow-hidden rounded-xl border-2 border-amber-500/20 bg-amber-500/5 p-6 text-center dark:bg-amber-500/10"
+                >
+                    <h3 class="mb-4 text-lg font-bold text-foreground">
+                        Event Evaluation
+                    </h3>
+                    <template v-if="event.evaluation_available && !event.evaluation_submitted">
+                        <p class="text-sm text-muted-foreground mb-4">
+                            Please take a moment to complete the evaluation form for this event.
+                        </p>
+                        <Link
+                            :href="`/portal/events/${event.id}/evaluation`"
+                            class="inline-flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700"
+                        >
+                            <FileText class="size-4" /> Go to Evaluation
+                        </Link>
+                    </template>
+                    <template v-else-if="event.evaluation_submitted">
+                        <p class="text-sm text-muted-foreground">
+                            You have already submitted the evaluation form. Thank you!
+                        </p>
+                    </template>
+                    <template v-else>
+                        <p class="text-sm text-muted-foreground">
+                            The evaluation form is not yet available. Please check back later.
+                        </p>
+                    </template>
                 </div>
 
                 <!-- Actions -->

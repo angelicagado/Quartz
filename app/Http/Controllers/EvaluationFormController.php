@@ -131,7 +131,6 @@ class EvaluationFormController extends Controller
             $participant->update(['status' => 'completed']);
         }
 
-        return redirect()->route('portal.events')
-            ->with('success', 'Evaluation submitted successfully.');
+        return back()->with('success', 'Evaluation submitted successfully.');
     }
 }

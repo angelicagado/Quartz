@@ -5,6 +5,7 @@ import { Link } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import OrganizerSelect from '@/components/OrganizerSelect.vue';
 
 interface Organizer {
     id: number;
@@ -24,7 +25,8 @@ interface Event {
     id: number;
     title: string;
     description: string | null;
-    organizer_id: number | null;
+    address: string | null;
+    organizers: number[];
     start_time: string;
     end_time: string;
     registration_start_date: string | null;
@@ -62,9 +64,8 @@ function toDatetimeLocal(str: string | null | undefined): string {
 const form = useForm({
     title: props.event.title,
     description: props.event.description ?? '',
-    organizer_id: props.event.organizer_id
-        ? String(props.event.organizer_id)
-        : '',
+    address: props.event.address ?? '',
+    organizers: props.event.organizers ?? [],
     start_time: toDatetimeLocal(props.event.start_time),
     end_time: toDatetimeLocal(props.event.end_time),
     registration_start_date: toDatetimeLocal(props.event.registration_start_date),
@@ -165,10 +166,10 @@ function submit() {
         <form @submit.prevent="submit" class="flex max-w-3xl flex-col gap-6">
             <!-- Section 1: Basic Info -->
             <div
-                class="overflow-hidden rounded-xl border border-border bg-card shadow-xs"
+                class="relative z-10 rounded-xl border border-border bg-card shadow-xs"
             >
                 <div
-                    class="flex items-center gap-3 border-b border-border bg-muted/30 px-6 py-4"
+                    class="flex items-center gap-3 rounded-t-xl border-b border-border bg-muted/30 px-6 py-4"
                 >
                     <div
                         class="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600"
@@ -228,40 +229,41 @@ function submit() {
                     </div>
 
                     <div class="grid gap-2">
-                        <Label for="organizer_id">Organizer</Label>
-                        <select
-                            id="organizer_id"
-                            v-model="form.organizer_id"
-                            class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus:border-ring focus:ring-2 focus:ring-ring/50 focus:outline-none"
+                        <Label for="address">Address / Location</Label>
+                        <Input
+                            id="address"
+                            v-model="form.address"
+                            placeholder="e.g. 123 Event Center St, Tech City"
                             :class="{
-                                'border-destructive': form.errors.organizer_id,
+                                'border-destructive ring-destructive/20':
+                                    form.errors.address,
                             }"
-                        >
-                            <option value="">Select an organizer...</option>
-                            <option
-                                v-for="organizer in organizers"
-                                :key="organizer.id"
-                                :value="organizer.id"
-                            >
-                                {{ organizer.name }} ({{ organizer.email }})
-                            </option>
-                        </select>
+                        />
                         <p
-                            v-if="form.errors.organizer_id"
+                            v-if="form.errors.address"
                             class="text-xs text-destructive"
                         >
-                            {{ form.errors.organizer_id }}
+                            {{ form.errors.address }}
                         </p>
+                    </div>
+
+                    <div class="grid gap-2">
+                        <Label>Organizers</Label>
+                        <OrganizerSelect
+                            v-model="form.organizers"
+                            :organizers="organizers"
+                            :error="form.errors.organizers"
+                        />
                     </div>
                 </div>
             </div>
 
             <!-- Section 2: Schedule -->
             <div
-                class="overflow-hidden rounded-xl border border-border bg-card shadow-xs"
+                class="rounded-xl border border-border bg-card shadow-xs"
             >
                 <div
-                    class="flex items-center gap-3 border-b border-border bg-muted/30 px-6 py-4"
+                    class="flex items-center gap-3 rounded-t-xl border-b border-border bg-muted/30 px-6 py-4"
                 >
                     <div
                         class="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600"
@@ -322,8 +324,8 @@ function submit() {
             </div>
 
             <!-- Section 3: Sessions -->
-            <div class="overflow-hidden rounded-xl border border-border bg-card shadow-xs">
-              <div class="flex items-center justify-between border-b border-border bg-muted/30 px-6 py-4">
+            <div class="rounded-xl border border-border bg-card shadow-xs">
+              <div class="flex items-center justify-between rounded-t-xl border-b border-border bg-muted/30 px-6 py-4">
                 <div class="flex items-center gap-3">
                   <div class="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-teal-500 to-emerald-600">
                     <CalendarDays class="size-4 text-white" />
@@ -370,10 +372,10 @@ function submit() {
 
             <!-- Section 4: Configuration -->
             <div
-                class="overflow-hidden rounded-xl border border-border bg-card shadow-xs"
+                class="rounded-xl border border-border bg-card shadow-xs"
             >
                 <div
-                    class="flex items-center gap-3 border-b border-border bg-muted/30 px-6 py-4"
+                    class="flex items-center gap-3 rounded-t-xl border-b border-border bg-muted/30 px-6 py-4"
                 >
                     <div
                         class="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-orange-500 to-rose-600"

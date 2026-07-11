@@ -216,6 +216,59 @@
         </div>
       </div>
     </div>
+
+    <!-- Scan Result Modal -->
+    <div v-if="modalVisible" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="modalVisible = false"></div>
+      
+      <div 
+        class="relative z-10 w-full max-w-sm transform overflow-hidden rounded-3xl bg-white p-6 shadow-2xl transition-all sm:p-8 dark:bg-slate-900"
+        :class="[
+          modalData.status === 'success' ? 'ring-1 ring-emerald-500/50 shadow-emerald-500/20' : 
+          modalData.status === 'warning' ? 'ring-1 ring-amber-500/50 shadow-amber-500/20' : 
+          'ring-1 ring-rose-500/50 shadow-rose-500/20'
+        ]"
+      >
+        <div class="flex flex-col items-center text-center">
+          <!-- Icon -->
+          <div 
+            class="mb-4 flex h-20 w-20 items-center justify-center rounded-full"
+            :class="[
+              modalData.status === 'success' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400' : 
+              modalData.status === 'warning' ? 'bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400' : 
+              'bg-rose-100 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400'
+            ]"
+          >
+            <CheckCircle2 v-if="modalData.status === 'success'" class="h-10 w-10" />
+            <AlertCircle v-else class="h-10 w-10" />
+          </div>
+          
+          <h3 class="mb-2 font-serif text-2xl font-bold text-slate-900 dark:text-white">
+            {{ modalData.title }}
+          </h3>
+          
+          <p v-if="modalData.name" class="mb-2 text-lg font-medium text-slate-700 dark:text-slate-300">
+            {{ modalData.name }}
+          </p>
+          
+          <p class="text-sm text-slate-500 dark:text-slate-400">
+            {{ modalData.message }}
+          </p>
+          
+          <button 
+            @click="modalVisible = false"
+            class="mt-6 w-full rounded-xl py-3 text-sm font-bold tracking-widest uppercase transition-all"
+            :class="[
+              modalData.status === 'success' ? 'bg-emerald-500 text-white hover:bg-emerald-600' : 
+              modalData.status === 'warning' ? 'bg-amber-500 text-white hover:bg-amber-600' : 
+              'bg-rose-500 text-white hover:bg-rose-600'
+            ]"
+          >
+            Continue
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -223,7 +276,7 @@
 import { ref, computed } from "vue";
 import { usePage, Head } from "@inertiajs/vue3";
 import axios from "axios";
-import { ScanLine, History, Users, Activity, Camera, Upload } from "@lucide/vue";
+import { ScanLine, History, Users, Activity, Camera, Upload, CheckCircle2, AlertCircle } from "@lucide/vue";
 import QRScanner from "@/components/QRScanner.vue";
 
 const page = usePage();
@@ -236,6 +289,24 @@ const selectedEventId = ref<number | string>("");
 const mode = ref<'camera' | 'file'>('camera');
 const isScanning = ref(false);
 const scannerRef = ref<any>(null);
+
+const modalVisible = ref(false);
+const modalData = ref({ status: 'success', title: '', message: '', name: '' });
+let modalTimeout: any = null;
+
+const showModal = (status: 'success' | 'warning' | 'error', title: string, message: string, name: string = '') => {
+  if (modalTimeout) clearTimeout(modalTimeout);
+  
+  modalData.value = { status, title, message, name };
+  modalVisible.value = true;
+  
+  // Auto-close success modal after 3 seconds
+  if (status === 'success' || status === 'warning') {
+    modalTimeout = setTimeout(() => {
+      modalVisible.value = false;
+    }, 3000);
+  }
+};
 
 const selectedEvent = computed(() => {
   return events.value.find(e => e.id === selectedEventId.value);
@@ -272,25 +343,45 @@ const handleStartAction = () => {
 const handleScan = async (token: string) => {
   if (!token) return;
   if (!selectedEventId.value) {
-    alert("Please select an event first.");
+    showModal('warning', 'Action Required', 'Please select an event first to start scanning.');
     return;
   }
 
   let cleanToken = token.trim();
-  if (cleanToken.includes("/")) {
-    const parts = cleanToken.replace(/\/$/, "").split("/");
-    cleanToken = parts[parts.length - 1];
+  
+  try {
+    // If it's a full URL, extract the token query parameter
+    const url = new URL(cleanToken);
+    if (url.searchParams.has('token')) {
+      cleanToken = url.searchParams.get('token') as string;
+    }
+  } catch (e) {
+    // Fallback for non-URLs or relative paths
+    if (cleanToken.includes('?token=')) {
+      cleanToken = cleanToken.split('?token=')[1];
+    } else if (cleanToken.includes("/")) {
+      const parts = cleanToken.replace(/\/$/, "").split("/");
+      cleanToken = parts[parts.length - 1];
+    }
   }
 
   try {
     console.log("Sending scan to backend:", cleanToken, "Event:", selectedEventId.value);
     
     // We use the specific event scan route instead of globalScan
-    const response = await axios.post(`/admin/events/${selectedEventId.value}/attendance/scan`, {
+    const response = await axios.post(`/events/${selectedEventId.value}/attendance/scan`, {
       token: cleanToken,
     });
 
-    if (response.data.status === "success") {
+    if (response.data.status === "success" || response.data.status === "already_scanned") {
+      const isSuccess = response.data.status === "success";
+      
+      showModal(
+        isSuccess ? 'success' : 'warning', 
+        isSuccess ? 'Scan Successful' : 'Already Scanned', 
+        response.data.message || (isSuccess ? 'Attendance recorded successfully.' : 'Attendance already recorded.'),
+        response.data.participant_name
+      );
       const newScan = {
         id: Date.now(),
         name: response.data.participant_name,
@@ -305,17 +396,17 @@ const handleScan = async (token: string) => {
             minute: "2-digit",
             second: "2-digit",
           }),
-        status: "success",
+        status: isSuccess ? "success" : "warning",
       };
       recentScans.value = [newScan, ...recentScans.value].slice(0, 8);
     } else {
-      alert("Scan Failed: " + (response.data.message || "Unknown Server Error"));
+      showModal('error', 'Scan Failed', response.data.message || "Unknown Server Error");
     }
   } catch (error: any) {
     console.error("Attendance Scan Failed:", error);
     const message = error.response?.data?.message || "Invalid Scan / Connection Error";
 
-    alert("Scan Result: " + message);
+    showModal('error', 'Scan Error', message);
 
     const errorScan = {
       id: Date.now(),

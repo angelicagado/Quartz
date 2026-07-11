@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Attendance;
 use App\Models\Certificate;
 use App\Models\EvaluationResponse;
 use App\Models\Event;
@@ -29,9 +30,10 @@ class ParticipantController extends Controller
 
         $search = $request->string('search')->toString();
 
-        $registeredEventIds = EventParticipant::query()
+        $participantRecords = EventParticipant::query()
             ->where('user_id', $user->id)
-            ->pluck('event_id');
+            ->get(['event_id', 'status'])
+            ->keyBy('event_id');
 
         $events = Event::query()
             ->where(function ($query) {
@@ -54,7 +56,8 @@ class ParticipantController extends Controller
                 'status' => $this->eventStatus($event),
                 'registration_type' => $event->registration_type,
                 'participants_count' => $event->event_participants_count,
-                'is_registered' => $registeredEventIds->contains($event->id),
+                'is_registered' => $participantRecords->has($event->id),
+                'registration_status' => $participantRecords->get($event->id)?->status,
                 'certificate_enabled' => $event->certificate_enabled,
             ]);
 
@@ -79,11 +82,28 @@ class ParticipantController extends Controller
             ->where('user_id', $user->id)
             ->first();
 
+        $attendances = Attendance::query()
+            ->where('event_id', $event->id)
+            ->where('user_id', $user->id)
+            ->get();
+
+        $form = $event->evaluationForm()->with('questions')->first();
+        $evaluationAvailable = $form !== null && $form->questions->isNotEmpty();
+
+        $evaluationSubmitted = false;
+        if ($evaluationAvailable && $participant !== null) {
+            $evaluationSubmitted = EvaluationResponse::query()
+                ->whereIn('evaluation_question_id', $form->questions->pluck('id'))
+                ->where('user_id', $user->id)
+                ->exists();
+        }
+
         return Inertia::render('Portal/EventShow', [
             'event' => [
                 'id' => $event->id,
                 'title' => $event->title,
                 'description' => $event->description,
+                'address' => $event->address,
                 'start_time' => $event->start_time,
                 'end_time' => $event->end_time,
                 'registration_start_date' => $event->registration_start_date,
@@ -94,15 +114,25 @@ class ParticipantController extends Controller
                 'participants_count' => $event->event_participants_count,
                 'certificate_enabled' => $event->certificate_enabled,
                 'evaluation_required' => $event->evaluation_required,
+                'evaluation_available' => $evaluationAvailable,
+                'evaluation_submitted' => $evaluationSubmitted,
+                'max_participants' => $event->max_participants,
                 'is_registered' => $participant !== null,
+                'registration_status' => $participant?->status,
                 'qr_code_url' => $participant?->qr_code_url,
-                'sessions' => $event->sessions->map(fn (EventSession $session) => [
-                    'id' => $session->id,
-                    'name' => $session->name,
-                    'start_time' => $session->start_time,
-                    'end_time' => $session->end_time,
-                    'requires_checkout' => $session->requires_checkout,
-                ]),
+                'sessions' => $event->sessions->map(function (EventSession $session) use ($attendances) {
+                    $sessionAttendances = $attendances->where('event_session_id', $session->id);
+
+                    return [
+                        'id' => $session->id,
+                        'name' => $session->name,
+                        'start_time' => $session->start_time,
+                        'end_time' => $session->end_time,
+                        'requires_checkout' => $session->requires_checkout,
+                        'has_check_in' => $sessionAttendances->where('type', 'check_in')->isNotEmpty(),
+                        'has_check_out' => $sessionAttendances->where('type', 'check_out')->isNotEmpty(),
+                    ];
+                }),
             ],
         ]);
     }

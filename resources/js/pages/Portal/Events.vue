@@ -17,6 +17,7 @@ interface Event {
     registration_type: string;
     participants_count: number;
     is_registered: boolean;
+    registration_status?: string;
     certificate_enabled: boolean;
 }
 
@@ -61,15 +62,32 @@ function registerForEvent(eventId: number) {
 function formatDateRange(start: string, end: string): string {
     const s = new Date(start);
     const e = new Date(end);
-    const opts: Intl.DateTimeFormatOptions = {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-    };
+    const dateOpts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', year: 'numeric' };
+    const timeOpts: Intl.DateTimeFormatOptions = { hour: 'numeric', minute: '2-digit' };
+    
+    const startTimeStr = s.toLocaleTimeString('en-US', timeOpts);
+    const endTimeStr = e.toLocaleTimeString('en-US', timeOpts);
+
     if (s.toDateString() === e.toDateString()) {
-        return s.toLocaleDateString('en-US', opts);
+        return `${s.toLocaleDateString('en-US', dateOpts)}, ${startTimeStr} – ${endTimeStr}`;
     }
-    return `${s.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${e.toLocaleDateString('en-US', opts)}`;
+    return `${s.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, ${startTimeStr} – ${e.toLocaleDateString('en-US', dateOpts)}, ${endTimeStr}`;
+}
+
+function getEventStatus(event: Event) {
+    const now = new Date();
+    const start = new Date(event.start_time);
+    const end = new Date(event.end_time);
+
+    if (event.status === 'cancelled') return 'cancelled';
+    
+    if (now > end) {
+        return 'completed';
+    } else if (now >= start && now <= end) {
+        return 'ongoing';
+    } else {
+        return 'upcoming';
+    }
 }
 
 function excerpt(text: string | null, length = 120): string {
@@ -163,7 +181,7 @@ const statusConfig: Record<string, { label: string; classes: string }> = {
         <!-- Events Grid -->
         <div
             v-if="events.data.length > 0"
-            class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+            class="grid gap-6 md:grid-cols-2"
         >
             <div
                 v-for="(event, index) in events.data"
@@ -196,17 +214,17 @@ const statusConfig: Record<string, { label: string; classes: string }> = {
                     <!-- Status Badge -->
                     <div class="absolute top-3 left-3">
                         <span
-                            v-if="statusConfig[event.status]"
+                            v-if="statusConfig[getEventStatus(event)]"
                             :class="[
                                 'inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold backdrop-blur-sm',
-                                statusConfig[event.status].classes,
+                                statusConfig[getEventStatus(event)].classes,
                             ]"
                         >
                             <span
-                                v-if="event.status === 'ongoing'"
+                                v-if="getEventStatus(event) === 'ongoing'"
                                 class="mr-1.5 size-1.5 animate-pulse rounded-full bg-green-500"
                             />
-                            {{ statusConfig[event.status].label }}
+                            {{ statusConfig[getEventStatus(event)].label }}
                         </span>
                     </div>
 
@@ -216,10 +234,17 @@ const statusConfig: Record<string, { label: string; classes: string }> = {
                         class="absolute top-3 right-3"
                     >
                         <span
+                            v-if="event.registration_status === 'pending'"
+                            class="inline-flex items-center gap-1 rounded-full bg-amber-100/90 px-2.5 py-1 text-xs font-semibold text-amber-700 shadow-sm backdrop-blur-sm dark:bg-amber-900/90 dark:text-amber-400"
+                        >
+                            Pending
+                        </span>
+                        <span
+                            v-else
                             class="inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold text-green-700 shadow-sm backdrop-blur-sm dark:bg-gray-900/90 dark:text-green-400"
                         >
                             <CheckCircle2 class="size-3" />
-                            Registered
+                            Confirmed
                         </span>
                     </div>
                 </div>
@@ -248,19 +273,16 @@ const statusConfig: Record<string, { label: string; classes: string }> = {
                     </p>
 
                     <div
-                        class="mt-4 flex items-center justify-between gap-3 border-t border-border pt-3"
+                        class="mt-4 flex items-center justify-end gap-3 border-t border-border pt-3"
                     >
-                        <span class="text-xs text-muted-foreground">
-                            {{ event.participants_count }} registered
-                        </span>
                         <div class="flex items-center gap-2">
                             <Link :href="`/portal/events/${event.id}`">
                                 <Button variant="ghost" size="sm">View</Button>
                             </Link>
                             <template
                                 v-if="
-                                    event.status !== 'cancelled' &&
-                                    event.status !== 'completed'
+                                    getEventStatus(event) !== 'cancelled' &&
+                                    getEventStatus(event) !== 'completed'
                                 "
                             >
                                 <Button
@@ -271,20 +293,10 @@ const statusConfig: Record<string, { label: string; classes: string }> = {
                                 >
                                     Register
                                 </Button>
-                                <Button
-                                    v-else
-                                    size="sm"
-                                    variant="outline"
-                                    disabled
-                                    class="border-green-200 text-green-600 dark:border-green-800 dark:text-green-400"
-                                >
-                                    <CheckCircle2 class="size-3.5" />
-                                    Registered
-                                </Button>
                             </template>
                             <template
                                 v-else-if="
-                                    event.status === 'completed' &&
+                                    getEventStatus(event) === 'completed' &&
                                     event.is_registered &&
                                     event.certificate_enabled
                                 "

@@ -9,11 +9,12 @@ const props = defineProps<{
         id: number;
         title: string;
         description: string;
+        address: string | null;
         start_time: string;
         end_time: string;
         registration_start_date: string;
         registration_end_date: string;
-        organizer: { name: string } | null;
+        organizers: { name: string }[];
     }>;
 }>();
 
@@ -171,9 +172,13 @@ function getGradient(index: number): string {
                                         <div><strong>End:</strong> {{ formatDate(event.end_time) }}</div>
                                     </div>
                                 </div>
-                                <div v-if="event.organizer" class="flex items-center gap-2 text-sm text-on-surface-variant">
+                                <div v-if="event.organizers?.length" class="flex items-center gap-2 text-sm text-on-surface-variant">
                                     <span class="material-symbols-outlined text-[18px] text-primary">person</span>
-                                    <span><strong>Organizer:</strong> {{ event.organizer.name }}</span>
+                                    <span><strong>Organizers:</strong> {{ event.organizers.map(o => o.name).join(', ') }}</span>
+                                </div>
+                                <div v-if="event.address" class="flex items-center gap-2 text-sm text-on-surface-variant">
+                                    <span class="material-symbols-outlined text-[18px] text-primary">location_on</span>
+                                    <span><strong>Location:</strong> {{ event.address }}</span>
                                 </div>
                             </div>
                         </div>

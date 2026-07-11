@@ -57,11 +57,11 @@
                                 }}
                             </div>
                             <div
-                                v-if="event.location"
-                                class="flex items-center gap-2 text-sm text-slate-400"
+                                v-if="event.address"
+                                class="flex items-center gap-2.5 font-medium text-slate-600 dark:text-slate-300"
                             >
-                                <MapPin class="h-4 w-4 text-[#d4af37]" />
-                                {{ event.location }}
+                                <MapPin class="h-5 w-5 text-[#d4af37]" />
+                                <span>{{ event.address || "Virtual Venue" }}</span>
                             </div>
                         </div>
                     </div>

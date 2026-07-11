@@ -16,7 +16,7 @@ class PublicEventController extends Controller
     public function index(): Response
     {
         $events = Event::query()
-            ->with('organizer:id,name')
+            ->with('organizers:id,name')
             ->where('end_time', '>=', now())
             ->orderBy('start_time', 'asc')
             ->get()
@@ -24,13 +24,14 @@ class PublicEventController extends Controller
                 'id' => $event->id,
                 'title' => $event->title,
                 'description' => $event->description,
+                'address' => $event->address,
                 'start_time' => $event->start_time,
                 'end_time' => $event->end_time,
                 'registration_start_date' => $event->registration_start_date,
                 'registration_end_date' => $event->registration_end_date,
-                'organizer' => $event->organizer ? [
-                    'name' => $event->organizer->name,
-                ] : null,
+                'organizers' => $event->organizers->map(fn ($o) => [
+                    'name' => $o->name,
+                ]),
             ]);
 
         return Inertia::render('Public/Events/Index', [
@@ -43,7 +44,7 @@ class PublicEventController extends Controller
      */
     public function show(Event $event): Response
     {
-        $event->load('organizer:id,name');
+        $event->load('organizers:id,name');
 
         $participant = null;
         if (Auth::check()) {
@@ -58,6 +59,7 @@ class PublicEventController extends Controller
                 'id' => $event->id,
                 'title' => $event->title,
                 'description' => $event->description,
+                'address' => $event->address,
                 'start_time' => $event->start_time,
                 'end_time' => $event->end_time,
                 'registration_start_date' => $event->registration_start_date,
@@ -68,9 +70,9 @@ class PublicEventController extends Controller
                 'evaluation_required' => $event->evaluation_required,
                 'is_registered' => $participant !== null,
                 'qr_code_url' => $participant?->qr_code_url,
-                'organizer' => $event->organizer ? [
-                    'name' => $event->organizer->name,
-                ] : null,
+                'organizers' => $event->organizers->map(fn ($o) => [
+                    'name' => $o->name,
+                ]),
             ],
         ]);
     }

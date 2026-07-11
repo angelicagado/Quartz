@@ -6,7 +6,6 @@ use Database\Factories\EventFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -16,6 +15,7 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property string $title
  * @property string|null $description
+ * @property string|null $address
  * @property Carbon $start_time
  * @property Carbon $end_time
  * @property string $registration_type
@@ -23,10 +23,7 @@ use Illuminate\Support\Carbon;
  * @property bool $evaluation_required
  * @property bool $certificate_enabled
  * @property int|null $max_participants
- * @property int|null $organizer_id
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
- * @property-read User|null $organizer
+ * @property-read Collection<int, User> $organizers
  * @property-read Collection<int, User> $participants
  * @property-read Collection<int, Attendance> $attendances
  * @property-read EvaluationForm|null $evaluationForm
@@ -44,6 +41,7 @@ class Event extends Model
     protected $fillable = [
         'title',
         'description',
+        'address',
         'start_time',
         'end_time',
         'registration_start_date',
@@ -53,7 +51,6 @@ class Event extends Model
         'evaluation_required',
         'certificate_enabled',
         'max_participants',
-        'organizer_id',
     ];
 
     /**
@@ -73,6 +70,14 @@ class Event extends Model
     }
 
     /**
+     * Prepare a date for array / JSON serialization.
+     */
+    protected function serializeDate(\DateTimeInterface $date): string
+    {
+        return $date->format('Y-m-d H:i:s');
+    }
+
+    /**
      * Determine if the event has reached its maximum participant capacity.
      */
     public function hasReachedCapacity(): bool
@@ -85,11 +90,11 @@ class Event extends Model
     }
 
     /**
-     * The user who organizes this event.
+     * The users who organize this event.
      */
-    public function organizer(): BelongsTo
+    public function organizers(): BelongsToMany
     {
-        return $this->belongsTo(User::class, 'organizer_id');
+        return $this->belongsToMany(User::class, 'event_organizer')->withTimestamps();
     }
 
     /**

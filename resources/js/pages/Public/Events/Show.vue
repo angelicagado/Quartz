@@ -10,6 +10,7 @@ const props = defineProps<{
         id: number;
         title: string;
         description: string;
+        address: string | null;
         start_time: string;
         end_time: string;
         registration_start_date: string;
@@ -20,7 +21,7 @@ const props = defineProps<{
         evaluation_required: boolean;
         is_registered?: boolean;
         qr_code_url?: string;
-        organizer: { name: string } | null;
+        organizers: { name: string }[];
     };
 }>();
 
@@ -152,7 +153,7 @@ const submitRegister = () => {
                                     class="flex flex-wrap gap-4 text-sm text-on-surface-variant"
                                 >
                                     <div
-                                        v-if="event.organizer"
+                                        v-if="event.organizers?.length"
                                         class="flex items-center gap-2"
                                     >
                                         <span
@@ -160,8 +161,21 @@ const submitRegister = () => {
                                             >person</span
                                         >
                                         <span
-                                            ><strong>Organizer:</strong>
-                                            {{ event.organizer.name }}</span
+                                            ><strong>Organizers:</strong>
+                                            {{ event.organizers.map(o => o.name).join(', ') }}</span
+                                        >
+                                    </div>
+                                    <div
+                                        v-if="event.address"
+                                        class="flex items-center gap-2"
+                                    >
+                                        <span
+                                            class="material-symbols-outlined text-[18px] text-primary"
+                                            >location_on</span
+                                        >
+                                        <span
+                                            ><strong>Location:</strong>
+                                            {{ event.address }}</span
                                         >
                                     </div>
                                     <div class="flex items-center gap-2">
