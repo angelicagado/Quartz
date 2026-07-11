@@ -35,12 +35,20 @@ class ParticipantController extends Controller
             ->pluck('event_id');
 
         $events = Event::query()
-            ->where(function ($query) {
-                $query->whereIn('registration_type', ['open', 'scheduled', 'approval'])
-                    ->where('end_time', '>=', now());
+            ->where(function ($query) use ($user) {
+                $query->where(function ($registerable) {
+                    $registerable->whereIn('registration_type', ['open', 'scheduled', 'approval'])
+                        ->where('end_time', '>=', now());
+                })
+                    ->orWhereHas('eventParticipants', function ($registered) use ($user) {
+                        $registered->where('user_id', $user->id);
+                    });
             })
-            ->orWhereHas('eventParticipants', function ($query) use ($user) {
-                $query->where('user_id', $user->id);
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($matches) use ($search) {
+                    $matches->where('title', 'like', '%'.$search.'%')
+                        ->orWhere('description', 'like', '%'.$search.'%');
+                });
             })
             ->withCount('eventParticipants')
             ->latest('start_time')
