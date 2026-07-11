@@ -14,6 +14,7 @@ import ProfileRail from '@/components/portal/ProfileRail.vue';
 import { ref } from 'vue';
 import axios from 'axios';
 import { toast } from 'vue-sonner';
+import MyEventsCalendar from '@/components/portal/MyEventsCalendar.vue';
 
 interface MyEvent {
     id: number;
@@ -127,8 +128,18 @@ async function viewCertificate(eventId: number) {
     <Head title="My Events" />
 
     <div class="grid gap-6 p-4 sm:p-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-20">
-        <ProfileRail />
+        <!-- Left column: profile + calendar (sticky, desktop only) -->
+        <div class="hidden lg:block">
+            <div class="sticky top-20 flex flex-col gap-6">
+                <ProfileRail />
+                <MyEventsCalendar :events="events" />
+            </div>
+        </div>
+
         <div class="flex min-w-0 flex-1 flex-col gap-6">
+        <!-- Calendar (mobile / tablet only — rail is hidden below lg) -->
+        <MyEventsCalendar :events="events" class="lg:hidden" />
+
         <!-- Header -->
         <div>
             <div class="mb-1 flex items-center gap-2">
