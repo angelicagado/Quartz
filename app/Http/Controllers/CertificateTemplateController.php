@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\Encoders\PngEncoder;
 use Intervention\Image\ImageManager;
 
 class CertificateTemplateController extends Controller
@@ -191,8 +192,7 @@ class CertificateTemplateController extends Controller
                 }
                 $font->size($size);
                 $font->color($color);
-                $font->align('center');
-                $font->valign('middle');
+                $font->align('center', 'middle');
             });
         }
 
@@ -209,7 +209,7 @@ class CertificateTemplateController extends Controller
             return $result;
         }
 
-        $encoded = $result->toPng();
+        $encoded = $result->encode(new PngEncoder);
 
         return response($encoded->toString())
             ->header('Content-Type', 'image/png')
@@ -230,7 +230,7 @@ class CertificateTemplateController extends Controller
         }
 
         $filename = 'certificate_'.Str::slug($event->title).'_'.Str::slug($user->name).'.png';
-        $encoded = $result->toPng();
+        $encoded = $result->encode(new PngEncoder);
 
         return response($encoded->toString())
             ->header('Content-Type', 'image/png')
@@ -251,7 +251,7 @@ class CertificateTemplateController extends Controller
         }
 
         // Convert the image to base64 to embed in the PDF
-        $base64 = base64_encode($result->toPng()->toString());
+        $base64 = base64_encode($result->encode(new PngEncoder)->toString());
         $imgSrc = 'data:image/png;base64,'.$base64;
 
         $html = '<style>

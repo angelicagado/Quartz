@@ -14,6 +14,11 @@ interface Event {
   registration_type?: string;
   certificate_enabled?: boolean;
   evaluation_required?: boolean;
+  registration_start_date?: string;
+  registration_end_date?: string;
+  has_evaluation_form?: boolean;
+  has_certificate_template?: boolean;
+  sessions_count?: number;
   [key: string]: any;
 }
 
@@ -255,7 +260,7 @@ const handleViewEvent = (event: Event) => {
     </div>
 
     <!-- Grid -->
-    <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
       <!-- Create New Card (Admin Only) -->
       <Link
         href="/admin/events/create"

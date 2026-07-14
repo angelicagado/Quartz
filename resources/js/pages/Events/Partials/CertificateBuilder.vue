@@ -322,7 +322,7 @@ onUnmounted(() => {
 });
 
 const submit = () => {
-  form.post(`/admin/events/${props.event.id}/certificates`, {
+  form.post(`/events/${props.event.id}/certificates`, {
     preserveScroll: true,
     onSuccess: () => {
       isModalOpen.value = false;
@@ -343,7 +343,7 @@ const viewTemplate = () => {
 const deleteTemplate = () => {
   if (!confirm("Are you sure you want to delete this template?")) return;
 
-  router.delete(`/admin/events/${props.event.id}/certificates`, {
+  router.delete(`/events/${props.event.id}/certificates`, {
     preserveScroll: true,
     onSuccess: () => {
       toast.success("Certificate template deleted successfully!");

@@ -168,7 +168,7 @@ async function viewCertificate(eventId: number) {
             <div
                 v-for="(event, index) in events"
                 :key="event.id"
-                class="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-xs transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
+                class="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-xs transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
             >
                 <!-- Image / Gradient Placeholder -->
                 <div
@@ -203,7 +203,7 @@ async function viewCertificate(eventId: number) {
 
                 <!-- Content -->
                 <div class="flex flex-1 flex-col p-5">
-                    <Link :href="`/portal/events/${event.id}`">
+                    <Link :href="`/portal/events/${event.id}`" class="before:absolute before:inset-0 before:z-0">
                         <h3
                             class="line-clamp-2 font-serif leading-snug font-semibold text-foreground transition-colors group-hover:text-violet-600 dark:group-hover:text-violet-400"
                         >
@@ -227,7 +227,7 @@ async function viewCertificate(eventId: number) {
                     </p>
 
                     <div
-                        class="mt-4 flex items-center justify-end gap-3 border-t border-border pt-4"
+                        class="relative z-10 mt-4 flex items-center justify-end gap-3 border-t border-border pt-4"
                     >
                         <div class="flex flex-wrap items-center justify-end gap-2">
                             <Link

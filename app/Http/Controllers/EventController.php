@@ -23,8 +23,8 @@ class EventController extends Controller
     public function index(): Response
     {
         $events = Event::query()
-            ->with('organizers')
-            ->withCount(['eventParticipants', 'attendances'])
+            ->with(['organizers', 'evaluationForm', 'certificateTemplate'])
+            ->withCount(['eventParticipants', 'attendances', 'sessions'])
             ->latest()
             ->get()
             ->map(fn (Event $event) => [
@@ -37,6 +37,9 @@ class EventController extends Controller
                 'registration_type' => $event->registration_type,
                 'evaluation_required' => $event->evaluation_required,
                 'certificate_enabled' => $event->certificate_enabled,
+                'has_evaluation_form' => $event->evaluationForm !== null,
+                'has_certificate_template' => $event->certificateTemplate !== null,
+                'sessions_count' => $event->sessions_count,
                 'organizers' => $event->organizers->map(fn ($o) => [
                     'id' => $o->id,
                     'name' => $o->name,
@@ -154,6 +157,7 @@ class EventController extends Controller
                 'attendances' => $userAttendances,
                 'certificate' => $userCertificate,
                 'has_answered_evaluation' => $hasAnsweredEvaluation,
+                'created_at' => $participant->created_at,
             ];
         });
 
@@ -168,6 +172,7 @@ class EventController extends Controller
                 'registration_start_date' => $event->registration_start_date,
                 'registration_end_date' => $event->registration_end_date,
                 'registration_type' => $event->registration_type,
+                'attendance_type' => $event->attendance_type,
                 'evaluation_required' => $event->evaluation_required,
                 'certificate_enabled' => $event->certificate_enabled,
                 'organizers' => $event->organizers,
