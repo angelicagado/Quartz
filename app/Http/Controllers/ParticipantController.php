@@ -133,7 +133,7 @@ class ParticipantController extends Controller
                 'max_participants' => $event->max_participants,
                 'is_registered' => $participant !== null,
                 'registration_status' => $participant?->status,
-                'qr_code_url' => $participant?->qr_code_url,
+                'qr_code_url' => $participant?->qr_token ? route('portal.qr.image', $event) : null,
                 'sessions' => $event->sessions->map(function (EventSession $session) use ($attendances) {
                     $sessionAttendances = $attendances->where('event_session_id', $session->id);
 
@@ -198,7 +198,7 @@ class ParticipantController extends Controller
             'status' => 'registered',
         ]);
 
-        $this->qrCodeService->generateFor($participant);
+        $this->qrCodeService->ensureTokenFor($participant);
 
         return back()->with('success', 'You have successfully registered for this event!');
     }
@@ -241,13 +241,35 @@ class ParticipantController extends Controller
             'participant' => [
                 'id' => $participant->id,
                 'status' => $participant->status,
-                'qr_code_url' => $participant->qr_code_url,
+                'qr_code_url' => $participant->qr_token ? route('portal.qr.image', $event) : null,
                 'user' => [
                     'name' => $user->name,
                     'email' => $user->email,
                 ],
             ],
         ]);
+    }
+
+    /**
+     * Stream the authenticated participant's QR code for the event as an SVG.
+     */
+    public function qrImage(Event $event): \Illuminate\Http\Response|RedirectResponse
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        $participant = EventParticipant::query()
+            ->where('event_id', $event->id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if ($participant === null || $participant->qr_token === null) {
+            return redirect()->route('portal.events')
+                ->with('error', 'No QR code is available for this event.');
+        }
+
+        return response($this->qrCodeService->svgFor($participant))
+            ->header('Content-Type', 'image/svg+xml');
     }
 
     /**
@@ -291,7 +313,7 @@ class ParticipantController extends Controller
                 'end_time' => $event->end_time,
                 'attendance_type' => $event->attendance_type,
                 'status' => $participant->status,
-                'has_qr' => $participant->qr_code_path !== null,
+                'has_qr' => $participant->qr_token !== null,
                 'evaluation_required' => $evaluationRequired,
                 'evaluation_available' => $evaluationAvailable,
                 'evaluation_submitted' => $evaluationSubmitted,

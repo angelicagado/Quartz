@@ -10,7 +10,6 @@ use App\Models\EvaluationResponse;
 use App\Models\Event;
 use App\Models\EventParticipant;
 use App\Models\User;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 use Spatie\Permission\Models\Role;
 
@@ -88,9 +87,7 @@ test('the event details page renders for a participant', function () {
         );
 });
 
-test('a participant can register for an open event and gets a QR code', function () {
-    Storage::fake('public');
-
+test('a participant can register for an open event and gets a QR token', function () {
     $user = participantUser();
     $event = Event::factory()->create([
         'registration_type' => 'open',
@@ -98,8 +95,10 @@ test('a participant can register for an open event and gets a QR code', function
     ]);
 
     $this->actingAs($user)
+        ->from(route('portal.events.show', $event))
         ->post(route('portal.register', $event))
-        ->assertRedirect(route('portal.qr', $event));
+        ->assertRedirect()
+        ->assertSessionHas('success');
 
     $participant = EventParticipant::query()
         ->where('event_id', $event->id)
@@ -108,16 +107,16 @@ test('a participant can register for an open event and gets a QR code', function
 
     expect($participant)->not->toBeNull()
         ->and($participant->status)->toBe('registered')
-        ->and($participant->qr_code_path)->not->toBeNull();
+        ->and($participant->qr_token)->not->toBeNull();
 
-    Storage::disk('public')->assertExists(
-        str_replace('public/', '', $participant->qr_code_path)
-    );
+    $response = $this->actingAs($user)->get(route('portal.qr.image', $event));
+
+    $response->assertOk();
+    expect($response->headers->get('Content-Type'))->toContain('image/svg+xml');
+    expect($response->getContent())->toContain('<svg');
 });
 
 test('a participant cannot register twice for the same event', function () {
-    Storage::fake('public');
-
     $user = participantUser();
     $event = Event::factory()->create(['registration_type' => 'open', 'end_time' => now()->addWeek()]);
 

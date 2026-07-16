@@ -20,7 +20,7 @@ import { Label } from '@/components/ui/label';
 interface Participant {
     id: number;
     user: { id: number; name: string; email: string };
-    qr_code_path: string | null;
+    qr_code_url: string | null;
     has_attended: boolean;
     registered_at: string;
 }
@@ -242,13 +242,13 @@ function removeParticipant(participantId: number) {
                                 </td>
                                 <td class="px-4 py-3">
                                     <div
-                                        v-if="participant.qr_code_path"
+                                        v-if="participant.qr_code_url"
                                         class="flex items-center gap-2"
                                     >
                                         <img
-                                            :src="`/storage/${participant.qr_code_path}`"
+                                            :src="participant.qr_code_url"
                                             alt="QR Code"
-                                            class="size-10 rounded border border-border object-cover"
+                                            class="size-10 rounded border border-border object-contain bg-white p-0.5"
                                         />
                                         <span
                                             class="text-xs font-medium text-green-600 dark:text-green-400"
@@ -267,9 +267,9 @@ function removeParticipant(participantId: number) {
                                     <div
                                         class="flex items-center justify-end gap-1"
                                     >
-                                        <Link
-                                            v-if="participant.qr_code_path"
-                                            :href="`/admin/events/${event.id}/participants/${participant.id}/qr`"
+                                        <a
+                                            v-if="participant.qr_code_url"
+                                            :href="participant.qr_code_url"
                                             target="_blank"
                                         >
                                             <Button
@@ -280,7 +280,7 @@ function removeParticipant(participantId: number) {
                                             >
                                                 <Eye class="size-4" />
                                             </Button>
-                                        </Link>
+                                        </a>
                                         <Button
                                             variant="ghost"
                                             size="icon-sm"

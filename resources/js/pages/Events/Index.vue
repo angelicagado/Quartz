@@ -260,7 +260,7 @@ const handleViewEvent = (event: Event) => {
     </div>
 
     <!-- Grid -->
-    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       <!-- Create New Card (Admin Only) -->
       <Link
         href="/admin/events/create"

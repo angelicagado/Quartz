@@ -11,10 +11,10 @@ import {
 import { Button } from '@/components/ui/button';
 import ParticipantLayout from '@/layouts/ParticipantLayout.vue';
 import ProfileRail from '@/components/portal/ProfileRail.vue';
+import MyEventsCalendar from '@/components/portal/MyEventsCalendar.vue';
 import { ref } from 'vue';
 import axios from 'axios';
 import { toast } from 'vue-sonner';
-import MyEventsCalendar from '@/components/portal/MyEventsCalendar.vue';
 
 interface MyEvent {
     id: number;
@@ -164,7 +164,7 @@ async function viewCertificate(eventId: number) {
         </div>
 
         <!-- Events Grid -->
-        <div v-if="events.length > 0" class="grid gap-6 md:grid-cols-2">
+        <div v-if="events.length > 0" class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             <div
                 v-for="(event, index) in events"
                 :key="event.id"
