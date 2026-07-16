@@ -139,9 +139,9 @@ function submit() {
 <template>
     <Head title="Edit Event" />
 
-    <div class="flex h-full flex-1 flex-col gap-6 p-6">
+    <div class="flex h-full flex-1 flex-col items-center gap-6 p-6">
         <!-- Header -->
-        <div class="flex items-center gap-4">
+        <div class="flex w-full max-w-3xl items-center gap-4">
             <Link :href="`/admin/events/${event.id}`">
                 <Button variant="ghost" size="icon-sm">
                     <ChevronLeft class="size-4" />
@@ -163,7 +163,7 @@ function submit() {
             </div>
         </div>
 
-        <form @submit.prevent="submit" class="flex max-w-3xl flex-col gap-6">
+        <form @submit.prevent="submit" class="flex w-full max-w-3xl flex-col gap-6">
             <!-- Section 1: Basic Info -->
             <div
                 class="relative z-10 rounded-xl border border-border bg-card shadow-xs"

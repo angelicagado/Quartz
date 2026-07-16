@@ -164,7 +164,7 @@ async function viewCertificate(eventId: number) {
         </div>
 
         <!-- Events Grid -->
-        <div v-if="events.length > 0" class="grid gap-6 md:grid-cols-2">
+        <div v-if="events.length > 0" class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             <div
                 v-for="(event, index) in events"
                 :key="event.id"

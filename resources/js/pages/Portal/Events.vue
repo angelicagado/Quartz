@@ -181,7 +181,7 @@ const statusConfig: Record<string, { label: string; classes: string }> = {
         <!-- Events Grid -->
         <div
             v-if="events.data.length > 0"
-            class="grid gap-6 md:grid-cols-2"
+            class="grid gap-6 md:grid-cols-2 xl:grid-cols-3"
         >
             <div
                 v-for="(event, index) in events.data"

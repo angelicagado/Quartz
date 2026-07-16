@@ -52,8 +52,8 @@ const form = useForm({
 function addSession() {
   form.sessions.push({
     name: "New Session",
-    start_time: form.start_time || "",
-    end_time: form.end_time || "",
+    start_time: "",
+    end_time: "",
     requires_checkout: false,
   });
 }
@@ -66,39 +66,58 @@ function applyPreset(preset: string) {
   if (preset === 'one_time') {
     form.sessions = [{
       name: "Main Event",
-      start_time: form.start_time,
-      end_time: form.end_time,
+      start_time: "",
+      end_time: "",
       requires_checkout: false,
     }];
   } else if (preset === 'am_pm') {
     form.sessions = [
       {
         name: "Morning Session",
-        start_time: form.start_time,
+        start_time: "",
         end_time: "",
         requires_checkout: true,
       },
       {
         name: "Afternoon Session",
         start_time: "",
-        end_time: form.end_time,
+        end_time: "",
         requires_checkout: true,
       }
     ];
   }
 }
 
+/**
+ * Combine a `YYYY-MM-DD` date with a `HH:mm` time into an ISO-like
+ * `YYYY-MM-DDTHH:mm` string the backend can validate as a date.
+ */
+function combine(date: string, time: string): string {
+  return date && time ? `${date}T${time}` : "";
+}
+
 function submit() {
-  form.post("/admin/events");
+  form
+    .transform((data) => ({
+      ...data,
+      start_time: data.start_time ? `${data.start_time}T00:00` : "",
+      end_time: data.end_time ? `${data.end_time}T23:59` : "",
+      sessions: data.sessions.map((session) => ({
+        ...session,
+        start_time: combine(data.start_time, session.start_time),
+        end_time: combine(data.start_time, session.end_time),
+      })),
+    }))
+    .post("/admin/events");
 }
 </script>
 
 <template>
   <Head title="Create Event" />
 
-  <div class="flex h-full flex-1 flex-col gap-6 p-6">
+  <div class="flex h-full flex-1 flex-col items-center gap-6 p-6">
     <!-- Header -->
-    <div class="flex items-center gap-4">
+    <div class="flex w-full max-w-3xl items-center gap-4">
       <Link href="/admin/events">
         <Button variant="ghost" size="icon-sm">
           <ChevronLeft class="size-4" />
@@ -114,7 +133,7 @@ function submit() {
       </div>
     </div>
 
-    <form @submit.prevent="submit" class="flex max-w-3xl flex-col gap-6">
+    <form @submit.prevent="submit" class="flex w-full max-w-3xl flex-col gap-6">
       <!-- Section 1: Basic Info -->
       <div class="relative z-10 rounded-xl border border-border bg-card shadow-xs">
         <div class="flex items-center gap-3 rounded-t-xl border-b border-border bg-muted/30 px-6 py-4">
@@ -205,12 +224,12 @@ function submit() {
         <div class="grid gap-5 p-6 sm:grid-cols-2">
           <div class="grid gap-2">
             <Label for="start_time"
-              >Event Start <span class="text-destructive">*</span></Label
+              >Event Start Date <span class="text-destructive">*</span></Label
             >
             <Input
               id="start_time"
               v-model="form.start_time"
-              type="datetime-local"
+              type="date"
               :class="{
                 'border-destructive': form.errors.start_time,
               }"
@@ -221,12 +240,12 @@ function submit() {
           </div>
           <div class="grid gap-2">
             <Label for="end_time"
-              >Event End <span class="text-destructive">*</span></Label
+              >Event End Date <span class="text-destructive">*</span></Label
             >
             <Input
               id="end_time"
               v-model="form.end_time"
-              type="datetime-local"
+              type="date"
               :class="{
                 'border-destructive': form.errors.end_time,
               }"
@@ -270,11 +289,11 @@ function submit() {
               </div>
               <div class="grid gap-2">
                 <Label>Start Time <span class="text-destructive">*</span></Label>
-                <Input v-model="session.start_time" type="datetime-local" />
+                <Input v-model="session.start_time" type="time" />
               </div>
               <div class="grid gap-2">
                 <Label>End Time <span class="text-destructive">*</span></Label>
-                <Input v-model="session.end_time" type="datetime-local" />
+                <Input v-model="session.end_time" type="time" />
               </div>
               <div class="col-span-2 flex items-center gap-2 mt-2">
                 <input type="checkbox" v-model="session.requires_checkout" :id="'checkout-'+index" class="rounded border-input text-violet-600 focus:ring-violet-600">

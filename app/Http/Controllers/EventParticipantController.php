@@ -9,8 +9,8 @@ use App\Models\User;
 use App\Services\QrCodeService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -31,8 +31,8 @@ class EventParticipantController extends Controller
             ->map(fn (EventParticipant $ep) => [
                 'id' => $ep->id,
                 'status' => $ep->status,
-                'qr_code_path' => $ep->qr_code_path
-                    ? Storage::url($ep->qr_code_path)
+                'qr_code_url' => $ep->qr_token
+                    ? route('events.participants.qr', [$event, $ep])
                     : null,
                 'user' => $ep->user,
                 'created_at' => $ep->created_at,
@@ -46,6 +46,19 @@ class EventParticipantController extends Controller
             ],
             'participants' => $participants,
         ]);
+    }
+
+    /**
+     * Stream a participant's QR code for the event as an SVG.
+     */
+    public function qrImage(Event $event, EventParticipant $participant): HttpResponse|RedirectResponse
+    {
+        if ($participant->event_id !== $event->id || $participant->qr_token === null) {
+            return back()->with('error', 'No QR code is available for this participant.');
+        }
+
+        return response($this->qrCodeService->svgFor($participant))
+            ->header('Content-Type', 'image/svg+xml');
     }
 
     /**
@@ -86,7 +99,7 @@ class EventParticipantController extends Controller
             'status' => 'registered',
         ]);
 
-        $this->qrCodeService->generateFor($participant);
+        $this->qrCodeService->ensureTokenFor($participant);
 
         return back()->with('success', 'Participant added successfully.');
     }
@@ -110,10 +123,6 @@ class EventParticipantController extends Controller
      */
     public function destroy(Event $event, EventParticipant $eventParticipant): RedirectResponse
     {
-        if ($eventParticipant->qr_code_path) {
-            Storage::delete($eventParticipant->qr_code_path);
-        }
-
         $eventParticipant->delete();
 
         return back()->with('success', 'Participant removed successfully.');
@@ -192,7 +201,7 @@ class EventParticipantController extends Controller
                 'status' => 'registered',
             ]);
 
-            $this->qrCodeService->generateFor($participant);
+            $this->qrCodeService->ensureTokenFor($participant);
             $imported++;
         }
 

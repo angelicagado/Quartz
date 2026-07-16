@@ -69,7 +69,7 @@ class PublicEventController extends Controller
                 'certificate_enabled' => $event->certificate_enabled,
                 'evaluation_required' => $event->evaluation_required,
                 'is_registered' => $participant !== null,
-                'qr_code_url' => $participant?->qr_code_url,
+                'qr_code_url' => $participant?->qr_token ? route('portal.qr.image', $event) : null,
                 'organizers' => $event->organizers->map(fn ($o) => [
                     'name' => $o->name,
                 ]),
