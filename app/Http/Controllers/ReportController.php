@@ -16,7 +16,7 @@ class ReportController extends Controller
     public function index(): Response
     {
         $events = Event::query()
-            ->with('organizer:id,name')
+            ->with('organizers:id,name')
             ->withCount([
                 'eventParticipants',
                 'attendances',
@@ -38,10 +38,10 @@ class ReportController extends Controller
                 'attendance_type' => $event->attendance_type,
                 'evaluation_required' => $event->evaluation_required,
                 'certificate_enabled' => $event->certificate_enabled,
-                'organizer' => $event->organizer ? [
-                    'id' => $event->organizer->id,
-                    'name' => $event->organizer->name,
-                ] : null,
+                'organizers' => $event->organizers->map(fn ($o) => [
+                    'id' => $o->id,
+                    'name' => $o->name,
+                ]),
                 'stats' => [
                     'registered' => $event->event_participants_count,
                     'attended' => $event->attended_count,

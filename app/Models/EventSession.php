@@ -28,6 +28,14 @@ class EventSession extends Model
         ];
     }
 
+    /**
+     * Prepare a date for array / JSON serialization.
+     */
+    protected function serializeDate(\DateTimeInterface $date): string
+    {
+        return $date->format('Y-m-d H:i:s');
+    }
+
     public function event(): BelongsTo
     {
         return $this->belongsTo(Event::class);

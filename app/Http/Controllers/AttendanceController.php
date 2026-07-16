@@ -34,11 +34,9 @@ class AttendanceController extends Controller
     {
         $request->validate([
             'qr_token' => ['required', 'string'],
-            'scan_type' => ['required', 'string'],
         ]);
 
         $token = $request->string('qr_token')->toString();
-        $scanType = $request->string('scan_type')->toString();
 
         $participant = EventParticipant::query()
             ->with(['event', 'user'])
@@ -52,79 +50,7 @@ class AttendanceController extends Controller
             ], 422);
         }
 
-        $event = $participant->event;
-
-        if ($event->attendance_type === 'single' || $event->attendance_type === 'one-time') {
-            $alreadyScanned = Attendance::query()
-                ->where('event_id', $event->id)
-                ->where('user_id', $participant->user_id)
-                ->exists();
-
-            if ($alreadyScanned) {
-                return response()->json([
-                    'status' => 'already_scanned',
-                    'message' => 'Attendance already recorded for this participant.',
-                    'participant_name' => $participant->user->name,
-                    'event_title' => $event->title,
-                    'data' => [
-                        'scan_type' => 'one-time',
-                        'scanned_at' => now()->toIso8601String(),
-                    ],
-                ]);
-            }
-
-            $attendance = Attendance::create([
-                'event_id' => $event->id,
-                'user_id' => $participant->user_id,
-                'scan_type' => 'one-time',
-                'scanned_at' => now(),
-            ]);
-
-            $participant->update(['status' => 'attended']);
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Attendance recorded successfully.',
-                'participant_name' => $participant->user->name,
-                'event_title' => $event->title,
-                'scanned_at' => now()->toDateTimeString(),
-                'data' => $attendance,
-            ]);
-        }
-
-        // am-pm attendance logic
-        $determinedScanType = $this->determineAmPmScanType($event->id, $participant->user_id);
-
-        if ($determinedScanType === null) {
-            return response()->json([
-                'status' => 'already_scanned',
-                'message' => 'All attendance slots have been recorded for this participant.',
-                'participant_name' => $participant->user->name,
-                'event_title' => $event->title,
-                'data' => [
-                    'scan_type' => $scanType,
-                    'scanned_at' => now()->toIso8601String(),
-                ],
-            ]);
-        }
-
-        $attendance = Attendance::create([
-            'event_id' => $event->id,
-            'user_id' => $participant->user_id,
-            'scan_type' => $determinedScanType,
-            'scanned_at' => now(),
-        ]);
-
-        $participant->update(['status' => 'attended']);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => "Attendance recorded: {$determinedScanType}.",
-            'participant_name' => $participant->user->name,
-            'event_title' => $event->title,
-            'scanned_at' => now()->toDateTimeString(),
-            'data' => $attendance,
-        ]);
+        return $this->processScanRecord($participant->event, $participant);
     }
 
     /**
@@ -152,52 +78,91 @@ class AttendanceController extends Controller
             ], 422);
         }
 
-        if ($event->attendance_type === 'one-time') {
-            $alreadyScanned = Attendance::query()
-                ->where('event_id', $event->id)
-                ->where('user_id', $participant->user_id)
-                ->exists();
+        return $this->processScanRecord($event, $participant);
+    }
 
-            if ($alreadyScanned) {
+    private function processScanRecord(Event $event, EventParticipant $participant): JsonResponse
+    {
+        $session = $event->sessions()
+            ->where('start_time', '<=', now()->addMinutes(30))
+            ->where('end_time', '>=', now()->subMinutes(30))
+            ->first();
+
+        if (! $session) {
+            $session = $event->sessions()->orderBy('start_time')->first();
+        }
+
+        if (! $session) {
+            return response()->json([
+                'status' => 'invalid',
+                'message' => 'No active sessions found for this event.',
+            ], 422);
+        }
+
+        $alreadyScannedIn = Attendance::query()
+            ->where('event_id', $event->id)
+            ->where('user_id', $participant->user_id)
+            ->where('event_session_id', $session->id)
+            ->where('type', 'check_in')
+            ->exists();
+
+        if ($alreadyScannedIn) {
+            if (! $session->requires_checkout) {
                 return response()->json([
                     'status' => 'already_scanned',
-                    'message' => 'Attendance already recorded for this participant.',
+                    'message' => 'Attendance already recorded for this session.',
                     'participant_name' => $participant->user->name,
+                    'event_title' => $event->title,
+                    'data' => [
+                        'type' => 'check_in',
+                        'scanned_at' => now()->toIso8601String(),
+                    ],
                 ]);
             }
 
-            Attendance::create([
+            $alreadyScannedOut = Attendance::query()
+                ->where('event_id', $event->id)
+                ->where('user_id', $participant->user_id)
+                ->where('event_session_id', $session->id)
+                ->where('type', 'check_out')
+                ->exists();
+
+            if ($alreadyScannedOut) {
+                return response()->json([
+                    'status' => 'already_scanned',
+                    'message' => 'Both check-in and check-out recorded for this session.',
+                    'participant_name' => $participant->user->name,
+                    'event_title' => $event->title,
+                    'data' => [
+                        'type' => 'check_out',
+                        'scanned_at' => now()->toIso8601String(),
+                    ],
+                ]);
+            }
+
+            $attendance = Attendance::create([
                 'event_id' => $event->id,
                 'user_id' => $participant->user_id,
-                'scan_type' => 'one-time',
+                'event_session_id' => $session->id,
+                'type' => 'check_out',
                 'scanned_at' => now(),
             ]);
 
-            $participant->update(['status' => 'attended']);
-
             return response()->json([
                 'status' => 'success',
-                'message' => 'Attendance recorded successfully.',
+                'message' => 'Check-out recorded successfully.',
                 'participant_name' => $participant->user->name,
+                'event_title' => $event->title,
                 'scanned_at' => now()->toDateTimeString(),
+                'data' => $attendance,
             ]);
         }
 
-        // am-pm attendance logic
-        $scanType = $this->determineAmPmScanType($event->id, $participant->user_id);
-
-        if ($scanType === null) {
-            return response()->json([
-                'status' => 'already_scanned',
-                'message' => 'All attendance slots have been recorded for this participant.',
-                'participant_name' => $participant->user->name,
-            ]);
-        }
-
-        Attendance::create([
+        $attendance = Attendance::create([
             'event_id' => $event->id,
             'user_id' => $participant->user_id,
-            'scan_type' => $scanType,
+            'event_session_id' => $session->id,
+            'type' => 'check_in',
             'scanned_at' => now(),
         ]);
 
@@ -205,35 +170,11 @@ class AttendanceController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => "Attendance recorded: {$scanType}.",
-            'scan_type' => $scanType,
+            'message' => 'Check-in recorded successfully.',
             'participant_name' => $participant->user->name,
+            'event_title' => $event->title,
             'scanned_at' => now()->toDateTimeString(),
+            'data' => $attendance,
         ]);
-    }
-
-    /**
-     * Determine the next AM/PM scan type for a participant.
-     *
-     * Scan order: am_in -> am_out -> pm_in -> pm_out
-     * Returns null if all slots are already recorded.
-     */
-    private function determineAmPmScanType(int $eventId, int $userId): ?string
-    {
-        $scannedTypes = Attendance::query()
-            ->where('event_id', $eventId)
-            ->where('user_id', $userId)
-            ->pluck('scan_type')
-            ->toArray();
-
-        $order = ['am_in', 'am_out', 'pm_in', 'pm_out'];
-
-        foreach ($order as $type) {
-            if (! in_array($type, $scannedTypes)) {
-                return $type;
-            }
-        }
-
-        return null;
     }
 }

@@ -101,28 +101,100 @@
                         <Users
                             class="inline-block h-4 w-4 shrink-0 text-slate-400"
                         />
-                        <span>{{ event.participants_count || 0 }}</span>
+                        <span>{{ event.participants_count || 0 }} Registered</span>
                     </div>
+
                     <div
-                        v-if="event.evaluation_required"
                         class="flex items-center gap-1.5 text-xs font-medium text-slate-500"
-                        title="Evaluation Required"
+                        title="Sessions"
+                    >
+                        <Layers
+                            class="inline-block h-4 w-4 shrink-0 text-slate-400"
+                        />
+                        <span>{{ event.sessions_count || 0 }} Sessions</span>
+                    </div>
+
+                    <div
+                        class="flex items-center gap-1.5 text-xs font-medium text-slate-500"
+                        title="Registration Type"
+                    >
+                        <Tags
+                            class="inline-block h-4 w-4 shrink-0 text-slate-400"
+                        />
+                        <span class="capitalize">{{ event.registration_type ? event.registration_type.replace('_', ' ') : 'Internal' }}</span>
+                    </div>
+
+                    <div
+                        v-if="event.has_evaluation_form"
+                        class="flex items-center gap-1.5 text-xs font-medium text-emerald-600"
+                        title="Evaluation Form Created"
                     >
                         <FileCheck
                             class="inline-block h-4 w-4 shrink-0 text-emerald-500"
                         />
-                        <span>Eval</span>
+                        <span>Eval Ready</span>
                     </div>
                     <div
-                        v-if="event.certificate_enabled"
-                        class="flex items-center gap-1.5 text-xs font-medium text-slate-500"
-                        title="Certificate Attached"
+                        v-else-if="event.evaluation_required"
+                        class="flex items-center gap-1.5 text-xs font-medium text-rose-500"
+                        title="Evaluation Required but not created"
+                    >
+                        <FileX
+                            class="inline-block h-4 w-4 shrink-0 text-rose-400"
+                        />
+                        <span>No Eval</span>
+                    </div>
+
+                    <div
+                        v-if="event.has_certificate_template"
+                        class="flex items-center gap-1.5 text-xs font-medium text-[#d4af37]"
+                        title="Certificate Template Created"
                     >
                         <Award
                             class="inline-block h-4 w-4 shrink-0 text-[#d4af37]"
                         />
-                        <span>Cert</span>
+                        <span>Cert Ready</span>
                     </div>
+                    <div
+                        v-else-if="event.certificate_enabled"
+                        class="flex items-center gap-1.5 text-xs font-medium text-rose-500"
+                        title="Certificate Enabled but not created"
+                    >
+                        <Award
+                            class="inline-block h-4 w-4 shrink-0 text-rose-400 opacity-60"
+                        />
+                        <span>No Cert</span>
+                    </div>
+                </div>
+                
+                <div class="mt-3 flex items-center gap-2.5 text-xs text-slate-500 dark:text-slate-400" title="Registration Dates">
+                    <CalendarPlus class="h-4 w-4 shrink-0 text-slate-400" />
+                    <span class="truncate">
+                        Reg: 
+                        {{
+                            event.registration_start_date ? new Date(event.registration_start_date).toLocaleDateString(
+                                'en-US',
+                                {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: 'numeric',
+                                    minute: '2-digit'
+                                },
+                            ) : 'N/A'
+                        }}
+                        -
+                        {{
+                            event.registration_end_date ? new Date(event.registration_end_date).toLocaleDateString(
+                                'en-US',
+                                {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: 'numeric',
+                                    minute: '2-digit'
+                                },
+                            ) : 'N/A'
+                        }}
+                    </span>
                 </div>
             </div>
 
@@ -140,7 +212,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { Calendar, Users, FileCheck, Award, MapPin, Clock } from '@lucide/vue';
+import { Calendar, Users, FileCheck, FileX, Award, MapPin, Clock, Layers, Tags, CalendarPlus } from '@lucide/vue';
 
 // Define the type locally if not imported
 interface Event {
@@ -150,8 +222,14 @@ interface Event {
     end_time: string;
     location?: string;
     participants_count?: number;
+    sessions_count?: number;
+    registration_type?: string;
+    registration_start_date?: string;
+    registration_end_date?: string;
     evaluation_required?: boolean;
     certificate_enabled?: boolean;
+    has_evaluation_form?: boolean;
+    has_certificate_template?: boolean;
     [key: string]: any;
 }
 

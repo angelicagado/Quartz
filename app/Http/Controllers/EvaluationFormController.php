@@ -131,7 +131,21 @@ class EvaluationFormController extends Controller
             $participant->update(['status' => 'completed']);
         }
 
-        return redirect()->route('portal.events')
-            ->with('success', 'Evaluation submitted successfully.');
+        return back()->with('success', 'Evaluation submitted successfully.');
+    }
+
+    /**
+     * Delete the evaluation form for the specified event.
+     */
+    public function destroy(Event $event): RedirectResponse
+    {
+        $form = $event->evaluationForm;
+
+        if ($form !== null) {
+            $form->delete();
+        }
+
+        return redirect()->route('events.show', $event)
+            ->with('success', 'Evaluation form deleted successfully.');
     }
 }

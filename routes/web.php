@@ -8,6 +8,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventParticipantController;
 use App\Http\Controllers\ParticipantController;
 use App\Http\Controllers\ParticipantProfileController;
+use App\Http\Controllers\PublicEventController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SuperAdminDashboardController;
@@ -17,6 +18,8 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'Welcome')->name('home');
+Route::get('/events', [PublicEventController::class, 'index'])->name('public.events.index');
+Route::get('/events/{event}', [PublicEventController::class, 'show'])->name('public.events.show');
 
 // Super admin dashboard lives at a fixed path, not scoped to a team.
 Route::middleware(['auth', 'verified', 'role:super_admin|admin'])->group(function () {
@@ -40,10 +43,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:super_admin|admin')->group(function () {
         Route::resource('users', UserController::class);
         Route::resource('roles', RoleController::class);
-        Route::resource('events', EventController::class);
-        Route::resource('events.participants', EventParticipantController::class)->only(['index', 'store', 'destroy']);
+        Route::resource('admin/events', EventController::class)->names('events')->parameters(['admin/events' => 'event']);
+        Route::resource('events.participants', EventParticipantController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::post('events/{event}/participants/csv', [EventParticipantController::class, 'uploadCsv'])->name('events.participants.csv');
-        Route::resource('events.evaluations', EvaluationFormController::class)->only(['store']);
+        Route::post('events/{event}/participants/{user}/issue-certificate', [EventParticipantController::class, 'issueCertificate'])->name('events.participants.issue-certificate');
+        Route::resource('events.evaluations', EvaluationFormController::class)->only(['store', 'destroy']);
         Route::resource('events.certificates', CertificateTemplateController::class)->only(['store', 'destroy']);
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('super-admin/logs', [SystemLogController::class, 'index'])->name('super-admin.logs');

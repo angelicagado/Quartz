@@ -43,10 +43,10 @@ const props = defineProps<{
 defineOptions({
     layout: (props: { event?: Event }) => ({
         breadcrumbs: [
-            { title: 'Events', href: '/events' },
+            { title: 'Events', href: '/admin/events' },
             {
                 title: props.event?.title ?? 'Event',
-                href: `/events/${props.event?.id}`,
+                href: `/admin/events/${props.event?.id}`,
             },
             { title: 'Monitor', href: '#' },
         ],
@@ -71,7 +71,7 @@ const scanForm = useForm({
 });
 
 function submitScan() {
-    scanForm.post(`/events/${props.event.id}/attendance/scan`, {
+    scanForm.post(`/admin/events/${props.event.id}/attendance/scan`, {
         onSuccess: () => scanForm.reset('token'),
         preserveScroll: true,
     });
@@ -129,7 +129,7 @@ const strokeDashoffset = computed(
         <!-- Header -->
         <div class="flex items-start justify-between gap-4">
             <div class="flex items-start gap-4">
-                <Link :href="`/events/${event.id}`">
+                <Link :href="`/admin/events/${event.id}`">
                     <Button variant="ghost" size="icon-sm" class="mt-1">
                         <ChevronLeft class="size-4" />
                     </Button>

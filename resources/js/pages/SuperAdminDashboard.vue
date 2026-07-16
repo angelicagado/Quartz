@@ -186,7 +186,7 @@ const formatDate = (value: string): string => new Date(value).toLocaleDateString
       </div>
 
       <Link
-        href="/events"
+        href="/admin/events"
         class="group flex w-full items-center justify-center gap-2 rounded-2xl bg-linear-60 from-slate-800 from-50% to-primary-container px-7 py-3.5 text-[15px] font-medium text-white shadow-sm hover:to-50% hover: transition-all duration-300 active:scale-[0.98] sm:w-auto"
       >
         <Plus class="h-5 w-5 text-[#C5A059]" />

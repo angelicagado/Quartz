@@ -28,22 +28,22 @@ class DashboardController extends Controller
         if ($user->hasRole('event_organizer')) {
             return Inertia::render('OrganizerDashboard', [
                 'stats' => [
-                    'totalEvents' => Event::where('organizer_id', $user->id)->count(),
-                    'todaysEvents' => Event::where('organizer_id', $user->id)
+                    'totalEvents' => Event::whereHas('organizers', fn ($q) => $q->where('user_id', $user->id))->count(),
+                    'todaysEvents' => Event::whereHas('organizers', fn ($q) => $q->where('user_id', $user->id))
                         ->whereDate('start_time', today())
                         ->count(),
                     'totalScans' => Attendance::whereHas('event', function ($query) use ($user) {
-                        $query->where('organizer_id', $user->id);
+                        $query->whereHas('organizers', fn ($q) => $q->where('user_id', $user->id));
                     })->count(),
                 ],
-                'liveEvents' => Event::where('organizer_id', $user->id)
+                'liveEvents' => Event::whereHas('organizers', fn ($q) => $q->where('user_id', $user->id))
                     ->where(function ($query) {
                         $query->whereDate('start_time', today())
                             ->orWhere(function ($q) {
                                 $q->where('start_time', '<=', now())
                                     ->where('end_time', '>=', now());
                             });
-                    })->with('organizer')->orderBy('start_time')->take(5)->get(),
+                    })->with('organizers')->orderBy('start_time')->take(5)->get(),
             ]);
         }
 

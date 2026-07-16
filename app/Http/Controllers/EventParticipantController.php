@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Certificate;
 use App\Models\Event;
 use App\Models\EventParticipant;
 use App\Models\User;
@@ -88,6 +89,20 @@ class EventParticipantController extends Controller
         $this->qrCodeService->generateFor($participant);
 
         return back()->with('success', 'Participant added successfully.');
+    }
+
+    /**
+     * Update participant status.
+     */
+    public function update(Request $request, Event $event, EventParticipant $participant): RedirectResponse
+    {
+        $validated = $request->validate([
+            'status' => ['required', 'string', 'in:registered,confirmed,attended,cancelled'],
+        ]);
+
+        $participant->update($validated);
+
+        return back()->with('success', 'Participant status updated successfully.');
     }
 
     /**
@@ -184,5 +199,43 @@ class EventParticipantController extends Controller
         fclose($handle);
 
         return back()->with('success', "CSV imported: {$imported} participants added, {$skipped} skipped.");
+    }
+
+    /**
+     * Manually issue a certificate to a participant.
+     */
+    public function issueCertificate(Event $event, User $user): RedirectResponse
+    {
+        if (! $event->certificate_enabled) {
+            return back()->with('error', 'Certificates are not enabled for this event.');
+        }
+
+        if ($event->certificateTemplate === null) {
+            return back()->with('error', 'No certificate template has been configured.');
+        }
+
+        $participant = $event->eventParticipants()->where('user_id', $user->id)->first();
+
+        if ($participant === null) {
+            return back()->with('error', 'User is not registered for this event.');
+        }
+
+        // Check if certificate already exists
+        $existing = Certificate::where('event_id', $event->id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if ($existing) {
+            return back()->with('error', 'Participant has already been issued a certificate.');
+        }
+
+        Certificate::create([
+            'event_id' => $event->id,
+            'user_id' => $user->id,
+            'certificate_number' => 'CERT-'.$event->id.'-'.$user->id.'-'.strtoupper(Str::random(5)),
+            'issue_date' => now(),
+        ]);
+
+        return back()->with('success', 'Certificate issued successfully.');
     }
 }

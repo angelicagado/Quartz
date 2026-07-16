@@ -4,6 +4,9 @@ import { Award, Download } from '@lucide/vue';
 import { Button } from '@/components/ui/button';
 import ParticipantLayout from '@/layouts/ParticipantLayout.vue';
 import ProfileRail from '@/components/portal/ProfileRail.vue';
+import { ref } from 'vue';
+import axios from 'axios';
+import { toast } from 'vue-sonner';
 
 interface CertificateItem {
     id: number;
@@ -29,6 +32,35 @@ function formatDate(dateStr: string): string {
         day: 'numeric',
         year: 'numeric',
     });
+}
+
+const isProcessing = ref<Record<number, boolean>>({});
+
+async function downloadCertificate(certificateId: number, url: string, filename: string) {
+    if (isProcessing.value[certificateId]) return;
+    isProcessing.value[certificateId] = true;
+    
+    try {
+        const response = await axios.get(url, { responseType: 'blob' });
+        
+        if (response.data.type && response.data.type.includes('text/html')) {
+             throw new Error("Failed to load certificate.");
+        }
+        
+        const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        
+        toast.success("Certificate downloaded successfully.");
+    } catch (error) {
+        toast.error("We couldn't download your certificate. Please try again later.");
+    } finally {
+        isProcessing.value[certificateId] = false;
+    }
 }
 </script>
 
@@ -87,15 +119,16 @@ function formatDate(dateStr: string): string {
                     </div>
                 </div>
 
-                <a :href="certificate.download_url" class="shrink-0">
-                    <Button
-                        size="sm"
-                        class="bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600"
-                    >
-                        <Download class="size-4" />
-                        Download
-                    </Button>
-                </a>
+                <Button
+                    @click="downloadCertificate(certificate.id, certificate.download_url, `certificate_${certificate.certificate_number}.png`)"
+                    :disabled="isProcessing[certificate.id]"
+                    size="sm"
+                    class="shrink-0 bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600"
+                >
+                    <span v-if="isProcessing[certificate.id]" class="size-4 animate-spin rounded-full border-2 border-current border-t-transparent mr-2"></span>
+                    <Download v-else class="size-4 mr-1" />
+                    Download
+                </Button>
             </div>
         </div>
 

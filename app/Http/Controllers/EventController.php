@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreEventRequest;
 use App\Http\Requests\UpdateEventRequest;
+use App\Models\Attendance;
+use App\Models\Certificate;
+use App\Models\EvaluationResponse;
 use App\Models\Event;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -20,8 +23,8 @@ class EventController extends Controller
     public function index(): Response
     {
         $events = Event::query()
-            ->with('organizer')
-            ->withCount(['eventParticipants', 'attendances'])
+            ->with(['organizers', 'evaluationForm', 'certificateTemplate'])
+            ->withCount(['eventParticipants', 'attendances', 'sessions'])
             ->latest()
             ->get()
             ->map(fn (Event $event) => [
@@ -34,10 +37,13 @@ class EventController extends Controller
                 'registration_type' => $event->registration_type,
                 'evaluation_required' => $event->evaluation_required,
                 'certificate_enabled' => $event->certificate_enabled,
-                'organizer' => $event->organizer ? [
-                    'id' => $event->organizer->id,
-                    'name' => $event->organizer->name,
-                ] : null,
+                'has_evaluation_form' => $event->evaluationForm !== null,
+                'has_certificate_template' => $event->certificateTemplate !== null,
+                'sessions_count' => $event->sessions_count,
+                'organizers' => $event->organizers->map(fn ($o) => [
+                    'id' => $o->id,
+                    'name' => $o->name,
+                ]),
                 'participants_count' => $event->event_participants_count,
                 'attendances_count' => $event->attendances_count,
             ]);
@@ -71,7 +77,14 @@ class EventController extends Controller
         $sessions = $validated['sessions'];
         unset($validated['sessions']);
 
+        $organizers = $validated['organizers'] ?? [];
+        unset($validated['organizers']);
+
         $event = Event::create($validated);
+
+        if (! empty($organizers)) {
+            $event->organizers()->sync($organizers);
+        }
 
         $event->sessions()->createMany($sessions);
 
@@ -82,10 +95,10 @@ class EventController extends Controller
     /**
      * Display the specified event with participants and attendance counts.
      */
-    public function show(Event $event): Response
+    public function show(Request $request, Event $event): Response
     {
         $event->load([
-            'organizer:id,name,email',
+            'organizers:id,name,email',
             'eventParticipants.user:id,name,email',
             'evaluationForm.questions',
             'certificateTemplate',
@@ -94,19 +107,75 @@ class EventController extends Controller
 
         $event->loadCount(['eventParticipants', 'attendances']);
 
+        $participantsQuery = $event->eventParticipants()->with('user');
+
+        $statusFilter = $request->string('status')->toString();
+        if ($statusFilter && $statusFilter !== 'all') {
+            $participantsQuery->where('status', $statusFilter);
+        }
+
+        $sort = $request->string('sort')->toString();
+        if ($sort === 'earliest') {
+            $participantsQuery->oldest();
+        } else {
+            $participantsQuery->latest();
+        }
+
+        $participants = $participantsQuery->paginate(15)->withQueryString();
+
+        $userIds = $participants->pluck('user_id');
+
+        $attendances = Attendance::where('event_id', $event->id)
+            ->whereIn('user_id', $userIds)
+            ->get();
+
+        $certificates = Certificate::where('event_id', $event->id)
+            ->whereIn('user_id', $userIds)
+            ->get();
+
+        $evaluationResponses = collect();
+        if ($event->evaluationForm) {
+            $questionIds = $event->evaluationForm->questions->pluck('id');
+            if ($questionIds->isNotEmpty()) {
+                $evaluationResponses = EvaluationResponse::whereIn('user_id', $userIds)
+                    ->whereIn('evaluation_question_id', $questionIds)
+                    ->get()
+                    ->groupBy('user_id');
+            }
+        }
+
+        $participants->getCollection()->transform(function ($participant) use ($attendances, $certificates, $evaluationResponses) {
+            $userAttendances = $attendances->where('user_id', $participant->user_id)->values();
+            $userCertificate = $certificates->where('user_id', $participant->user_id)->first();
+            $hasAnsweredEvaluation = $evaluationResponses->has($participant->user_id);
+
+            return [
+                'id' => $participant->id,
+                'user_id' => $participant->user_id,
+                'status' => $participant->status,
+                'user' => $participant->user,
+                'attendances' => $userAttendances,
+                'certificate' => $userCertificate,
+                'has_answered_evaluation' => $hasAnsweredEvaluation,
+                'created_at' => $participant->created_at,
+            ];
+        });
+
         return Inertia::render('Events/Show', [
             'event' => [
                 'id' => $event->id,
                 'title' => $event->title,
                 'description' => $event->description,
+                'address' => $event->address,
                 'start_time' => $event->start_time,
                 'end_time' => $event->end_time,
                 'registration_start_date' => $event->registration_start_date,
                 'registration_end_date' => $event->registration_end_date,
                 'registration_type' => $event->registration_type,
+                'attendance_type' => $event->attendance_type,
                 'evaluation_required' => $event->evaluation_required,
                 'certificate_enabled' => $event->certificate_enabled,
-                'organizer' => $event->organizer,
+                'organizers' => $event->organizers,
                 'participants_count' => $event->event_participants_count,
                 'attendances_count' => $event->attendances_count,
                 'has_evaluation_form' => $event->evaluationForm !== null,
@@ -114,6 +183,12 @@ class EventController extends Controller
                 'has_certificate_template' => $event->certificateTemplate !== null,
                 'certificate_template' => $event->certificateTemplate,
                 'sessions' => $event->sessions,
+                'max_participants' => $event->max_participants,
+            ],
+            'participants' => $participants,
+            'filters' => [
+                'status' => $statusFilter,
+                'sort' => $sort,
             ],
         ]);
     }
@@ -123,7 +198,7 @@ class EventController extends Controller
      */
     public function edit(Event $event): Response
     {
-        $event->load('sessions');
+        $event->load('sessions', 'organizers');
 
         $organizers = User::role('event_organizer')
             ->select(['id', 'name', 'email'])
@@ -135,6 +210,7 @@ class EventController extends Controller
                 'id' => $event->id,
                 'title' => $event->title,
                 'description' => $event->description,
+                'address' => $event->address,
                 'start_time' => $event->start_time,
                 'end_time' => $event->end_time,
                 'registration_start_date' => $event->registration_start_date,
@@ -142,7 +218,7 @@ class EventController extends Controller
                 'registration_type' => $event->registration_type,
                 'evaluation_required' => $event->evaluation_required,
                 'certificate_enabled' => $event->certificate_enabled,
-                'organizer_id' => $event->organizer_id,
+                'organizers' => $event->organizers->pluck('id')->toArray(),
                 'sessions' => $event->sessions,
             ],
             'organizers' => $organizers,
@@ -158,7 +234,12 @@ class EventController extends Controller
         $sessionsData = $validated['sessions'];
         unset($validated['sessions']);
 
+        $organizers = $validated['organizers'] ?? [];
+        unset($validated['organizers']);
+
         $event->update($validated);
+
+        $event->organizers()->sync($organizers);
 
         // Update sessions (delete removed, update existing, create new)
         $existingSessionIds = $event->sessions()->pluck('id')->toArray();
@@ -178,7 +259,7 @@ class EventController extends Controller
 
         // Delete sessions that were removed
         $sessionsToDelete = array_diff($existingSessionIds, $updatedSessionIds);
-        if (!empty($sessionsToDelete)) {
+        if (! empty($sessionsToDelete)) {
             $event->sessions()->whereIn('id', $sessionsToDelete)->delete();
         }
 
@@ -206,7 +287,7 @@ class EventController extends Controller
         $user = Auth::user();
 
         $events = Event::query()
-            ->where('organizer_id', $user->id)
+            ->whereHas('organizers', fn ($q) => $q->where('user_id', $user->id))
             ->withCount(['eventParticipants', 'attendances'])
             ->latest()
             ->get()
@@ -234,7 +315,7 @@ class EventController extends Controller
     public function monitor(Event $event): Response
     {
         $event->load([
-            'organizer:id,name,email',
+            'organizers:id,name,email',
             'eventParticipants.user:id,name,email',
             'attendances.user:id,name,email',
             'evaluationForm.questions',
@@ -249,12 +330,13 @@ class EventController extends Controller
                 'id' => $event->id,
                 'title' => $event->title,
                 'description' => $event->description,
+                'address' => $event->address,
                 'start_time' => $event->start_time,
                 'end_time' => $event->end_time,
                 'attendance_type' => $event->attendance_type,
                 'evaluation_required' => $event->evaluation_required,
                 'certificate_enabled' => $event->certificate_enabled,
-                'organizer' => $event->organizer,
+                'organizers' => $event->organizers,
                 'participants_count' => $event->event_participants_count,
                 'attendances_count' => $event->attendances_count,
                 'attended_count' => $attendedUserIds->count(),

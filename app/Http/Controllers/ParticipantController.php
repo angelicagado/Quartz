@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Attendance;
 use App\Models\Certificate;
 use App\Models\EvaluationResponse;
 use App\Models\Event;
@@ -12,7 +13,6 @@ use App\Services\QrCodeService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -30,9 +30,10 @@ class ParticipantController extends Controller
 
         $search = $request->string('search')->toString();
 
-        $registeredEventIds = EventParticipant::query()
+        $participantRecords = EventParticipant::query()
             ->where('user_id', $user->id)
-            ->pluck('event_id');
+            ->get(['event_id', 'status'])
+            ->keyBy('event_id');
 
         $events = Event::query()
             ->where(function ($query) use ($user) {
@@ -63,7 +64,8 @@ class ParticipantController extends Controller
                 'status' => $this->eventStatus($event),
                 'registration_type' => $event->registration_type,
                 'participants_count' => $event->event_participants_count,
-                'is_registered' => $registeredEventIds->contains($event->id),
+                'is_registered' => $participantRecords->has($event->id),
+                'registration_status' => $participantRecords->get($event->id)?->status,
                 'certificate_enabled' => $event->certificate_enabled,
             ]);
 
@@ -83,33 +85,68 @@ class ParticipantController extends Controller
 
         $event->loadCount('eventParticipants')->load('sessions');
 
-        $isRegistered = EventParticipant::query()
+        $participant = EventParticipant::query()
             ->where('event_id', $event->id)
             ->where('user_id', $user->id)
-            ->exists();
+            ->first();
+
+        $attendances = Attendance::query()
+            ->where('event_id', $event->id)
+            ->where('user_id', $user->id)
+            ->get();
+
+        $form = $event->evaluationForm()->with('questions')->first();
+        $evaluationAvailable = $form !== null && $form->questions->isNotEmpty();
+
+        $evaluationSubmitted = false;
+        if ($evaluationAvailable && $participant !== null) {
+            $evaluationSubmitted = EvaluationResponse::query()
+                ->whereIn('evaluation_question_id', $form->questions->pluck('id'))
+                ->where('user_id', $user->id)
+                ->exists();
+        }
+
+        $certificateAvailable = $event->certificate_enabled
+            && $participant !== null
+            && $participant->status !== 'registered'
+            && (! $event->evaluation_required || $evaluationSubmitted);
 
         return Inertia::render('Portal/EventShow', [
             'event' => [
                 'id' => $event->id,
                 'title' => $event->title,
                 'description' => $event->description,
+                'address' => $event->address,
                 'start_time' => $event->start_time,
                 'end_time' => $event->end_time,
                 'registration_start_date' => $event->registration_start_date,
                 'registration_end_date' => $event->registration_end_date,
                 'registration_type' => $event->registration_type,
+                'attendance_type' => $event->attendance_type,
                 'status' => $this->eventStatus($event),
                 'participants_count' => $event->event_participants_count,
                 'certificate_enabled' => $event->certificate_enabled,
+                'certificate_available' => $certificateAvailable,
                 'evaluation_required' => $event->evaluation_required,
-                'is_registered' => $isRegistered,
-                'sessions' => $event->sessions->map(fn (EventSession $session) => [
-                    'id' => $session->id,
-                    'name' => $session->name,
-                    'start_time' => $session->start_time,
-                    'end_time' => $session->end_time,
-                    'requires_checkout' => $session->requires_checkout,
-                ]),
+                'evaluation_available' => $evaluationAvailable,
+                'evaluation_submitted' => $evaluationSubmitted,
+                'max_participants' => $event->max_participants,
+                'is_registered' => $participant !== null,
+                'registration_status' => $participant?->status,
+                'qr_code_url' => $participant?->qr_code_url,
+                'sessions' => $event->sessions->map(function (EventSession $session) use ($attendances) {
+                    $sessionAttendances = $attendances->where('event_session_id', $session->id);
+
+                    return [
+                        'id' => $session->id,
+                        'name' => $session->name,
+                        'start_time' => $session->start_time,
+                        'end_time' => $session->end_time,
+                        'requires_checkout' => $session->requires_checkout,
+                        'has_check_in' => $sessionAttendances->where('type', 'check_in')->isNotEmpty(),
+                        'has_check_out' => $sessionAttendances->where('type', 'check_out')->isNotEmpty(),
+                    ];
+                }),
             ],
         ]);
     }
@@ -151,6 +188,10 @@ class ParticipantController extends Controller
             return back()->with('error', 'You are already registered for this event.');
         }
 
+        if ($event->hasReachedCapacity()) {
+            return back()->with('error', 'This event has reached its maximum participant capacity.');
+        }
+
         $participant = EventParticipant::create([
             'event_id' => $event->id,
             'user_id' => $user->id,
@@ -159,8 +200,7 @@ class ParticipantController extends Controller
 
         $this->qrCodeService->generateFor($participant);
 
-        return redirect()->route('portal.qr', $event)
-            ->with('success', 'You have successfully registered for this event!');
+        return back()->with('success', 'You have successfully registered for this event!');
     }
 
     /**
@@ -181,19 +221,27 @@ class ParticipantController extends Controller
                 ->with('error', 'You are not registered for this event.');
         }
 
+        $event->load('sessions');
+
         return Inertia::render('Portal/QrCode', [
             'event' => [
                 'id' => $event->id,
                 'title' => $event->title,
                 'start_time' => $event->start_time,
                 'end_time' => $event->end_time,
+                'attendance_type' => $event->attendance_type,
+                'sessions_count' => $event->sessions->count(),
+                'sessions' => $event->sessions->map(fn ($session) => [
+                    'id' => $session->id,
+                    'name' => $session->name,
+                    'start_time' => $session->start_time,
+                    'end_time' => $session->end_time,
+                ]),
             ],
             'participant' => [
                 'id' => $participant->id,
                 'status' => $participant->status,
-                'qr_code_url' => $participant->qr_code_path
-                    ? Storage::url(str_replace('public/', '', $participant->qr_code_path))
-                    : null,
+                'qr_code_url' => $participant->qr_code_url,
                 'user' => [
                     'name' => $user->name,
                     'email' => $user->email,

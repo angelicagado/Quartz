@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
-import { ArrowLeft, CalendarDays, Clock, QrCode } from '@lucide/vue';
+import { ArrowLeft, CalendarDays, Clock, QrCode, Download, Layers, UserCheck } from '@lucide/vue';
 import ParticipantLayout from '@/layouts/ParticipantLayout.vue';
+import { downloadQrAsPng } from '@/lib/downloadQr';
 
 interface Event {
     id: number;
@@ -9,6 +10,9 @@ interface Event {
     start_time: string;
     end_time: string;
     location?: string;
+    attendance_type: string;
+    sessions_count: number;
+    sessions: { id: number; name: string; start_time: string; end_time: string; }[];
 }
 
 interface ParticipantData {
@@ -43,11 +47,10 @@ function formatTime(dateStr: string) {
 </script>
 
 <template>
-    <Head :title="`QR Code — ${event.title}`" />
-
     <div
         class="flex h-full flex-1 flex-col items-center justify-center gap-6 p-6"
     >
+        <Head :title="`QR Code — ${event.title}`" />
         <div class="w-full max-w-md">
             <!-- Back Link -->
             <Link
@@ -101,6 +104,14 @@ function formatTime(dateStr: string) {
                             :alt="`QR Code for ${participant.user.name}`"
                             class="size-56 rounded-xl bg-white object-contain p-2 shadow-md"
                         />
+                        
+                        <!-- Download Button -->
+                        <button 
+                            @click="downloadQrAsPng(participant.qr_code_url)" 
+                            class="absolute -bottom-4 right-0 flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg transition-transform hover:scale-105 hover:bg-primary/90"
+                        >
+                            <Download class="size-4" /> Download
+                        </button>
                     </div>
                     <div
                         v-else
@@ -135,30 +146,45 @@ function formatTime(dateStr: string) {
                     <!-- Event Details -->
                     <div class="w-full space-y-2.5">
                         <div class="flex items-start gap-3">
-                            <CalendarDays
-                                class="mt-0.5 size-4 shrink-0 text-muted-foreground"
-                            />
+                            <CalendarDays class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
                             <div>
-                                <p class="text-xs text-muted-foreground">
-                                    Start
-                                </p>
+                                <p class="text-xs text-muted-foreground">Event Schedule</p>
                                 <p class="text-sm font-medium text-foreground">
-                                    {{ formatDate(event.start_time) }}
+                                    {{ formatDate(event.start_time) }} <br>
+                                    {{ formatTime(event.start_time) }} – {{ formatTime(event.end_time) }}
                                 </p>
                             </div>
                         </div>
+
                         <div class="flex items-start gap-3">
-                            <Clock
-                                class="mt-0.5 size-4 shrink-0 text-muted-foreground"
-                            />
+                            <UserCheck class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
                             <div>
+                                <p class="text-xs text-muted-foreground">Attendance Type</p>
+                                <p class="text-sm font-medium text-foreground capitalize">
+                                    {{ event.attendance_type.replace('_', ' ') }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3" v-if="event.sessions_count > 0">
+                            <Layers class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                            <div class="w-full">
                                 <p class="text-xs text-muted-foreground">
-                                    Time
+                                    Sessions ({{ event.sessions_count }})
                                 </p>
-                                <p class="text-sm font-medium text-foreground">
-                                    {{ formatTime(event.start_time) }} –
-                                    {{ formatTime(event.end_time) }}
-                                </p>
+                                <div class="mt-2 space-y-2">
+                                    <div 
+                                        v-for="session in event.sessions" 
+                                        :key="session.id"
+                                        class="rounded-lg border border-border bg-muted/20 p-2 text-sm"
+                                    >
+                                        <p class="font-medium text-foreground">{{ session.name }}</p>
+                                        <p class="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                                            <Clock class="size-3" />
+                                            {{ formatTime(session.start_time) }} – {{ formatTime(session.end_time) }}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

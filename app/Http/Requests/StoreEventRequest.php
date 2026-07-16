@@ -24,6 +24,7 @@ class StoreEventRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'address' => ['nullable', 'string', 'max:1000'],
             'start_time' => ['required', 'date'],
             'end_time' => ['required', 'date', 'after:start_time'],
             'registration_start_date' => ['nullable', 'date'],
@@ -36,7 +37,9 @@ class StoreEventRequest extends FormRequest
             'sessions.*.requires_checkout' => ['boolean'],
             'evaluation_required' => ['boolean'],
             'certificate_enabled' => ['boolean'],
-            'organizer_id' => ['nullable', 'exists:users,id'],
+            'max_participants' => ['nullable', 'integer', 'min:1'],
+            'organizers' => ['nullable', 'array'],
+            'organizers.*' => ['exists:users,id'],
         ];
     }
 }

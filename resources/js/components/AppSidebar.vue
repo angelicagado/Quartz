@@ -49,7 +49,7 @@ const mainNavItems = computed<NavItem[]>(() => [
   },
   {
     title: "Events",
-    href: "/events",
+    href: "/admin/events",
     icon: CalendarDays,
   },
   {

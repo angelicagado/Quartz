@@ -3,6 +3,7 @@ import { Head, Link, useForm } from '@inertiajs/vue3';
 import { Award, CalendarDays, CheckCircle2, ChevronLeft, Star } from '@lucide/vue';
 import { ref } from 'vue';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import ParticipantLayout from '@/layouts/ParticipantLayout.vue';
 
 interface Question {
@@ -46,7 +47,30 @@ const evaluationForm = useForm({
     answers: buildInitialAnswers(),
 });
 
+const formErrors = ref<Record<number, string>>({});
+const showSuccessModal = ref(false);
+
+function validateForm(): boolean {
+    formErrors.value = {};
+    let isValid = true;
+    props.form?.questions?.forEach((q) => {
+        const answer = evaluationForm.answers[q.id];
+        if (q.question_type === 'rating' && (!answer || Number(answer) === 0)) {
+            formErrors.value[q.id] = 'Please provide a rating.';
+            isValid = false;
+        } else if ((q.question_type === 'text' || q.question_type === 'options') && (!answer || String(answer).trim() === '')) {
+            formErrors.value[q.id] = 'This field is required.';
+            isValid = false;
+        }
+    });
+    return isValid;
+}
+
 function submitEvaluation() {
+    if (!validateForm()) {
+        return;
+    }
+
     evaluationForm
         .transform((data) => ({
             responses: props.form.questions.map((q) => {
@@ -69,6 +93,9 @@ function submitEvaluation() {
         }))
         .post(`/portal/events/${props.event.id}/evaluation`, {
             preserveScroll: true,
+            onSuccess: () => {
+                showSuccessModal.value = true;
+            }
         });
 }
 
@@ -236,10 +263,10 @@ function formatDate(dateStr: string) {
 
                                 <!-- Error -->
                                 <p
-                                    v-if="(evaluationForm.errors as Record<string, string>)[`answers.${question.id}`]"
+                                    v-if="formErrors[question.id] || (evaluationForm.errors as Record<string, string>)[`answers.${question.id}`]"
                                     class="mt-1 ml-9 text-xs text-destructive"
                                 >
-                                    {{ (evaluationForm.errors as Record<string, string>)[`answers.${question.id}`] }}
+                                    {{ formErrors[question.id] || (evaluationForm.errors as Record<string, string>)[`answers.${question.id}`] }}
                                 </p>
                             </div>
                         </div>
@@ -260,5 +287,34 @@ function formatDate(dateStr: string) {
                 </div>
             </div>
         </div>
+
+        <!-- Success Modal -->
+        <Dialog :open="showSuccessModal" @update:open="showSuccessModal = $event">
+            <DialogContent class="sm:max-w-md text-center">
+                <div class="flex flex-col items-center gap-4 py-6">
+                    <div class="relative">
+                        <div class="flex size-20 items-center justify-center rounded-full bg-gradient-to-br from-green-400 to-teal-500 shadow-lg shadow-green-200 dark:shadow-green-900/30">
+                            <CheckCircle2 class="size-10 text-white" />
+                        </div>
+                        <div class="absolute -right-1 -top-1 flex size-7 items-center justify-center rounded-full bg-amber-400 shadow-sm">
+                            <Award class="size-3.5 text-white" />
+                        </div>
+                    </div>
+                    <DialogHeader>
+                        <DialogTitle class="text-2xl font-serif text-center">Thank You!</DialogTitle>
+                        <DialogDescription class="text-center text-base mt-2">
+                            Your evaluation has been submitted successfully. We appreciate your feedback!
+                        </DialogDescription>
+                    </DialogHeader>
+                </div>
+                <DialogFooter class="sm:justify-center">
+                    <Link href="/portal/events" class="w-full sm:w-auto">
+                        <Button type="button" class="w-full">
+                            Back to Events
+                        </Button>
+                    </Link>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </div>
 </template>

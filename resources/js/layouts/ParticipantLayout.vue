@@ -248,6 +248,8 @@
                 </DialogFooter>
             </DialogContent>
         </Dialog>
+
+        <Toaster />
     </div>
 </template>
 
@@ -282,6 +284,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Toaster } from '@/components/ui/sonner';
 import { getInitials } from '@/composables/useInitials';
 import { logout } from '@/routes';
 
