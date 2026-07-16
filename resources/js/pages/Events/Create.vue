@@ -74,14 +74,14 @@ function applyPreset(preset: string) {
     form.sessions = [
       {
         name: "Morning Session",
-        start_time: "",
-        end_time: "",
+        start_time: "08:00",
+        end_time: "12:00",
         requires_checkout: true,
       },
       {
         name: "Afternoon Session",
-        start_time: "",
-        end_time: "",
+        start_time: "13:00",
+        end_time: "17:00",
         requires_checkout: true,
       }
     ];

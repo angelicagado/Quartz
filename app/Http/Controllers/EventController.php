@@ -80,6 +80,11 @@ class EventController extends Controller
         $organizers = $validated['organizers'] ?? [];
         unset($validated['organizers']);
 
+        // The event window is derived from its sessions: it starts when the
+        // earliest session starts and ends when the latest session ends.
+        $validated['start_time'] = collect($sessions)->min('start_time');
+        $validated['end_time'] = collect($sessions)->max('end_time');
+
         $event = Event::create($validated);
 
         if (! empty($organizers)) {
