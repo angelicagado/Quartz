@@ -23,10 +23,10 @@ const dashboardUrl = computed(() =>
 
     <div class="min-h-screen overflow-x-hidden font-body-md text-foreground bg-background antialiased selection:bg-primary/20 selection:text-primary">
         <!-- TopNavBar -->
-        <nav class="sticky top-0 z-50 border-b border-border bg-white/80 shadow-sm backdrop-blur-xl">
+        <nav class="sticky top-0 z-50  bg-white/80 shadow-sm backdrop-blur-xl">
             <div class="mx-auto flex h-20 max-w-container-max items-center justify-between px-margin-desktop max-md:px-margin-mobile">
-                <div class="font-headline-md text-headline-md font-bold tracking-widest text-primary">
-                    QUARTZ
+                <div class="font-headline-md text-headline-md font-bold tracking-widest text-primary flex gap-2 items-center">
+                    <img src="/images/quartz-logo.png" alt="" class=" h-10">
                 </div>
                 <div class="hidden items-center gap-gutter font-body-md text-body-md md:flex">
                     <Link class="text-muted-foreground transition-colors duration-300 hover:text-primary" href="/events">Events</Link>
@@ -52,18 +52,22 @@ const dashboardUrl = computed(() =>
         </nav>
 
         <!-- Hero Section -->
-        <header class="relative flex min-h-[90vh] items-center justify-center overflow-hidden pt-20 pb-32">
-            <!-- Abstract Background -->
-            <div class="absolute inset-0 z-0">
-                <div class="absolute inset-0 z-10 bg-white/90"></div>
-                <div
-                    class="absolute inset-0 z-0 bg-cover bg-center opacity-10 mix-blend-overlay"
-                    style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDnAvVgd6dbED8-E0Z7ftyR8ljk65t055MwUF4QmrJH040Agal3Lla_YwK2Ek6mzHlvL9Yve6FaAgd9N8JqOTNfYfxbb1Tcw0BnFnzT3F9vtY9RkTPCeCryrHhjJ7HvajGU_WYvd3Oi-qSQO-D2__YDCUhrEUMw9hJjfqR7lhDmDcU-4YDIMVzPzALBhkwgJE0HIZcOtqB7DITm9tsNLV7Ut2W1vQ5rjyvea_EUZAf769hrdA437zJK');"
-                ></div>
-                <div class="pointer-events-none absolute top-1/4 left-1/4 z-10 h-96 w-96 rounded-full bg-primary/20 blur-[120px]"></div>
-                <div class="pointer-events-none absolute right-1/4 bottom-1/4 z-10 h-96 w-96 rounded-full bg-secondary/20 blur-[120px]"></div>
+        <header class="relative flex min-h-[90vh]  overflow-hidden pt-20 pb-32">
+
+            <!-- Background Video -->
+            <div class="absolute inset-0 z-0 overflow-hidden">
+                <video
+                    autoplay
+                    loop
+                    muted
+                    playsinline
+                    class="absolute inset-0 z-0 h-full w-full object-cover"
+                >
+                    <source src="https://res.cloudinary.com/di6h8djgw/video/upload/17017654-hd_1280_720_60fps_a6u7ny.mp4" type="video/mp4" />
+                </video>
+                <div class="absolute inset-0 z-10 bg-slate-200/95 w-1/2 skew-4 -translate-12 h-screen"></div>
             </div>
-            <div class="relative z-20 mx-auto flex max-w-container-max flex-col items-center gap-8 px-margin-desktop max-md:px-margin-mobile md:flex-row">
+            <div class="relative z-20 flex max-w-container-max flex-col items-center gap-8 px-margin-desktop max-md:px-margin-mobile md:flex-row">
                 <div class="space-y-6">
                     <h1 class="max-w-4xl font-display-lg text-display-lg text-foreground max-md:font-headline-lg-mobile max-md:text-headline-lg-mobile">
                         Digitizing <br /><span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Event Management</span>
@@ -82,13 +86,7 @@ const dashboardUrl = computed(() =>
                         </button>
                     </div>
                 </div>
-                <div>
-                    <img
-                        alt="Quartz Event Orchestration Logo"
-                        class="mb-8 h-auto w-64 md:w-80 drop-shadow-2xl"
-                        src="/images/quartzlogo.png"
-                    />
-                </div>
+                
             </div>
         </header>
 
@@ -216,7 +214,7 @@ const dashboardUrl = computed(() =>
                     QUARTZ
                 </div>
                 <div class="text-center font-body-md text-body-md text-muted-foreground md:text-left">
-                    © 2026 Quartz Event Management.
+                    © 2026 Quartz
                 </div>
                 <div class="flex gap-6 font-label-sm text-label-sm">
                     <a class="text-muted-foreground transition-colors hover:text-primary" href="#">Privacy Policy</a>
