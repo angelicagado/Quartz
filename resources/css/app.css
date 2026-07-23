@@ -150,7 +150,7 @@
     --card-foreground: hsl(0 0% 3.9%);
     --popover: hsl(0 0% 100%);
     --popover-foreground: hsl(0 0% 3.9%);
-    --primary: #5B3FBB;
+    --primary: #6D4AFF;
     --primary-foreground: hsl(0 0% 98%);
     --secondary: #2563EB;
     --secondary-foreground: hsl(0 0% 98%);
@@ -199,7 +199,7 @@
     --destructive-foreground: hsl(0 0% 98%);
     --border: #2a3140;
     --input: #2a3140;
-    --ring: #d4af37;
+    --ring: #6D4AFF;
     --chart-1: hsl(220 70% 50%);
     --chart-2: hsl(160 60% 45%);
     --chart-3: hsl(30 80% 55%);
@@ -207,12 +207,12 @@
     --chart-5: hsl(340 75% 55%);
     --sidebar-background: #090c14;
     --sidebar-foreground: #f8f9fc;
-    --sidebar-primary: #d4af37;
+    --sidebar-primary: #6D4AFF;
     --sidebar-primary-foreground: #0e131e;
     --sidebar-accent: #1e2532;
-    --sidebar-accent-foreground: #d4af37;
+    --sidebar-accent-foreground: #F59E0B;
     --sidebar-border: #1e2532;
-    --sidebar-ring: #d4af37;
+    --sidebar-ring: #6D4AFF;
     --sidebar: #090c14;
 }
 
@@ -245,7 +245,7 @@
         var(--gradient-angle),
         var(--color-slate-800),
 
-        var(--color-primary-container)
+        var(--color-primary)
     );
     animation: spin-gradient 10s ease-in-out infinite alternate;
 }

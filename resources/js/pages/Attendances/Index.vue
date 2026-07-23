@@ -129,10 +129,10 @@
       <!-- Card A (Left on desktop, Bottom on mobile) -->
       <div class="w-full lg:w-2/3">
         <div
-          class="relative h-full overflow-hidden rounded-[2.5rem] border border-slate-800 bg-slate-900 p-6 shadow-2xl sm:p-10 dark:border-slate-700 dark:bg-slate-800"
+          class="relative h-full overflow-hidden rounded-[2.5rem] border border-purple-300 bg-purple-100/85 p-6 shadow-2xl sm:p-10"
         >
           <div
-            class="absolute top-0 right-0 h-64 w-64 translate-x-1/2 -translate-y-1/2 rounded-full bg-[#d4af37]/10 blur-3xl"
+            class="absolute top-0 right-0 h-64 w-64 translate-x-1/2 -translate-y-1/2 rounded-full bg-purple-300/90 blur-3xl"
           ></div>
 
           <div class="relative z-10 h-full">

@@ -7,7 +7,7 @@ Quartz is a premium, web-based event management suite designed for elite corpora
 - **Name:** Quartz
 - **Slogan:** Precision in Every Event. Prestige in Every Detail.
 - **Design System:** "Luminous Corporate Dark"
-- **Visual Palette:** Deep navy (`#0e131e`) and charcoal surfaces, accented with shimmering gold (`#d4af37`) and silver.
+- **Visual Palette:** Deep navy (`#0e131e`) and charcoal surfaces, accented with Primary (`#6D4AFF`), Secondary Sapphire Blue (`#2563EB`), and Amber Gold (`#F59E0B`).
 - **Typography:** 
     - **Headings:** Playfair Display (Serif) for authority and elegance.
     - **Body:** Clean Sans-serif for modern readability.

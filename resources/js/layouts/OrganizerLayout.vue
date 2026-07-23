@@ -17,7 +17,7 @@
             <div
                 class="relative flex h-20 items-center justify-between overflow-hidden border-b border-slate-800 px-6"
             >
-                <div class="absolute inset-0 bg-[#d4af37]/5"></div>
+                <div class="absolute inset-0 bg-[#6D4AFF]/5"></div>
                 <img
                     src="/quartzlogo.png"
                     alt="QUARTZ"
@@ -44,14 +44,14 @@
                     class="group relative flex items-center gap-3 overflow-hidden rounded-xl px-3 py-3 transition-all duration-200"
                     :class="[
                         isActive(item.href)
-                            ? 'bg-[#1E293B] text-white shadow-[inset_2px_0_0_0_#d4af37]'
+                            ? 'bg-[#1E293B] text-white shadow-[inset_2px_0_0_0_#6D4AFF]'
                             : 'text-slate-400 hover:bg-slate-800 hover:text-white',
                     ]"
                 >
                     <div
                         :class="
                             isActive(item.href)
-                                ? 'text-[#d4af37]'
+                                ? 'text-[#6D4AFF]'
                                 : 'text-slate-500 group-hover:text-slate-300'
                         "
                     >
@@ -67,7 +67,7 @@
                 >
                     <div class="mb-4 flex items-center gap-3">
                         <div
-                            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-600 bg-slate-700 text-[#d4af37]"
+                            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-600 bg-slate-700 text-[#F59E0B]"
                         >
                             <span class="font-bold">{{
                                 user?.name?.charAt(0) || 'O'

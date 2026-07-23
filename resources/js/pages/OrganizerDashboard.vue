@@ -5,7 +5,7 @@
             class="relative flex flex-col justify-between gap-6 overflow-hidden rounded-3xl border border-slate-800 bg-slate-900 p-8 text-white shadow-2xl md:flex-row md:items-center lg:p-10"
         >
             <div
-                class="bg-gradient-radial absolute top-0 right-0 h-[500px] w-[500px] translate-x-1/3 -translate-y-1/2 rounded-full from-[#d4af37]/20 to-transparent blur-3xl"
+                class="bg-gradient-radial absolute top-0 right-0 h-[500px] w-[500px] translate-x-1/3 -translate-y-1/2 rounded-full from-[#6D4AFF]/20 to-transparent blur-3xl"
             ></div>
             <div
                 class="absolute bottom-[-100px] left-[-100px] h-[300px] w-[300px] rounded-full bg-slate-800/50 mix-blend-screen blur-3xl"
@@ -13,10 +13,10 @@
 
             <div class="relative z-10 flex-1 space-y-3">
                 <div
-                    class="mb-2 inline-flex items-center gap-2 rounded-full border border-slate-700/50 bg-slate-800/80 px-3 py-1 text-xs font-bold tracking-widest text-[#d4af37] backdrop-blur-sm"
+                    class="mb-2 inline-flex items-center gap-2 rounded-full border border-slate-700/50 bg-slate-800/80 px-3 py-1 text-xs font-bold tracking-widest text-[#F59E0B] backdrop-blur-sm"
                 >
                     <span
-                        class="h-2 w-2 animate-pulse rounded-full bg-[#d4af37]"
+                        class="h-2 w-2 animate-pulse rounded-full bg-[#F59E0B]"
                     ></span>
                     ACTIVE ORGANIZER
                 </div>
@@ -25,7 +25,7 @@
                 >
                     Welcome,
                     <span
-                        class="bg-gradient-to-r from-[#d4af37] to-[#F3E5AB] bg-clip-text text-transparent"
+                        class="bg-gradient-to-r from-[#6D4AFF] to-[#2563EB] bg-clip-text text-transparent"
                         >{{ auth.user.name }}</span
                     >
                 </h1>
@@ -39,7 +39,7 @@
                 class="relative z-10 flex shrink-0 items-center gap-4 rounded-2xl border border-white/20 bg-white/10 p-4 shadow-xl backdrop-blur-md"
             >
                 <div
-                    class="flex h-16 w-16 items-center justify-center rounded-xl bg-[#d4af37] text-white shadow-[0_0_20px_rgba(197,160,89,0.4)]"
+                    class="flex h-16 w-16 items-center justify-center rounded-xl bg-[#6D4AFF] text-white shadow-[0_0_20px_rgba(109,74,255,0.4)]"
                 >
                     <CalendarDays class="h-8 w-8" />
                 </div>
@@ -53,7 +53,7 @@
             <h2
                 class="mb-6 flex items-center gap-2 font-serif text-2xl font-bold tracking-tight text-slate-900 drop-shadow-sm dark:text-slate-100"
             >
-                <Activity class="h-6 w-6 text-[#d4af37]" />
+                <Activity class="h-6 w-6 text-[#F59E0B]" />
                 Quick Access Dashboard
             </h2>
             <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
@@ -62,7 +62,7 @@
                     class="group relative flex min-h-[220px] cursor-pointer flex-col justify-between overflow-hidden rounded-2xl border border-slate-700 bg-gradient-to-br from-slate-900 to-slate-800 p-6 shadow-xl transition-all duration-300 active:scale-[0.98]"
                 >
                     <div
-                        class="absolute top-[-50px] right-[-50px] h-32 w-32 rounded-full bg-[#d4af37]/20 blur-2xl transition-colors duration-500 group-hover:bg-[#d4af37]/40"
+                        class="absolute top-[-50px] right-[-50px] h-32 w-32 rounded-full bg-[#6D4AFF]/20 blur-2xl transition-colors duration-500 group-hover:bg-[#6D4AFF]/40"
                     ></div>
                     <div
                         class="relative z-10 mb-4 flex items-center justify-between"
@@ -113,14 +113,14 @@
                         class="relative z-10 mb-4 flex items-center justify-between"
                     >
                         <div
-                            class="flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-100 bg-slate-50 text-slate-600 transition-all duration-500 group-hover:scale-110 group-hover:bg-[#d4af37] group-hover:text-white dark:border-slate-800 dark:bg-slate-800 dark:text-slate-400"
+                            class="flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-100 bg-slate-50 text-slate-600 transition-all duration-500 group-hover:scale-110 group-hover:bg-[#6D4AFF] group-hover:text-white dark:border-slate-800 dark:bg-slate-800 dark:text-slate-400"
                         >
                             <CalendarDays class="h-7 w-7" />
                         </div>
                     </div>
                     <div class="relative z-10 mt-auto">
                         <h3
-                            class="mb-2 font-serif text-xl font-bold tracking-tight text-slate-900 transition-colors group-hover:text-[#d4af37] dark:text-slate-100"
+                            class="mb-2 font-serif text-xl font-bold tracking-tight text-slate-900 transition-colors group-hover:text-[#6D4AFF] dark:text-slate-100"
                         >
                             Managed Events
                         </h3>
@@ -168,7 +168,7 @@
                 <h2
                     class="flex items-center gap-2 font-serif text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100"
                 >
-                    <Activity class="h-6 w-6 text-[#d4af37]" />
+                    <Activity class="h-6 w-6 text-[#F59E0B]" />
                     Live Event Feed
                 </h2>
                 <div
@@ -207,7 +207,7 @@
                     >
                         <div class="flex items-center gap-5">
                             <div
-                                class="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-800 bg-slate-900 text-sm font-bold text-[#d4af37] shadow-lg transition-all group-hover:scale-110 group-hover:-rotate-3"
+                                class="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-800 bg-slate-900 text-sm font-bold text-[#6D4AFF] shadow-lg transition-all group-hover:scale-110 group-hover:-rotate-3"
                             >
                                 EV
                             </div>
@@ -255,7 +255,7 @@
                                 }}
                             </p>
                             <p
-                                class="mt-1 text-[10px] font-bold tracking-widest text-[#d4af37] uppercase"
+                                class="mt-1 text-[10px] font-bold tracking-widest text-[#6D4AFF] uppercase"
                             >
                                 {{
                                     new Date(
@@ -269,7 +269,7 @@
                 <Link
                     v-if="liveEvents.length > 0"
                     href="/my-events"
-                    class="group block w-full border-t border-slate-100 bg-slate-50/30 py-5 text-center text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase transition-all hover:bg-white hover:text-[#d4af37] dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800"
+                    class="group block w-full border-t border-slate-100 bg-slate-50/30 py-5 text-center text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase transition-all hover:bg-white hover:text-[#6D4AFF] dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800"
                 >
                     <span class="transition-all group-hover:tracking-[0.25em]"
                         >View All Events</span

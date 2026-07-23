@@ -58,7 +58,7 @@ onMounted(() => {
   isMounted.value = true;
 });
 
-const barColors = ["#1E293B", "#C5A059", "#94A3B8", "#0EA5E9", "#10B981"];
+const barColors = ["#1E293B", "#6D4AFF", "#94A3B8", "#0EA5E9", "#10B981"];
 
 const lineSeries = computed(() => [
   { name: "Events", data: props.lineData.map((point) => point.events) },
@@ -75,7 +75,7 @@ const lineOptions = computed(() => ({
     toolbar: { show: false },
     zoom: { enabled: false },
   },
-  colors: ["#1E293B", "#C5A059"],
+  colors: ["#1E293B", "#6D4AFF"],
   stroke: { curve: "smooth" as const, width: 3 },
   dataLabels: { enabled: false },
   grid: { borderColor: "#f1f5f9", strokeDashArray: 4 },
@@ -156,7 +156,7 @@ const formatDate = (value: string): string => new Date(value).toLocaleDateString
     <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
       <div>
         <p
-          class="mb-3 inline-flex items-center gap-2 rounded-full border border-[#C5A059]/20 bg-[#C5A059]/10 px-3 py-1 text-xs font-bold tracking-widest text-[#C5A059]"
+          class="mb-3 inline-flex items-center gap-2 rounded-full border border-[#6D4AFF]/20 bg-[#6D4AFF]/10 px-3 py-1 text-xs font-bold tracking-widest text-[#6D4AFF]"
         >
           ADMIN OVERVIEW
         </p>
@@ -178,7 +178,7 @@ const formatDate = (value: string): string => new Date(value).toLocaleDateString
         <input
           type="text"
           placeholder="Search events, users, or certificates..."
-          class="w-full rounded-2xl border border-slate-200 bg-white py-3.5 pr-4 pl-12 text-[15px] font-light text-slate-700 shadow-sm transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-[#C5A059] focus:ring-4 focus:ring-[#C5A059]/10 focus:outline-none"
+          class="w-full rounded-2xl border border-slate-200 bg-white py-3.5 pr-4 pl-12 text-[15px] font-light text-slate-700 shadow-sm transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-[#6D4AFF] focus:ring-4 focus:ring-[#6D4AFF]/10 focus:outline-none"
         />
         <Search
           class="pointer-events-none absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-slate-400"
@@ -187,9 +187,9 @@ const formatDate = (value: string): string => new Date(value).toLocaleDateString
 
       <Link
         href="/admin/events"
-        class="group flex w-full items-center justify-center gap-2 rounded-2xl bg-linear-60 from-slate-800 from-50% to-primary-container px-7 py-3.5 text-[15px] font-medium text-white shadow-sm hover:to-50% hover: transition-all duration-300 active:scale-[0.98] sm:w-auto"
+        class="group flex w-full items-center justify-center gap-2 rounded-2xl bg-linear-60 from-slate-800 from-50% to-primary px-7 py-3.5 text-[15px] font-medium text-white shadow-sm hover:to-50% hover: transition-all duration-300 active:scale-[0.98] sm:w-auto"
       >
-        <Plus class="h-5 w-5 text-[#C5A059]" />
+        <Plus class="h-5 w-5 text-[#F59E0B]" />
         Manage Events
       </Link>
     </div>
@@ -200,7 +200,7 @@ const formatDate = (value: string): string => new Date(value).toLocaleDateString
         class="group relative flex items-start justify-between overflow-hidden rounded-[1.5rem] border border-slate-100 bg-white p-7 shadow-sm transition-all hover:shadow-md"
       >
         <div
-          class="absolute top-0 right-0 -z-10 h-32 w-32 rounded-bl-full bg-gradient-to-br from-[#C5A059]/5 to-transparent transition-transform duration-500 group-hover:scale-110"
+          class="absolute top-0 right-0 -z-10 h-32 w-32 rounded-bl-full  transition-transform duration-500 group-hover:scale-110"
         ></div>
         <div>
           <p class="mb-2 text-sm font-medium text-slate-500">Upcoming Events</p>
@@ -211,7 +211,7 @@ const formatDate = (value: string): string => new Date(value).toLocaleDateString
         <div
           class="flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-100 bg-white shadow-sm"
         >
-          <CalendarIcon class="h-7 w-7 text-[#C5A059]" />
+          <CalendarIcon class="h-7 w-7 text-[#6D4AFF]" />
         </div>
       </div>
 
@@ -238,7 +238,7 @@ const formatDate = (value: string): string => new Date(value).toLocaleDateString
         class="group relative flex items-start justify-between overflow-hidden rounded-[1.5rem] border border-slate-100 bg-white p-7 shadow-sm transition-all hover:shadow-md"
       >
         <div
-          class="absolute top-0 right-0 -z-10 h-32 w-32 rounded-bl-full bg-gradient-to-br from-[#C5A059]/5 to-transparent transition-transform duration-500 group-hover:scale-110"
+          class="absolute top-0 right-0 -z-10 h-32 w-32 rounded-bl-full bg-gradient-to-br from-[#6D4AFF]/5 to-transparent transition-transform duration-500 group-hover:scale-110"
         ></div>
         <div>
           <p class="mb-2 text-sm font-medium text-slate-500">Total Events Managed</p>
@@ -249,7 +249,7 @@ const formatDate = (value: string): string => new Date(value).toLocaleDateString
         <div
           class="flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-100 bg-white shadow-sm"
         >
-          <Layers class="h-7 w-7 text-[#C5A059]" />
+          <Layers class="h-7 w-7 text-[#6D4AFF]" />
         </div>
       </div>
     </div>
@@ -263,7 +263,7 @@ const formatDate = (value: string): string => new Date(value).toLocaleDateString
           <h3 class="text-[1.15rem] font-semibold text-slate-900">Growth Analysis</h3>
           <Link
             href="/reports"
-            class="rounded-full px-3 py-1 text-sm font-semibold text-[#C5A059] transition-colors hover:bg-[#C5A059]/10 hover:text-[#b38d45]"
+            class="rounded-full px-3 py-1 text-sm font-semibold text-[#6D4AFF] transition-colors hover:bg-[#6D4AFF]/10 hover:text-[#2563EB]"
           >
             View Full Report
           </Link>
@@ -311,7 +311,7 @@ const formatDate = (value: string): string => new Date(value).toLocaleDateString
         <h2
           class="flex items-center gap-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100"
         >
-          <Activity class="h-6 w-6 text-[#C5A059]" />
+          <Activity class="h-6 w-6 text-[#F59E0B]" />
           Live Attendance Feed
         </h2>
         <div
@@ -342,7 +342,7 @@ const formatDate = (value: string): string => new Date(value).toLocaleDateString
           >
             <div class="flex items-center gap-4">
               <div
-                class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-xs font-bold text-[#C5A059] ring-4 ring-slate-900/5 transition-transform group-hover:scale-110"
+                class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-xs font-bold text-[#6D4AFF] ring-4 ring-slate-900/5 transition-transform group-hover:scale-110"
               >
                 {{ scanLabel(scan.scan_type) }}
               </div>
@@ -370,7 +370,7 @@ const formatDate = (value: string): string => new Date(value).toLocaleDateString
         <Link
           v-if="recentScans.length > 0"
           href="/attendance"
-          class="block w-full border-t border-slate-50 py-4 text-center text-xs font-bold tracking-widest text-slate-400 uppercase transition-colors hover:text-[#C5A059] dark:border-slate-800 dark:hover:bg-slate-800"
+          class="block w-full border-t border-slate-50 py-4 text-center text-xs font-bold tracking-widest text-slate-400 uppercase transition-colors hover:text-[#6D4AFF] dark:border-slate-800 dark:hover:bg-slate-800"
         >
           Manage Full Attendance
         </Link>

@@ -1,6 +1,6 @@
 <template>
     <div
-        class="group flex h-full min-h-[360px] cursor-pointer flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#d4af37]/30 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900"
+        class="group flex h-full min-h-[360px] cursor-pointer flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#6D4AFF]/30 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900"
     >
         <!-- Header / Banner Area -->
         <div class="relative h-28 flex-shrink-0 bg-slate-900">
@@ -26,7 +26,7 @@
                 class="absolute bottom-[-20px] left-5 flex items-center justify-center rounded-xl border border-slate-100 bg-white p-2 shadow-md transition-transform duration-300 group-hover:scale-110 dark:border-slate-800 dark:bg-slate-950"
             >
                 <div
-                    class="flex h-10 w-10 items-center justify-center rounded-lg bg-[#d4af37]/10 text-[#d4af37]"
+                    class="flex h-10 w-10 items-center justify-center rounded-lg bg-[#6D4AFF]/10 text-[#6D4AFF]"
                 >
                     <Calendar class="h-5 w-5" />
                 </div>
@@ -37,7 +37,7 @@
             class="relative flex w-full flex-1 flex-col overflow-hidden p-6 pt-8"
         >
             <h5
-                class="mb-2 line-clamp-1 text-xl font-bold text-slate-900 transition-colors group-hover:text-[#d4af37] dark:text-slate-100"
+                class="mb-2 line-clamp-1 text-xl font-bold text-slate-900 transition-colors group-hover:text-[#6D4AFF] dark:text-slate-100"
             >
                 {{ event.title }}
             </h5>
@@ -147,11 +147,11 @@
 
                     <div
                         v-if="event.has_certificate_template"
-                        class="flex items-center gap-1.5 text-xs font-medium text-[#d4af37]"
+                        class="flex items-center gap-1.5 text-xs font-medium text-[#6D4AFF]"
                         title="Certificate Template Created"
                     >
                         <Award
-                            class="inline-block h-4 w-4 shrink-0 text-[#d4af37]"
+                            class="inline-block h-4 w-4 shrink-0 text-[#6D4AFF]"
                         />
                         <span>Cert Ready</span>
                     </div>

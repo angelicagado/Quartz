@@ -3,7 +3,7 @@
         class="min-h-screen bg-slate-950 pb-20 font-sans md:pb-0 dark:bg-slate-950"
     >
         <header
-            class="sticky top-0 z-40 border-b border-violet-500/30 bg-gradient-to-r from-violet-700 to-indigo-700 shadow-md"
+            class="sticky top-0 z-40 border-b border-[#6D4AFF]/30 bg-gradient-to-r from-[#6D4AFF] to-[#2563EB] shadow-md"
         >
             <div
                 class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8"
@@ -25,7 +25,7 @@
                         :class="
                             isActive(item.href)
                                 ? 'bg-white/20 text-white'
-                                : 'text-violet-100/80 hover:bg-white/20 hover:text-[#d4af37]'
+                                : 'text-white/80 hover:bg-white/20 hover:text-[#F59E0B]'
                         "
                     >
                         <component :is="item.icon" class="h-5 w-5" />
@@ -52,7 +52,7 @@
                                         {{ getInitials(user?.name) }}
                                     </AvatarFallback>
                                 </Avatar>
-                                <ChevronDown class="h-4 w-4 text-white/80 transition-colors group-hover:text-[#d4af37]" />
+                                <ChevronDown class="h-4 w-4 text-white/80 transition-colors group-hover:text-[#F59E0B]" />
                             </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" class="w-56">
@@ -110,7 +110,7 @@
                     </Link>
                     <button
                         @click="isMobileOpen = true"
-                        class="rounded-xl p-2 text-white/80 transition-colors hover:bg-white/20 hover:text-[#d4af37]"
+                        class="rounded-xl p-2 text-white/80 transition-colors hover:bg-white/20 hover:text-[#F59E0B]"
                     >
                         <Menu class="h-6 w-6" />
                     </button>
@@ -125,11 +125,11 @@
             ></div>
 
             <div
-                class="relative ml-auto flex h-full w-4/5 max-w-sm animate-in flex-col border-l border-violet-500/30 bg-gradient-to-b from-violet-700 to-indigo-800 p-6 shadow-2xl duration-300 slide-in-from-right"
+                class="relative ml-auto flex h-full w-4/5 max-w-sm animate-in flex-col border-l border-[#6D4AFF]/30 bg-gradient-to-b from-[#6D4AFF] to-[#2563EB] p-6 shadow-2xl duration-300 slide-in-from-right"
             >
                 <button
                     @click="isMobileOpen = false"
-                    class="absolute top-5 right-5 rounded-xl bg-white/15 p-2 text-white/80 transition-colors hover:bg-white/20 hover:text-[#d4af37]"
+                    class="absolute top-5 right-5 rounded-xl bg-white/15 p-2 text-white/80 transition-colors hover:bg-white/20 hover:text-[#F59E0B]"
                 >
                     <X class="h-5 w-5" />
                 </button>
@@ -155,7 +155,7 @@
                         <p class="font-medium text-white">
                             {{ user?.name || 'Participant Name' }}
                         </p>
-                        <p class="text-sm text-violet-100/70">
+                        <p class="text-sm text-white/70">
                             {{ user?.email || 'user@example.com' }}
                         </p>
                     </div>
@@ -171,7 +171,7 @@
                         :class="
                             isActive(item.href)
                                 ? 'bg-white/20 text-white'
-                                : 'text-violet-100/80 hover:bg-white/20 hover:text-[#d4af37]'
+                                : 'text-white/80 hover:bg-white/20 hover:text-[#F59E0B]'
                         "
                     >
                         <component :is="item.icon" class="h-5 w-5" />
@@ -208,13 +208,13 @@
                 class="flex min-w-[64px] flex-col items-center justify-center rounded-xl p-2 transition-all"
                 :class="
                     isActive(item.href)
-                        ? 'text-violet-600 dark:text-violet-400'
-                        : 'text-slate-400 hover:text-[#d4af37]'
+                        ? 'text-[#6D4AFF] dark:text-[#6D4AFF]'
+                        : 'text-slate-400 hover:text-[#F59E0B]'
                 "
             >
                 <div
                     class="mb-1 rounded-full p-1 transition-all"
-                    :class="isActive(item.href) ? 'bg-violet-600/10 dark:bg-violet-400/10' : ''"
+                    :class="isActive(item.href) ? 'bg-[#6D4AFF]/10 dark:bg-[#6D4AFF]/10' : ''"
                 >
                     <component :is="item.icon" class="h-5 w-5" />
                 </div>

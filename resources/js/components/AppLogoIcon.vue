@@ -13,5 +13,5 @@ defineProps<Props>();
 </script>
 
 <template>
-    <img src="/images/quartz-icon.png" class="object-fit h-full" />
+    <img src="/images/quartz-logo.png" class="object-fit h-10" />
 </template>

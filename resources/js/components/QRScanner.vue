@@ -2,7 +2,7 @@
     <div class="mx-auto w-full space-y-8">
         <div class="group relative">
             <div
-                class="relative flex aspect-video flex-col items-center justify-center overflow-hidden rounded-[2rem] border-2 border-slate-700 bg-slate-900 shadow-inner transition-all group-hover:border-[#d4af37]/30 sm:aspect-[16/9]"
+                class="relative flex aspect-video flex-col items-center justify-center overflow-hidden rounded-[2rem] border-2 border-pruple-700 bg-purple-300 shadow-inner transition-all group-hover:border-[#6D4AFF]/30 sm:aspect-[16/9]"
             >
                 <div
                     id="qr-reader"
@@ -11,30 +11,30 @@
                 ></div>
 
                 <div
-                    class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-black/0 via-black/20 to-black/60"
+                    class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-300 via-purple-300 to-purple-300"
                 ></div>
 
                 <template v-if="!lastScan && !error">
                     <div
-                        class="absolute top-12 left-12 h-12 w-12 rounded-tl-xl border-t-2 border-l-2 border-[#d4af37] opacity-30"
+                        class="absolute top-12 left-12 h-12 w-12 rounded-tl-xl border-t-2 border-l-2 border-[#6D4AFF] opacity-30"
                     ></div>
                     <div
-                        class="absolute top-12 right-12 h-12 w-12 rounded-tr-xl border-t-2 border-r-2 border-[#d4af37] opacity-30"
+                        class="absolute top-12 right-12 h-12 w-12 rounded-tr-xl border-t-2 border-r-2 border-[#6D4AFF] opacity-30"
                     ></div>
                     <div
-                        class="absolute bottom-12 left-12 h-12 w-12 rounded-bl-xl border-b-2 border-l-2 border-[#d4af37] opacity-30"
+                        class="absolute bottom-12 left-12 h-12 w-12 rounded-bl-xl border-b-2 border-l-2 border-[#6D4AFF] opacity-30"
                     ></div>
                     <div
-                        class="absolute right-12 bottom-12 h-12 w-12 rounded-br-xl border-r-2 border-b-2 border-[#d4af37] opacity-30"
+                        class="absolute right-12 bottom-12 h-12 w-12 rounded-br-xl border-r-2 border-b-2 border-[#6D4AFF] opacity-30"
                     ></div>
                 </template>
 
                 <div
                     v-if="isScanning && mode === 'camera'"
-                    class="absolute inset-0 flex items-center justify-center bg-[#d4af37]/5"
+                    class="absolute inset-0 flex items-center justify-center bg-[#6D4AFF]/5"
                 >
                     <div
-                        class="absolute top-0 h-0.5 w-full animate-[scan_2s_ease-in-out_infinite] bg-[#d4af37] shadow-[0_0_15px_#d4af37]"
+                        class="absolute top-0 h-0.5 w-full animate-[scan_2s_ease-in-out_infinite] bg-[#6D4AFF] shadow-[0_0_15px_#6D4AFF]"
                     ></div>
                 </div>
 
@@ -89,9 +89,9 @@
                         class="flex flex-col items-center space-y-6"
                     >
                         <div
-                            class="flex h-20 w-20 animate-spin items-center justify-center rounded-full bg-[#d4af37]/20"
+                            class="flex h-20 w-20 animate-spin items-center justify-center rounded-full bg-[#6D4AFF]/20"
                         >
-                            <ScanLine class="h-10 w-10 text-[#d4af37]" />
+                            <ScanLine class="h-10 w-10 text-[#6D4AFF]" />
                         </div>
                         <div class="text-center">
                             <p class="font-bold tracking-wide text-white">
@@ -114,10 +114,10 @@
                             ref="fileInputRef"
                         />
                         <div
-                            class="flex h-24 w-24 items-center justify-center rounded-3xl border-2 border-dashed border-slate-700 bg-slate-800 transition-all group-hover/upload:border-[#d4af37] group-hover/upload:bg-slate-800/80"
+                            class="flex h-24 w-24 items-center justify-center rounded-3xl border-2 border-dashed border-slate-700 bg-slate-800 transition-all group-hover/upload:border-[#6D4AFF] group-hover/upload:bg-slate-800/80"
                         >
                             <ImageIcon
-                                class="h-10 w-10 text-slate-500 group-hover/upload:text-[#d4af37]"
+                                class="h-10 w-10 text-slate-500 group-hover/upload:text-[#6D4AFF]"
                             />
                         </div>
                         <div class="text-center">
@@ -134,11 +134,11 @@
                         class="flex flex-col items-center space-y-4"
                     >
                         <div
-                            class="flex h-20 w-20 items-center justify-center rounded-full bg-slate-800/50 text-slate-600"
+                            class="flex h-20 w-20 items-center justify-center rounded-full bg-purple-800/50 text-purple-600"
                         >
                             <ScanLine class="h-10 w-10" />
                         </div>
-                        <p class="text-sm font-light text-slate-500">
+                        <p class="text-sm font-light text-purple-800">
                             Camera Standby
                         </p>
                     </div>
@@ -147,17 +147,17 @@
         </div>
 
         <div
-            class="flex items-start gap-4 rounded-2xl border border-slate-800 bg-slate-900/50 p-4"
+            class="flex items-start gap-4 rounded-2xl border border-slate-800 bg-purple-300/90 p-4"
         >
             <div
-                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-700 bg-slate-800"
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-purple-700 bg-purple-500"
             >
-                <AlertCircle class="h-5 w-5 text-slate-500" />
+                <AlertCircle class="h-5 w-5 text-purple-800" />
             </div>
             <div>
-                <h5 class="text-sm font-bold text-white">Scanning Protocol</h5>
+                <h5 class="text-sm font-bold text-purple-900">Scanning Protocol</h5>
                 <p
-                    class="mt-1 text-xs leading-relaxed font-light text-slate-500"
+                    class="mt-1 text-xs leading-relaxed font-light text-purple-700"
                 >
                     Use the camera for real-time check-ins. If the camera is
                     unavailable on your device, use the upload feature to

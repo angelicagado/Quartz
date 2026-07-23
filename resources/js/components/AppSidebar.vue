@@ -79,7 +79,7 @@ const mainNavItems = computed<NavItem[]>(() => [
 <template>
   <Sidebar collapsible="icon" variant="inset">
     <SidebarHeader
-      class="rounded-lg bg-linear-120 from-slate-800 from-40% to-primary-container"
+      class="rounded-lg "
     >
       <SidebarMenu>
         <SidebarMenuItem>

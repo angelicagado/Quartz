@@ -13,20 +13,20 @@
             :class="isMobileOpen ? 'translate-x-0' : '-translate-x-full'"
         >
             <div
-                class="pointer-events-none absolute inset-0 z-0 bg-gradient-to-br from-slate-900 via-slate-800/80 to-slate-900 opacity-90"
+                class="pointer-events-none absolute inset-0 z-0"
             ></div>
             <div
-                class="pointer-events-none absolute top-0 right-0 z-0 h-64 w-64 rounded-bl-full bg-[#d4af37] opacity-[0.05] blur-3xl filter"
+                class="pointer-events-none absolute top-0 right-0 z-0 h-64 w-64 rounded-bl-full bg-[#6D4AFF] opacity-[0.05] blur-3xl filter"
             ></div>
             <div
-                class="pointer-events-none absolute bottom-0 left-0 z-0 h-64 w-64 rounded-tr-full bg-[#d4af37] opacity-[0.05] blur-3xl filter"
+                class="pointer-events-none absolute bottom-0 left-0 z-0 h-64 w-64 rounded-tr-full bg-[#2563EB] opacity-[0.05] blur-3xl filter"
             ></div>
 
             <div
                 class="relative z-10 flex w-full flex-col items-center justify-center pt-10 pb-6"
             >
                 <img
-                    src="/quartzlogo.png"
+                    src="/quartz-logo.png"
                     alt="QUARTZ"
                     class="h-auto w-[75%] max-w-[150px] object-contain brightness-110 drop-shadow-2xl"
                 />
@@ -51,7 +51,7 @@
                     class="group flex items-center gap-3.5 rounded-xl px-4 py-3.5 transition-all duration-300"
                     :class="[
                         isActive(item.href)
-                            ? 'bg-[#d4af37]/15 font-medium text-[#d4af37] shadow-[inset_4px_0_0_0_#d4af37]'
+                            ? 'bg-[#6D4AFF]/15 font-medium text-[#6D4AFF] shadow-[inset_4px_0_0_0_#6D4AFF]'
                             : 'font-light text-slate-400 hover:bg-slate-800/50 hover:text-slate-200',
                     ]"
                 >
@@ -59,7 +59,7 @@
                         class="transition-colors duration-300"
                         :class="
                             isActive(item.href)
-                                ? 'text-[#d4af37]'
+                                ? 'text-[#6D4AFF]'
                                 : 'text-slate-500 group-hover:text-slate-300'
                         "
                     >
@@ -80,7 +80,7 @@
                 >
                     <div class="flex items-center gap-3 px-2 py-1">
                         <div
-                            class="flex h-9 w-9 items-center justify-center rounded-full border border-slate-600/50 bg-slate-700/80 text-[#d4af37] shadow-inner"
+                            class="flex h-9 w-9 items-center justify-center rounded-full border border-slate-600/50 bg-slate-700/80 text-[#6D4AFF] shadow-inner"
                         >
                             <User class="h-4 w-4" />
                         </div>
@@ -91,7 +91,7 @@
                                 {{ user?.name || 'Admin User' }}
                             </p>
                             <p
-                                class="mt-0.5 truncate text-[11px] font-bold tracking-widest text-[#d4af37] uppercase"
+                                class="mt-0.5 truncate text-[11px] font-bold tracking-widest text-[#F59E0B] uppercase"
                             >
                                 {{
                                     user?.role?.name?.replace('_', ' ') ||
@@ -136,7 +136,7 @@
 
                 <div class="flex items-center gap-3">
                     <button
-                        class="relative rounded-full p-2.5 text-slate-400 transition-all hover:bg-[#d4af37]/10 hover:text-[#d4af37] active:scale-95"
+                        class="relative rounded-full p-2.5 text-slate-400 transition-all hover:bg-[#6D4AFF]/10 hover:text-[#6D4AFF] active:scale-95"
                     >
                         <Bell class="pointer-events-none h-5 w-5" />
                         <span
