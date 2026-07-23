@@ -3,7 +3,7 @@
         class="min-h-screen bg-slate-950 pb-20 font-sans md:pb-0 dark:bg-slate-950"
     >
         <header
-            class="sticky top-0 z-40 border-b border-slate-800 bg-slate-900 shadow-md"
+            class="sticky top-0 z-40 border-b border-violet-500/30 bg-gradient-to-r from-violet-700 to-indigo-700 shadow-md"
         >
             <div
                 class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8"
@@ -24,8 +24,8 @@
                         class="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all"
                         :class="
                             isActive(item.href)
-                                ? 'bg-[#d4af37]/15 text-[#d4af37]'
-                                : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                                ? 'bg-white/20 text-white'
+                                : 'text-violet-100/80 hover:bg-white/20 hover:text-[#d4af37]'
                         "
                     >
                         <component :is="item.icon" class="h-5 w-5" />
@@ -38,21 +38,21 @@
                     <DropdownMenu>
                         <DropdownMenuTrigger as-child>
                             <button
-                                class="flex items-center gap-2 rounded-full p-0.5 transition-colors hover:bg-slate-800"
+                                class="group flex items-center gap-2 rounded-full p-0.5 transition-colors hover:bg-white/20"
                             >
-                                <Avatar class="h-9 w-9 border border-slate-700">
+                                <Avatar class="h-9 w-9 border border-white/30">
                                     <AvatarImage
                                         v-if="avatarUrl"
                                         :src="avatarUrl"
                                         :alt="user?.name"
                                     />
                                     <AvatarFallback
-                                        class="bg-slate-800 text-sm font-semibold text-[#d4af37]"
+                                        class="bg-white/20 text-sm font-semibold text-white"
                                     >
                                         {{ getInitials(user?.name) }}
                                     </AvatarFallback>
                                 </Avatar>
-                                <ChevronDown class="h-4 w-4 text-slate-400" />
+                                <ChevronDown class="h-4 w-4 text-white/80 transition-colors group-hover:text-[#d4af37]" />
                             </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" class="w-56">
@@ -93,16 +93,16 @@
                 <div class="flex items-center gap-2 md:hidden">
                     <Link
                         href="/portal/profile"
-                        class="rounded-full p-0.5 transition-colors hover:bg-slate-800"
+                        class="rounded-full p-0.5 transition-colors hover:bg-white/20"
                     >
-                        <Avatar class="h-9 w-9 border border-slate-700">
+                        <Avatar class="h-9 w-9 border border-white/30">
                             <AvatarImage
                                 v-if="avatarUrl"
                                 :src="avatarUrl"
                                 :alt="user?.name"
                             />
                             <AvatarFallback
-                                class="bg-slate-800 text-sm font-semibold text-[#d4af37]"
+                                class="bg-white/20 text-sm font-semibold text-white"
                             >
                                 {{ getInitials(user?.name) }}
                             </AvatarFallback>
@@ -110,7 +110,7 @@
                     </Link>
                     <button
                         @click="isMobileOpen = true"
-                        class="rounded-xl p-2 text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
+                        class="rounded-xl p-2 text-white/80 transition-colors hover:bg-white/20 hover:text-[#d4af37]"
                     >
                         <Menu class="h-6 w-6" />
                     </button>
@@ -125,11 +125,11 @@
             ></div>
 
             <div
-                class="relative ml-auto flex h-full w-4/5 max-w-sm animate-in flex-col border-l border-slate-800 bg-slate-900 p-6 shadow-2xl duration-300 slide-in-from-right"
+                class="relative ml-auto flex h-full w-4/5 max-w-sm animate-in flex-col border-l border-violet-500/30 bg-gradient-to-b from-violet-700 to-indigo-800 p-6 shadow-2xl duration-300 slide-in-from-right"
             >
                 <button
                     @click="isMobileOpen = false"
-                    class="absolute top-5 right-5 rounded-xl bg-slate-800 p-2 text-slate-400 hover:text-white"
+                    class="absolute top-5 right-5 rounded-xl bg-white/15 p-2 text-white/80 transition-colors hover:bg-white/20 hover:text-[#d4af37]"
                 >
                     <X class="h-5 w-5" />
                 </button>
@@ -137,16 +137,16 @@
                 <Link
                     href="/portal/profile"
                     @click="isMobileOpen = false"
-                    class="mt-8 mb-6 flex items-center gap-3 border-b border-slate-800 pb-6"
+                    class="mt-8 mb-6 flex items-center gap-3 border-b border-white/15 pb-6"
                 >
-                    <Avatar class="h-12 w-12 border border-slate-700">
+                    <Avatar class="h-12 w-12 border border-white/30">
                         <AvatarImage
                             v-if="avatarUrl"
                             :src="avatarUrl"
                             :alt="user?.name"
                         />
                         <AvatarFallback
-                            class="bg-slate-800 text-base font-semibold text-[#d4af37]"
+                            class="bg-white/20 text-base font-semibold text-white"
                         >
                             {{ getInitials(user?.name) }}
                         </AvatarFallback>
@@ -155,7 +155,7 @@
                         <p class="font-medium text-white">
                             {{ user?.name || 'Participant Name' }}
                         </p>
-                        <p class="text-sm text-slate-400">
+                        <p class="text-sm text-violet-100/70">
                             {{ user?.email || 'user@example.com' }}
                         </p>
                     </div>
@@ -170,8 +170,8 @@
                         class="flex items-center gap-3 rounded-xl px-4 py-3.5 text-sm font-medium transition-all"
                         :class="
                             isActive(item.href)
-                                ? 'bg-[#d4af37]/15 text-[#d4af37]'
-                                : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'
+                                ? 'bg-white/20 text-white'
+                                : 'text-violet-100/80 hover:bg-white/20 hover:text-[#d4af37]'
                         "
                     >
                         <component :is="item.icon" class="h-5 w-5" />
@@ -179,7 +179,7 @@
                     </Link>
                 </nav>
 
-                <div class="border-t border-slate-800 pt-6">
+                <div class="border-t border-white/15 pt-6">
                     <button
                         @click="
                             isMobileOpen = false;
@@ -208,13 +208,13 @@
                 class="flex min-w-[64px] flex-col items-center justify-center rounded-xl p-2 transition-all"
                 :class="
                     isActive(item.href)
-                        ? 'text-[#d4af37]'
-                        : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                        ? 'text-violet-600 dark:text-violet-400'
+                        : 'text-slate-400 hover:text-[#d4af37]'
                 "
             >
                 <div
                     class="mb-1 rounded-full p-1 transition-all"
-                    :class="isActive(item.href) ? 'bg-[#d4af37]/10' : ''"
+                    :class="isActive(item.href) ? 'bg-violet-600/10 dark:bg-violet-400/10' : ''"
                 >
                     <component :is="item.icon" class="h-5 w-5" />
                 </div>
