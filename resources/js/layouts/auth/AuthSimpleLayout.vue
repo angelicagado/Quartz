@@ -11,15 +11,14 @@ const currentYear = computed(() => new Date().getFullYear());
 </script>
 
 <template>
-    <div class="min-h-screen bg-[#F4F5F7] font-body-md lg:grid lg:grid-cols-2">
-        <!-- Left column — form -->
-        <div class="flex min-h-screen flex-col px-6 py-8 sm:px-12 lg:min-h-0 lg:px-16">
-            <!-- Mobile logo -->
-            <div class="mb-10 flex justify-center lg:hidden">
-                <div class="h-10">
-                    <AppLogoIcon />
-                </div>
-            </div>
+    <div class="flex min-h-screen bg-linear-to-bl from-purple-200 via-violet-200 to-white font-body-md">
+        <!-- Left Side - Image/Branding (Hidden on mobile) -->
+        <div
+            class="relative hidden flex-col items-center justify-center overflow-hidden p-12 lg:flex lg:w-1/2"
+        >
+            <div
+                class="absolute inset-0"
+            ></div>
 
             <!-- Form area (vertically centered) -->
             <div class="flex flex-1 flex-col justify-center">
@@ -39,14 +38,19 @@ const currentYear = computed(() => new Date().getFullYear());
                         </p>
                     </div>
 
-                    <slot />
-                </div>
-            </div>
-
-            <!-- Footer -->
-            <div class="mx-auto w-full max-w-[400px] pt-8">
-                <p class="text-sm text-slate-400 flex justify-center">
-                    Quartz {{ currentYear }}. All Rights Reserved
+            <div
+                class="relative z-10 flex max-w-lg flex-col items-center space-y-8 text-center"
+            >
+                <img
+                    src="/images/quartz-logo.png"
+                    alt="QUARTZ"
+                    class="w-[85%] max-w-[400px] object-contain drop-shadow-2xl"
+                />
+                <p
+                    class="mt-8 text-lg leading-relaxed font-display-lg italic tracking-wide text-black"
+                >
+                    The premiere destination for professional event planning,
+                    attendance tracking, and certificate management.
                 </p>
             </div>
         </div>
