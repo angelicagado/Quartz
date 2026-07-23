@@ -72,7 +72,7 @@ async function downloadCertificate(certificateId: number, url: string, filename:
         <div class="flex min-w-0 flex-1 flex-col gap-6">
         <!-- Header -->
         <div>
-            <div class="mb-1 flex items-center gap-2">
+            <div class="mb-2.5 flex items-center gap-2">
                 <div
                     class="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 shadow-sm"
                 >
