@@ -6,13 +6,15 @@ import {
     CheckCircle2,
     FileText,
     QrCode,
+    Search,
     Ticket,
 } from '@lucide/vue';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import ParticipantLayout from '@/layouts/ParticipantLayout.vue';
 import ProfileRail from '@/components/portal/ProfileRail.vue';
 import MyEventsCalendar from '@/components/portal/MyEventsCalendar.vue';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import axios from 'axios';
 import { toast } from 'vue-sonner';
 
@@ -31,11 +33,60 @@ interface MyEvent {
     certificate_available: boolean;
 }
 
-defineProps<{
+const props = defineProps<{
     events: MyEvent[];
 }>();
 
 defineOptions({ layout: ParticipantLayout });
+
+type EventFilter = 'all' | 'upcoming' | 'done';
+
+const filter = ref<EventFilter>('all');
+const search = ref('');
+
+/** An event is "done" once its end time has passed. */
+function isDone(event: MyEvent): boolean {
+    return new Date(event.end_time).getTime() < Date.now();
+}
+
+/** Events matching the current search term (title or description). */
+const searchedEvents = computed(() => {
+    const term = search.value.trim().toLowerCase();
+    if (!term) {
+        return props.events;
+    }
+    return props.events.filter(
+        (event) =>
+            event.title.toLowerCase().includes(term) ||
+            (event.description ?? '').toLowerCase().includes(term),
+    );
+});
+
+const filteredEvents = computed(() => {
+    if (filter.value === 'upcoming') {
+        return searchedEvents.value.filter((event) => !isDone(event));
+    }
+    if (filter.value === 'done') {
+        return searchedEvents.value.filter((event) => isDone(event));
+    }
+    return searchedEvents.value;
+});
+
+function countFor(key: EventFilter): number {
+    if (key === 'upcoming') {
+        return searchedEvents.value.filter((event) => !isDone(event)).length;
+    }
+    if (key === 'done') {
+        return searchedEvents.value.filter((event) => isDone(event)).length;
+    }
+    return searchedEvents.value.length;
+}
+
+const filterTabs: { key: EventFilter; label: string }[] = [
+    { key: 'all', label: 'All' },
+    { key: 'upcoming', label: 'Upcoming' },
+    { key: 'done', label: 'Done' },
+];
 
 const statusConfig: Record<string, { label: string; classes: string }> = {
     registered: {
@@ -142,7 +193,7 @@ async function viewCertificate(eventId: number) {
 
         <!-- Header -->
         <div>
-            <div class="mb-1 flex items-center gap-2">
+            <div class="mb-2.5 flex items-center gap-2">
                 <div
                     class="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 shadow-sm"
                 >
@@ -163,10 +214,47 @@ async function viewCertificate(eventId: number) {
             </p>
         </div>
 
-        <!-- Events Grid -->
-        <div v-if="events.length > 0" class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <!-- Search + filter tabs -->
+        <div
+            v-if="events.length > 0"
+            class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+        >
+            <div class="relative w-full sm:max-w-xs">
+                <Search
+                    class="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+                />
+                <Input
+                    v-model="search"
+                    placeholder="Search your events..."
+                    class="border-2 bg-card pl-9 shadow-sm"
+                />
+            </div>
+
             <div
-                v-for="(event, index) in events"
+                class="flex w-fit items-center gap-1 rounded-xl border-2 border-border bg-card p-1 shadow-sm"
+            >
+                <button
+                    v-for="tab in filterTabs"
+                    :key="tab.key"
+                    type="button"
+                    class="rounded-lg px-3 py-1.5 text-sm font-medium transition-colors"
+                    :class="
+                        filter === tab.key
+                            ? 'bg-violet-600 text-white shadow-sm'
+                            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                    "
+                    @click="filter = tab.key"
+                >
+                    {{ tab.label }}
+                    <span class="ml-1 text-xs opacity-70">{{ countFor(tab.key) }}</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Events Grid -->
+        <div v-if="filteredEvents.length > 0" class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            <div
+                v-for="(event, index) in filteredEvents"
                 :key="event.id"
                 class="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-xs transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
             >
@@ -279,7 +367,7 @@ async function viewCertificate(eventId: number) {
 
         <!-- Empty State -->
         <div
-            v-else
+            v-else-if="events.length === 0"
             class="flex flex-col items-center justify-center gap-4 py-20"
         >
             <div
@@ -302,6 +390,25 @@ async function viewCertificate(eventId: number) {
                     Browse Events
                 </Button>
             </Link>
+        </div>
+
+        <!-- Filtered-empty State -->
+        <div
+            v-else
+            class="flex flex-col items-center justify-center gap-3 py-16 text-center"
+        >
+            <div
+                class="flex size-14 items-center justify-center rounded-2xl bg-muted"
+            >
+                <CalendarDays class="size-7 text-muted-foreground" />
+            </div>
+            <p class="text-sm text-muted-foreground">
+                {{
+                    search.trim()
+                        ? 'No events match your search.'
+                        : `No ${filter === 'done' ? 'completed' : 'upcoming'} events.`
+                }}
+            </p>
         </div>
         </div>
     </div>

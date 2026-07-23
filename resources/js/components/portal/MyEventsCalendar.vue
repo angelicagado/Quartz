@@ -166,7 +166,7 @@ function selectDay(cell: DayCell) {
 </script>
 
 <template>
-    <div class="rounded-2xl border border-border bg-card p-4 shadow-xs">
+    <div class="rounded-2xl border border-border bg-card p-4 shadow-md ring-1 ring-border">
         <!-- Month nav -->
         <div class="mb-3 flex items-center justify-between">
             <h3 class="font-serif text-sm font-semibold text-foreground">
@@ -200,7 +200,7 @@ function selectDay(cell: DayCell) {
         </div>
 
         <!-- Day grid -->
-        <div class="grid grid-cols-7 gap-0.5">
+        <div class="grid grid-cols-7 gap-0.5 rounded-xl bg-muted/50 p-1.5">
             <template v-for="(cell, index) in cells" :key="index">
                 <div v-if="!cell" />
                 <button
@@ -210,10 +210,10 @@ function selectDay(cell: DayCell) {
                     class="relative flex aspect-square flex-col items-center justify-center rounded-lg text-xs transition-colors"
                     :class="[
                         cell.events.length > 0
-                            ? 'cursor-pointer font-medium text-foreground hover:bg-muted'
-                            : 'text-muted-foreground/60',
+                            ? 'cursor-pointer bg-card font-semibold text-foreground shadow-xs hover:bg-background'
+                            : 'text-muted-foreground/80',
                         cell.isToday
-                            ? 'ring-1 ring-violet-400 dark:ring-violet-500'
+                            ? 'ring-2 ring-violet-400 dark:ring-violet-500'
                             : '',
                         selectedKey === cell.key
                             ? 'bg-violet-100 dark:bg-violet-900/40'

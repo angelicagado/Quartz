@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Head, useForm, usePage } from '@inertiajs/vue3';
-import { Camera, KeyRound, UserCog } from '@lucide/vue';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
+import { AlertCircle, Camera, CheckCircle2, KeyRound, UserCog, X } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,19 @@ const profileForm = useForm({
 
 const avatarPreview = ref<string | null>(profile.value?.avatar ?? null);
 
+const feedback = ref<{ type: 'success' | 'error'; message: string } | null>(
+    null,
+);
+
+function showFeedback(type: 'success' | 'error', message: string) {
+    feedback.value = { type, message };
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function dismissFeedback() {
+    feedback.value = null;
+}
+
 function onAvatarChange(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0] ?? null;
     profileForm.avatar = file;
@@ -42,6 +55,16 @@ function submitProfile() {
         .post('/portal/profile', {
             forceFormData: true,
             preserveScroll: true,
+            onSuccess: () =>
+                showFeedback(
+                    'success',
+                    'Your profile was updated successfully!',
+                ),
+            onError: () =>
+                showFeedback(
+                    'error',
+                    'We could not update your profile. Please check the fields and try again.',
+                ),
         });
 }
 
@@ -54,8 +77,17 @@ const passwordForm = useForm({
 function submitPassword() {
     passwordForm.put('/settings/password', {
         preserveScroll: true,
-        onSuccess: () => passwordForm.reset(),
-        onError: () => passwordForm.reset('password', 'password_confirmation'),
+        onSuccess: () => {
+            passwordForm.reset();
+            showFeedback('success', 'Your password was updated successfully!');
+        },
+        onError: () => {
+            passwordForm.reset('password', 'password_confirmation');
+            showFeedback(
+                'error',
+                'We could not update your password. Please check the fields and try again.',
+            );
+        },
     });
 }
 
@@ -66,9 +98,51 @@ defineOptions({ layout: ParticipantLayout });
     <Head title="My Profile" />
 
     <div class="mx-auto flex w-full max-w-3xl flex-col gap-6">
+        <!-- Feedback alert -->
+        <div
+            v-if="feedback"
+            role="alert"
+            :class="[
+                'flex items-center justify-between gap-4 rounded-xl border px-4 py-3',
+                feedback.type === 'success'
+                    ? 'border-green-300 bg-green-100 text-green-800 dark:border-green-900/50 dark:bg-green-900/25 dark:text-green-300'
+                    : 'border-red-300 bg-red-100 text-red-800 dark:border-red-900/50 dark:bg-red-900/25 dark:text-red-300',
+            ]"
+        >
+            <div class="flex items-center gap-2.5">
+                <CheckCircle2
+                    v-if="feedback.type === 'success'"
+                    class="size-5 shrink-0"
+                />
+                <AlertCircle v-else class="size-5 shrink-0" />
+                <span class="text-sm font-medium">{{ feedback.message }}</span>
+            </div>
+
+            <Link
+                v-if="feedback.type === 'success'"
+                href="/portal/my-events"
+            >
+                <Button
+                    size="sm"
+                    class="bg-green-600 text-white hover:bg-green-700"
+                >
+                    View Profile
+                </Button>
+            </Link>
+            <button
+                v-else
+                type="button"
+                aria-label="Dismiss"
+                class="rounded-lg p-1 text-red-700 transition-colors hover:bg-red-200 dark:text-red-300 dark:hover:bg-red-900/40"
+                @click="dismissFeedback"
+            >
+                <X class="size-5" />
+            </button>
+        </div>
+
         <!-- Header -->
         <div>
-            <div class="mb-1 flex items-center gap-2">
+            <div class="mb-2.5 flex items-center gap-2">
                 <div
                     class="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 shadow-sm"
                 >
