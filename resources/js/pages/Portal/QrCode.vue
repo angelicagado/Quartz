@@ -94,23 +94,23 @@ function formatTime(dateStr: string) {
 
                 <!-- QR Code Section -->
                 <div class="flex flex-col items-center gap-4 p-8">
-                    <div v-if="participant.qr_code_url" class="relative">
+                    <div v-if="participant.qr_code_url" class="relative mb-4">
                         <!-- Decorative border frame -->
                         <div
-                            class="absolute -inset-3 -z-10 rounded-2xl bg-gradient-to-br from-violet-200 to-indigo-200 dark:from-violet-900/40 dark:to-indigo-900/40"
+                            class="absolute -inset-3 -z-10 rounded-2xl bg-gradient-to-br from-violet-300 to-indigo-300 dark:from-violet-900/50 dark:to-indigo-900/50"
                         />
                         <img
                             :src="participant.qr_code_url"
                             :alt="`QR Code for ${participant.user.name}`"
-                            class="size-56 rounded-xl bg-white object-contain p-2 shadow-md"
+                            class="size-56 rounded-xl bg-white object-contain p-3 ring-1 ring-slate-900/10 dark:ring-white/10"
                         />
                         
                         <!-- Download Button -->
                         <button 
                             @click="downloadQrAsPng(participant.qr_code_url)" 
-                            class="absolute -bottom-4 right-0 flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg transition-transform hover:scale-105 hover:bg-primary/90"
+                            class="absolute -bottom-4 right-0 flex items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground shadow-lg transition-transform hover:scale-102 hover:bg-primary/90 hover:cursor-pointer"
                         >
-                            <Download class="size-4" /> Download
+                            <Download class="size-3.5" /> Download
                         </button>
                     </div>
                     <div
@@ -148,7 +148,7 @@ function formatTime(dateStr: string) {
                         <div class="flex items-start gap-3">
                             <CalendarDays class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
                             <div>
-                                <p class="text-xs text-muted-foreground">Event Schedule</p>
+                                <p class="text-xs text-muted-foreground mb-1">Event Schedule</p>
                                 <p class="text-sm font-medium text-foreground">
                                     {{ formatDate(event.start_time) }} <br>
                                     {{ formatTime(event.start_time) }} – {{ formatTime(event.end_time) }}
@@ -159,7 +159,7 @@ function formatTime(dateStr: string) {
                         <div class="flex items-start gap-3">
                             <UserCheck class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
                             <div>
-                                <p class="text-xs text-muted-foreground">Attendance Type</p>
+                                <p class="text-xs text-muted-foreground mb-1">Attendance Type</p>
                                 <p class="text-sm font-medium text-foreground capitalize">
                                     {{ event.attendance_type.replace('_', ' ') }}
                                 </p>
@@ -195,7 +195,7 @@ function formatTime(dateStr: string) {
                     class="border-t border-border bg-muted/30 px-6 py-4 text-center"
                 >
                     <p class="text-xs leading-relaxed text-muted-foreground">
-                        📱 Show this QR code to the event organizer at the
+                        Show this QR code to the event organizer at the
                         entrance to record your attendance. Screenshot or save
                         this page for offline access.
                     </p>
