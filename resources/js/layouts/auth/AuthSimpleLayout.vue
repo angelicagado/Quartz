@@ -10,13 +10,13 @@ const currentYear = computed(() => new Date().getFullYear());
 </script>
 
 <template>
-    <div class="flex min-h-screen bg-[#F8F9FC] font-body-md">
+    <div class="flex min-h-screen bg-linear-to-bl from-purple-200 via-violet-200 to-white font-body-md">
         <!-- Left Side - Image/Branding (Hidden on mobile) -->
         <div
-            class="relative hidden flex-col items-center justify-center overflow-hidden bg-slate-900 p-12 lg:flex lg:w-1/2"
+            class="relative hidden flex-col items-center justify-center overflow-hidden p-12 lg:flex lg:w-1/2"
         >
             <div
-                class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 opacity-90"
+                class="absolute inset-0"
             ></div>
 
             <!-- Decorative Elements -->
@@ -31,12 +31,12 @@ const currentYear = computed(() => new Date().getFullYear());
                 class="relative z-10 flex max-w-lg flex-col items-center space-y-8 text-center"
             >
                 <img
-                    src="/images/quartzlogo.png"
+                    src="/images/quartz-logo.png"
                     alt="QUARTZ"
                     class="w-[85%] max-w-[400px] object-contain drop-shadow-2xl"
                 />
                 <p
-                    class="mt-8 text-lg leading-relaxed font-display-lg italic tracking-wide text-slate-200"
+                    class="mt-8 text-lg leading-relaxed font-display-lg italic tracking-wide text-black"
                 >
                     The premiere destination for professional event planning,
                     attendance tracking, and certificate management.
