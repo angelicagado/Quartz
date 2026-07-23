@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
 import { CalendarDays, CheckCircle2, Search, Ticket } from '@lucide/vue';
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ParticipantLayout from '@/layouts/ParticipantLayout.vue';
@@ -58,6 +58,41 @@ watch(search, () => {
 function registerForEvent(eventId: number) {
     router.post(`/portal/events/${eventId}/register`);
 }
+
+type EventFilter = 'all' | 'upcoming' | 'done';
+
+const filter = ref<EventFilter>('all');
+
+/** An event is "done" once its end time has passed. */
+function isDone(event: Event): boolean {
+    return new Date(event.end_time).getTime() < Date.now();
+}
+
+const filteredEvents = computed(() => {
+    if (filter.value === 'upcoming') {
+        return props.events.data.filter((event) => !isDone(event));
+    }
+    if (filter.value === 'done') {
+        return props.events.data.filter((event) => isDone(event));
+    }
+    return props.events.data;
+});
+
+function countFor(key: EventFilter): number {
+    if (key === 'upcoming') {
+        return props.events.data.filter((event) => !isDone(event)).length;
+    }
+    if (key === 'done') {
+        return props.events.data.filter((event) => isDone(event)).length;
+    }
+    return props.events.data.length;
+}
+
+const filterTabs: { key: EventFilter; label: string }[] = [
+    { key: 'all', label: 'All' },
+    { key: 'upcoming', label: 'Upcoming' },
+    { key: 'done', label: 'Done' },
+];
 
 function formatDateRange(start: string, end: string): string {
     const s = new Date(start);
@@ -144,7 +179,7 @@ const statusConfig: Record<string, { label: string; classes: string }> = {
         <!-- Header -->
         <div class="flex items-end justify-between gap-4">
             <div>
-                <div class="mb-1 flex items-center gap-2">
+                <div class="mb-2.5 flex items-center gap-2">
                     <div
                         class="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 shadow-sm"
                     >
@@ -166,25 +201,47 @@ const statusConfig: Record<string, { label: string; classes: string }> = {
             </div>
         </div>
 
-        <!-- Search -->
-        <div class="relative max-w-md">
-            <Search
-                class="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
-            />
-            <Input
-                v-model="search"
-                placeholder="Search events..."
-                class="pl-9"
-            />
+        <!-- Search + filter tabs -->
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="relative w-full sm:max-w-xs">
+                <Search
+                    class="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+                />
+                <Input
+                    v-model="search"
+                    placeholder="Search events..."
+                    class="border-2 bg-card pl-9 shadow-sm"
+                />
+            </div>
+
+            <div
+                class="flex w-fit items-center gap-1 rounded-xl border-2 border-border bg-card p-1 shadow-sm"
+            >
+                <button
+                    v-for="tab in filterTabs"
+                    :key="tab.key"
+                    type="button"
+                    class="rounded-lg px-3 py-1.5 text-sm font-medium transition-colors"
+                    :class="
+                        filter === tab.key
+                            ? 'bg-violet-600 text-white shadow-sm'
+                            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                    "
+                    @click="filter = tab.key"
+                >
+                    {{ tab.label }}
+                    <span class="ml-1 text-xs opacity-70">{{ countFor(tab.key) }}</span>
+                </button>
+            </div>
         </div>
 
         <!-- Events Grid -->
         <div
-            v-if="events.data.length > 0"
+            v-if="filteredEvents.length > 0"
             class="grid gap-6 md:grid-cols-2 xl:grid-cols-3"
         >
             <div
-                v-for="(event, index) in events.data"
+                v-for="(event, index) in filteredEvents"
                 :key="event.id"
                 class="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-xs transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
             >
@@ -308,7 +365,7 @@ const statusConfig: Record<string, { label: string; classes: string }> = {
 
         <!-- Empty State -->
         <div
-            v-else
+            v-else-if="events.data.length === 0"
             class="flex flex-col items-center justify-center gap-4 py-20"
         >
             <div
@@ -330,6 +387,21 @@ const statusConfig: Record<string, { label: string; classes: string }> = {
                     }}
                 </p>
             </div>
+        </div>
+
+        <!-- Filtered-empty State -->
+        <div
+            v-else
+            class="flex flex-col items-center justify-center gap-3 py-16 text-center"
+        >
+            <div
+                class="flex size-14 items-center justify-center rounded-2xl bg-muted"
+            >
+                <CalendarDays class="size-7 text-muted-foreground" />
+            </div>
+            <p class="text-sm text-muted-foreground">
+                No {{ filter === 'done' ? 'completed' : 'upcoming' }} events on this page.
+            </p>
         </div>
 
         <!-- Pagination -->
