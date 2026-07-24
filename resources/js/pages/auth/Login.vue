@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Form, Head } from '@inertiajs/vue3';
+import { Lock, Mail } from '@lucide/vue';
 import InputError from '@/components/InputError.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import TeamInvitationAlert from '@/components/TeamInvitationAlert.vue';
@@ -16,8 +17,8 @@ import type { TeamInvitationContext } from '@/types';
 
 defineOptions({
     layout: {
-        title: 'Log in to your Account',
-        description: 'Enter your Email and Password below to log in',
+        title: 'Sign In',
+        description: '',
     },
 });
 
@@ -29,7 +30,7 @@ defineProps<{
 </script>
 
 <template>
-    <Head title="Log in" />
+    <Head title="Sign in" />
 
     <div
         v-if="status"
@@ -50,72 +51,82 @@ defineProps<{
         v-slot="{ errors, processing }"
         class="flex flex-col gap-6"
     >
-        <div class="grid gap-6">
-            <div class="grid gap-2">
+        <div class="grid">
+            <div class="grid gap-3 mb-8">
                 <Label
                     for="email"
-                    class="font-medium font-body-lg tracking-wide text-slate-700"
+                    class="font-body-lg font-medium tracking-wide text-slate-700"
                 >
                     Email Address
                 </Label>
-                <Input
-                    id="email"
-                    type="email"
-                    name="email"
-                    required
-                    autofocus
-                    :tabindex="1"
-                    autocomplete="email"
-                    placeholder="email@example.com"
-                    class="h-12 rounded-xl border-slate-200 bg-slate-50 text-[15px] transition-all focus:border-[#C5A059] focus:ring-[#C5A059]"
-                />
+                <div class="relative">
+                    <Mail
+                        class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400"
+                    />
+                    <Input
+                        id="email"
+                        type="email"
+                        name="email"
+                        required
+                        autofocus
+                        :tabindex="1"
+                        autocomplete="email"
+                        placeholder="example@email.com"
+                        class="h-10.5 border-slate-200 bg-slate-50 pl-10 text-[12px] transition-all focus:border-[#C5A059] focus:ring-[#C5A059]"
+                    />
+                </div>
                 <InputError :message="errors.email" />
             </div>
 
-            <div class="grid gap-2">
-                <div class="flex items-center">
-                    <Label
-                        for="password"
-                        class="font-medium tracking-wide text-slate-700"
-                    >
-                        Password
-                    </Label>
-                    <TextLink
-                        v-if="canResetPassword"
-                        :href="request()"
-                        class="ml-auto text-sm font-medium text-[#c19c56] transition-colors hover:text-slate-900 decoration-0"
-                        :tabindex="5"
-                    >
-                        Forgot password?
-                    </TextLink>
+            <div class="grid gap-2 mb-4">
+                <Label
+                    for="password"
+                    class="font-medium tracking-wide text-slate-700"
+                >
+                    Password
+                </Label>
+                <div class="relative">
+                    <Lock
+                        class="pointer-events-none absolute top-1/2 left-3 z-10 size-4 -translate-y-1/2 text-slate-400"
+                    />
+                    <PasswordInput
+                        id="password"
+                        name="password"
+                        required
+                        :tabindex="2"
+                        autocomplete="current-password"
+                        placeholder="********"
+                        class="h-10.5 border-slate-200 bg-slate-50 pl-10 text-[12px] transition-all focus:border-[#C5A059] focus:ring-[#C5A059]"
+                    />
                 </div>
-                <PasswordInput
-                    id="password"
-                    name="password"
-                    required
-                    :tabindex="2"
-                    autocomplete="current-password"
-                    placeholder="Password"
-                    class="h-12 rounded-xl border-slate-200 bg-slate-50 text-[15px] transition-all focus:border-[#C5A059] focus:ring-[#C5A059]"
-                />
                 <InputError :message="errors.password" />
             </div>
 
-            <div class="flex items-center space-x-3">
-                <Checkbox
-                    id="remember"
-                    name="remember"
-                    :tabindex="3"
-                    class="data-[state=checked]:border-[#C5A059] data-[state=checked]:bg-[#C5A059]"
-                />
-                <Label for="remember" class="font-normal text-slate-700">
-                    Remember me
-                </Label>
+            <div class="flex items-center justify-between mb-14">
+                <div class="flex items-center space-x-2.5">
+                    <Checkbox
+                        id="remember"
+                        name="remember"
+                        :tabindex="3"
+                        class="data-[state=checked]:border-primary data-[state=checked]:bg-primary"
+                    />
+                    <Label for="remember" class="font-normal text-slate-700">
+                        Remember me
+                    </Label>
+                </div>
+                <TextLink
+                    v-if="canResetPassword"
+                    :href="request()"
+                    class="text-sm font-medium text-[#c19c56] decoration-0 transition-colors hover:text-slate-900"
+                    :tabindex="5"
+                >
+                    Forgot password?
+                </TextLink>
             </div>
 
             <Button
                 type="submit"
-                class="mt-4 h-12 w-full rounded-xl bg-slate-900 text-[15px] font-medium text-white shadow-md transition-all duration-300 hover:bg-[#C5A059] hover:shadow-lg active:scale-[0.98]"
+                class="mt-4 h-12 w-full rounded-xl bg-primary text-[15px] font-medium text-primary-foreground shadow-lg shadow-primary/20 transition-all duration-300 hover:bg-primary/90 hover:shadow-primary/40 active:scale-[0.98]"
                 :tabindex="4"
                 :disabled="processing"
                 data-test="login-button"
@@ -125,7 +136,7 @@ defineProps<{
             </Button>
         </div>
 
-        <div class="mt-2 text-center text-[15px] text-slate-500">
+        <div class="mt-12 text-center text-[15px] text-slate-500">
             Don't have an account?
             <TextLink
                 :href="
@@ -136,10 +147,10 @@ defineProps<{
                     })
                 "
                 :tabindex="5"
-                class="font-medium text-[#C5A059] transition-colors hover:text-slate-900 decoration-0"
+                class="font-medium text-[#C5A059] decoration-0 transition-colors hover:text-slate-900"
                 data-test="register-link"
             >
-                Sign up
+                Sign Up
             </TextLink>
         </div>
     </Form>

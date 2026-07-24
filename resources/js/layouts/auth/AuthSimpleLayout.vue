@@ -1,5 +1,6 @@
-    <script setup lang="ts">
+<script setup lang="ts">
 import { computed } from 'vue';
+import AppLogoIcon from '@/components/AppLogoIcon.vue';
 
 defineProps<{
     title?: string;
@@ -19,13 +20,23 @@ const currentYear = computed(() => new Date().getFullYear());
                 class="absolute inset-0"
             ></div>
 
-            <!-- Decorative Elements -->
-            <div
-                class="absolute top-0 right-0 h-96 w-96 rounded-bl-full bg-[#C5A059] opacity-[0.05] blur-3xl filter"
-            ></div>
-            <div
-                class="absolute bottom-0 left-0 h-96 w-96 rounded-tr-full bg-[#C5A059] opacity-[0.05] blur-3xl filter"
-            ></div>
+            <!-- Form area (vertically centered) -->
+            <div class="flex flex-1 flex-col justify-center">
+                <div class="mx-auto w-full max-w-[400px]">
+                    <div v-if="title || description" class="mb-12">
+                        <h1
+                            v-if="title"
+                            class="text-4xl font-bold tracking-tight text-slate-900"
+                        >
+                            {{ title }}
+                        </h1>
+                        <p
+                            v-if="description"
+                            class="mt-2 text-sm text-slate-500"
+                        >
+                            {{ description }}
+                        </p>
+                    </div>
 
             <div
                 class="relative z-10 flex max-w-lg flex-col items-center space-y-8 text-center"
@@ -44,41 +55,52 @@ const currentYear = computed(() => new Date().getFullYear());
             </div>
         </div>
 
-        <!-- Right Side - Auth Form -->
-        <div
-            class="relative flex w-full flex-col items-center justify-center p-6 sm:p-12 lg:w-1/2"
-        >
-            <!-- Mobile Logo Only -->
-            <div class="mb-8 flex justify-center lg:hidden">
-                <img
-                    src="/images/quartzlogo.png"
-                    alt="QUARTZ"
-                    class="w-48 object-contain"
-                />
-            </div>
-
+        <!-- Right column — branding panel -->
+        <div class="hidden p-3 lg:block">
             <div
-                class="relative z-10 w-full max-w-md rounded-[2rem] border border-slate-100 bg-white p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] sm:p-10"
+                class="relative flex h-full flex-col overflow-hidden rounded-3xl bg-slate-950 p-12 text-white"
             >
-                <div class="mb-8 text-center">
-                    <h1
-                        class="mb-2 text-3xl font-display-lg tracking-tight text-slate-900 "
-                    >
-                        {{ title }}
-                    </h1>
-                    <p class="text-[14px] text-slate-700">
-                        {{ description }}
-                    </p>
+                <!-- Background blurs (mirrors the landing hero) -->
+                <div class="pointer-events-none absolute inset-0">
+                    <div
+                        class="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-primary/30 blur-[120px]"
+                    />
+                    <div
+                        class="absolute right-0 bottom-1/3 h-96 w-96 rounded-full bg-secondary/25 blur-[120px]"
+                    />
+                    <div
+                        class="absolute -bottom-24 left-1/4 h-72 w-72 rounded-full bg-accent/15 blur-[100px]"
+                    />
                 </div>
 
-                <slot />
-            </div>
+                <!-- Content -->
+                <div class="relative z-10 flex h-full flex-col">
+                    <div class="h-12 w-12">
+                        <AppLogoIcon />
+                    </div>
 
-            <!-- Footer -->
-            <div class="absolute right-0 bottom-6 left-0 text-center">
-                <p class="text-sm text-slate-400">
-                    © {{ currentYear }} Quartz. All rights reserved.
-                </p>
+                    <div class="mt-12">
+                        <h2 class="font-display-lg text-3xl font-bold tracking-tight">
+                            Welcome to
+                            <span
+                                class="bg-gradient-to-r from-violet-400 to-blue-400 bg-clip-text text-transparent"
+                            >
+                                Quartz
+                            </span>
+                        </h2>
+                        <p class="mt-4 max-w-md text-sm leading-relaxed text-slate-500">
+                            QUARTZ is a web-based event management system that
+                            automates Event registration, Attendance tracking,
+                            Evaluations, and Rule-based certificate generation
+                            and dissemination.
+                        </p>
+                    </div>
+
+                    <!-- Reserved placeholder -->
+                    <div
+                        class="mt-auto h-64 w-full rounded-2xl bg-white/5 ring-1 ring-white/10"
+                    />
+                </div>
             </div>
         </div>
     </div>
