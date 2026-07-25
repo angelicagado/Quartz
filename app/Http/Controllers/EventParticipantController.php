@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
+use Maatwebsite\Excel\Concerns\ToArray;
+use Maatwebsite\Excel\Facades\Excel;
 
 class EventParticipantController extends Controller
 {
@@ -133,40 +135,69 @@ class EventParticipantController extends Controller
      */
     public function uploadCsv(Request $request, Event $event): RedirectResponse
     {
+        return $this->import($request, $event);
+    }
+
+    /**
+     * Handle file (Excel/CSV) upload of participant list.
+     */
+    public function import(Request $request, Event $event): RedirectResponse
+    {
         $request->validate([
-            'csv_file' => ['required', 'file', 'mimes:csv,txt', 'max:2048'],
+            'file' => ['required_without:csv_file', 'nullable', 'file', 'mimes:csv,txt,xlsx,xls', 'max:5120'],
+            'csv_file' => ['required_without:file', 'nullable', 'file', 'mimes:csv,txt,xlsx,xls', 'max:5120'],
         ]);
 
-        $file = $request->file('csv_file');
+        $file = $request->file('file') ?? $request->file('csv_file');
 
         if ($file === null) {
             return back()->with('error', 'No file uploaded.');
         }
 
-        $path = $file->getRealPath();
-        $handle = fopen($path, 'r');
-
-        if ($handle === false) {
-            return back()->with('error', 'Could not read CSV file.');
+        try {
+            $sheets = Excel::toArray(new class implements ToArray
+            {
+                public function array(array $array)
+                {
+                    return $array;
+                }
+            }, $file);
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Could not read file: '.$e->getMessage());
         }
 
-        $header = fgetcsv($handle);
+        $rows = $sheets[0] ?? [];
+
+        if (empty($rows) || count($rows) < 1) {
+            return back()->with('error', 'The uploaded file is empty.');
+        }
+
+        $headerRow = array_shift($rows);
+        $header = [];
+        foreach ($headerRow as $index => $col) {
+            $header[strtolower(trim((string) $col))] = $index;
+        }
+
+        $hasHeader = isset($header['name']) || isset($header['email']);
+        if (! $hasHeader) {
+            array_unshift($rows, $headerRow);
+            $nameIdx = 0;
+            $emailIdx = 1;
+        } else {
+            $nameIdx = $header['name'] ?? 0;
+            $emailIdx = $header['email'] ?? 1;
+        }
+
         $imported = 0;
         $skipped = 0;
 
-        while (($row = fgetcsv($handle)) !== false) {
-            if ($header === false || $header === null || count($row) < 2) {
+        foreach ($rows as $row) {
+            if (! is_array($row) || count($row) < 2) {
                 continue;
             }
 
-            $data = array_combine($header, $row);
-
-            if ($data === false) {
-                continue;
-            }
-
-            $name = trim($data['name'] ?? $data[0] ?? '');
-            $email = trim($data['email'] ?? $data[1] ?? '');
+            $name = trim((string) ($row[$nameIdx] ?? $row[0] ?? ''));
+            $email = trim((string) ($row[$emailIdx] ?? $row[1] ?? ''));
 
             if (empty($name) || empty($email) || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $skipped++;
@@ -205,9 +236,7 @@ class EventParticipantController extends Controller
             $imported++;
         }
 
-        fclose($handle);
-
-        return back()->with('success', "CSV imported: {$imported} participants added, {$skipped} skipped.");
+        return back()->with('success', "File imported: {$imported} participants added, {$skipped} skipped.");
     }
 
     /**

@@ -47,6 +47,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('events.participants', EventParticipantController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::get('events/{event}/participants/{participant}/qr', [EventParticipantController::class, 'qrImage'])->name('events.participants.qr');
         Route::post('events/{event}/participants/csv', [EventParticipantController::class, 'uploadCsv'])->name('events.participants.csv');
+        Route::post('events/{event}/participants/import', [EventParticipantController::class, 'import'])->name('events.participants.import');
         Route::post('events/{event}/participants/{user}/issue-certificate', [EventParticipantController::class, 'issueCertificate'])->name('events.participants.issue-certificate');
         Route::resource('events.evaluations', EvaluationFormController::class)->only(['store', 'destroy']);
         Route::resource('events.certificates', CertificateTemplateController::class)->only(['store', 'destroy']);

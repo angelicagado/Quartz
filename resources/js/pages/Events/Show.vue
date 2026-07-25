@@ -216,6 +216,13 @@
           Registered Participants
         </h2>
         <div class="flex flex-wrap items-center gap-3">
+          <button
+            @click="isAddParticipantModalOpen = true"
+            class="inline-flex items-center gap-2 rounded-xl bg-[#d4af37] px-4 py-2 text-xs font-bold tracking-widest text-slate-950 uppercase shadow-sm transition-all hover:bg-[#c49f27] active:scale-[0.98]"
+          >
+            <UserPlus class="h-4 w-4" />
+            Add Participant
+          </button>
           <select
             v-model="filtersForm.status"
             class="rounded-xl border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 focus:border-[#d4af37] focus:ring-[#d4af37] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
@@ -471,6 +478,13 @@
       :event="event" 
       @close="isAttendanceModalOpen = false" 
     />
+
+    <!-- Add Participant Modal -->
+    <AddParticipantModal
+      :show="isAddParticipantModalOpen"
+      :event="event"
+      @close="isAddParticipantModalOpen = false"
+    />
   </div>
 </template>
 
@@ -489,6 +503,7 @@ import {
   Users,
   Ticket,
   Award,
+  UserPlus,
 } from "@lucide/vue";
 import QrcodeVue from "qrcode.vue";
 import { computed, ref, watch } from "vue";
@@ -513,6 +528,7 @@ import {
 import CertificateBuilder from "./Partials/CertificateBuilder.vue";
 import EvaluationFormBuilder from "./Partials/EvaluationFormBuilder.vue";
 import AttendanceRecordsModal from "./Partials/AttendanceRecordsModal.vue";
+import AddParticipantModal from "./Partials/AddParticipantModal.vue";
 import type { Event } from "@/types/Event";
 
 const props = defineProps<{
@@ -590,6 +606,7 @@ const deleteParticipant = () => {
 };
 
 const isAttendanceModalOpen = ref(false);
+const isAddParticipantModalOpen = ref(false);
 const selectedParticipantForAttendance = ref<any>(null);
 
 const viewAttendances = (participant: any) => {
