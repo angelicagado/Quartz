@@ -53,6 +53,8 @@ const currentYear = computed(() => new Date().getFullYear());
                     attendance tracking, and certificate management.
                 </p>
             </div>
+                </div>
+            </div>
         </div>
 
         <!-- Right column — branding panel -->
